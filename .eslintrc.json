@@ -12,5 +12,8 @@
   ],
   "root": true,
   "rules": {
+    "no-await-in-loop": "off",
+    "no-restricted-syntax": "off",
+    "import/no-extraneous-dependencies": "off"
   }
 }
