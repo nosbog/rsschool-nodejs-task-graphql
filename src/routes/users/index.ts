@@ -62,7 +62,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
           const newSubscribers = subscriber.subscribedToUserIds.filter((item) => item !== id);
           await fastify.db.users.change(subscriber.id, { ...subscriber, subscribedToUserIds: newSubscribers })
         })
-        return await fastify.db.users.delete(id);;
+        return await fastify.db.users.delete(id);
       } else {
         throw fastify.httpErrors.badRequest("User not found!");
       }
