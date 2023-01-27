@@ -7,7 +7,11 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
   fastify
 ): Promise<void> => {
   fastify.get('/', async function (request, reply): Promise<PostEntity[]> {
-    return reply.send()
+    try {
+      return this.db.posts.findMany();
+    } catch (error) {
+      throw reply.notFound();
+    }
   });
 
   fastify.get(
@@ -18,8 +22,12 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
       },
     },
     async function (request, reply): Promise<PostEntity> {
-      return reply.send()
-
+      try {
+        const posts = this.db.posts.findOne({ key: 'id', equals: request.params.id });
+        return await reply.send(posts);
+      } catch (error) {
+        throw reply.notFound();
+      }
     }
   );
 
@@ -31,8 +39,11 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
       },
     },
     async function (request, reply): Promise<PostEntity> {
-      return reply.send()
-
+      try {
+        return await this.db.posts.create(request.body);
+      } catch (error) {
+        throw reply.badRequest();
+      }
     }
   );
 
@@ -44,8 +55,11 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
       },
     },
     async function (request, reply): Promise<PostEntity> {
-      return reply.send()
-
+      try {
+        return await this.db.posts.delete(request.params.id);
+      } catch (error) {
+        throw reply.notFound();
+      }
     }
   );
 
@@ -58,8 +72,11 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
       },
     },
     async function (request, reply): Promise<PostEntity> {
-      return reply.send()
-
+      try {
+        return await this.db.posts.change(request.params.id, request.body);
+      } catch (error) {
+        throw reply.notFound();
+      }
     }
   );
 };

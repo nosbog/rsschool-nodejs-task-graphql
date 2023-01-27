@@ -9,7 +9,11 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
   fastify.get('/', async function (request, reply): Promise<
     ProfileEntity[]
   > {
-    return reply.send()
+    try {
+      return await this.db.profiles.findMany();
+    } catch (error) {
+      throw reply.notFound();
+    }
   });
 
   fastify.get(
@@ -20,7 +24,12 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
       },
     },
     async function (request, reply): Promise<ProfileEntity> {
-      return reply.send()
+      try {
+        const userId = this.db.profiles.findOne({ key: 'id', equals: request.params.id });
+        return await reply.send(userId);
+      } catch (error) {
+        throw reply.notFound();
+      }
     }
   );
 
@@ -32,8 +41,14 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
       },
     },
     async function (request, reply): Promise<ProfileEntity> {
-      return reply.send()
-
+      try {
+        const { avatar, sex, birthday, country, street, city, userId, memberTypeId } = request.body;
+        return await this.db.profiles.create({
+          avatar, sex, birthday, country, street, city, userId, memberTypeId
+        })
+      } catch (error) {
+        throw reply.badRequest();
+      }
     }
   );
 
@@ -45,8 +60,11 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
       },
     },
     async function (request, reply): Promise<ProfileEntity> {
-      return reply.send()
-
+      try {
+        return this.db.profiles.delete(request.params.id);
+      } catch (error) {
+        throw reply.notFound();
+      }
     }
   );
 
@@ -59,8 +77,11 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
       },
     },
     async function (request, reply): Promise<ProfileEntity> {
-      return reply.send()
-
+      try {
+        return this.db.profiles.change(request.params.id, request.body);
+      } catch (error) {
+        throw reply.notFound();
+      }
     }
   );
 };
