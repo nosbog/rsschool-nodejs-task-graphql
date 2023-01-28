@@ -1,6 +1,6 @@
 import { GraphQLInt, GraphQLObjectType, GraphQLString } from 'graphql/type';
 
-export const profileEntity = new GraphQLObjectType({
+export const ProfileEntity = new GraphQLObjectType({
   name: 'ProfileEntity',
   fields: {
     id: { type: GraphQLString },

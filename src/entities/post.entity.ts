@@ -1,6 +1,6 @@
 import { GraphQLObjectType, GraphQLString } from 'graphql/type';
 
-export const postEntity = new GraphQLObjectType({
+export const PostEntity = new GraphQLObjectType({
   name: 'PostEntity',
   fields: {
     id: { type: GraphQLString },
