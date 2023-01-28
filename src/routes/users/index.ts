@@ -11,12 +11,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
   fastify
 ): Promise<void> => {
   fastify.get('/', async function (request, reply): Promise<UserEntity[]> {
-    try {
-      return await this.db.users.findMany();
-    }
-    catch (error) {
-      throw reply.notFound();
-    }
+    return await this.db.users.findMany();
   });
 
   fastify.get(
@@ -27,12 +22,13 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
       },
     },
     async function (request, reply): Promise<UserEntity> {
-      try {
-        const getUserById = this.db.users.findOne({ key: 'id', equals: request.params.id });
-        return await reply.send(getUserById);
-      } catch (error) {
-        throw reply.notFound();
+      const user = await this.db.users.findOne({ key: 'id', equals: request.params.id });
+
+      if (!user) {
+        throw reply.notFound(`User ${user} not found!`);
       }
+
+      return user;
     }
   );
 
@@ -44,11 +40,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
       },
     },
     async function (request, reply): Promise<UserEntity> {
-      try {
-        return await this.db.users.create(request.body);
-      } catch (error) {
-        throw reply.badRequest();
-      }
+      return await this.db.users.create(request.body);
     }
   );
 
@@ -61,9 +53,31 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
     },
     async function (request, reply): Promise<UserEntity> {
       try {
+        const userId = request.params.id;
+        const profile = await this.db.profiles.findOne({ key: 'userId', equals: userId });
+        const posts = await this.db.posts.findMany({ key: 'userId', equals: userId });
+        const subscribers = await this.db.users.findMany({ key: 'subscribedToUserIds', inArray: userId });
+
+        subscribers.forEach(async (user) => {
+          const userIndex = user.subscribedToUserIds.indexOf(userId);
+          user.subscribedToUserIds.slice(userIndex, 1);
+
+          await this.db.users.change(user.id, {
+            subscribedToUserIds: user.subscribedToUserIds
+          });
+        });
+
+        posts.forEach(async (post) => {
+          await this.db.posts.delete(post.id);
+        });
+
+        if (profile) {
+          await this.db.profiles.delete(profile.id);
+        }
+
         return await this.db.users.delete(request.params.id);
-      } catch (error) {
-        throw reply.notFound();
+      } catch (error: any) {
+        throw reply.badRequest(error.message);
       }
     }
   );
@@ -77,12 +91,26 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
       },
     },
     async function (request, reply): Promise<UserEntity> {
-      try {
-        return await this.db.users.change(request.params.id, {
-          'subscribedToUserIds': [request.body.userId]
-        });
-      } catch (error) {
-        throw reply.notFound();
+      const userId = request.params.id;
+      const subscribedUserId = request.body.userId;
+      const user = await this.db.users.findOne({ key: 'id', equals: userId });
+
+      if (!user) {
+        throw reply.notFound(`User ${user} not found!`);
+      } else {
+        const subscribedUser = await this.db.users.findOne({ key: 'id', equals: subscribedUserId });
+
+        if (!subscribedUser) {
+          throw reply.badRequest(`User ${subscribedUser} not found!`);
+        } else {
+          if (subscribedUser.subscribedToUserIds.includes(userId)) {
+            throw reply.badRequest(`User ${subscribedUser} already subscribed!`);
+          } else {
+            return await this.db.users.change(subscribedUserId, {
+              subscribedToUserIds: [...subscribedUser.subscribedToUserIds, userId]
+            });
+          }
+        }
       }
     }
   );
@@ -96,12 +124,30 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
       },
     },
     async function (request, reply): Promise<UserEntity> {
-      try {
-        return await this.db.users.change(request.params.id, {
-          'subscribedToUserIds': [request.body.userId]
-        });
-      } catch (error) {
-        throw reply.notFound();
+      const userId = request.params.id;
+      const subscribedUserId = request.body.userId;
+      const user = await this.db.users.findOne({ key: 'id', equals: userId });
+
+      if (!user) {
+        throw reply.notFound(`User ${user} not found!`);
+      } else {
+        const subscribedUser = await this.db.users.findOne({ key: 'id', equals: subscribedUserId });
+
+        if (!subscribedUser) {
+          throw reply.badRequest(`User ${subscribedUser} not found!`);
+        } else {
+          const userIndex = subscribedUser.subscribedToUserIds.indexOf(userId);
+
+          if (userIndex < 0) {
+            throw reply.badRequest(`User ${subscribedUser} not subscribed`);
+          } else {
+            subscribedUser.subscribedToUserIds.splice(userIndex, 1);
+
+            return await this.db.users.change(subscribedUserId, {
+              subscribedToUserIds: subscribedUser.subscribedToUserIds
+            });
+          }
+        }
       }
     }
   );
@@ -117,8 +163,8 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
     async function (request, reply): Promise<UserEntity> {
       try {
         return await this.db.users.change(request.params.id, request.body);
-      } catch (error) {
-        throw reply.notFound();
+      } catch (error: any) {
+        throw reply.badRequest(error.message);
       }
     }
   );
