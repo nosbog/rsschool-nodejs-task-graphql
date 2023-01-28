@@ -7,12 +7,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
   fastify
 ): Promise<void> => {
   fastify.get('/', async function (request, reply): Promise<PostEntity[]> {
-    try {
-      return await this.db.posts.findMany();
-    } catch (error) {
-      reply.statusCode = 404;
-      throw reply.notFound();
-    }
+    return await this.db.posts.findMany();
   });
 
   fastify.get(
@@ -23,12 +18,13 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
       },
     },
     async function (request, reply): Promise<PostEntity | null> {
-      try {
-        return await this.db.posts.findOne({ key: 'id', equals: request.params.id });
-      } catch (error) {
-        reply.statusCode = 404;
-        throw reply.notFound();
+      const post = await this.db.posts.findOne({ key: 'id', equals: request.params.id });
+
+      if (!post) {
+        throw reply.notFound(`Post ${post} not found!`);
       }
+
+      return post;
     }
   );
 
@@ -40,12 +36,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
       },
     },
     async function (request, reply): Promise<PostEntity> {
-      try {
-        return await this.db.posts.create(request.body);
-      } catch (error) {
-        reply.statusCode = 404;
-        throw reply.notFound();
-      }
+      return await this.db.posts.create(request.body);
     }
   );
 
@@ -59,9 +50,8 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
     async function (request, reply): Promise<PostEntity> {
       try {
         return await this.db.posts.delete(request.params.id);
-      } catch (error) {
-        reply.statusCode = 404;
-        throw reply.notFound();
+      } catch (error: any) {
+        throw reply.badRequest(error.message);
       }
     }
   );
@@ -77,9 +67,8 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
     async function (request, reply): Promise<PostEntity> {
       try {
         return await this.db.posts.change(request.params.id, request.body);
-      } catch (error) {
-        reply.statusCode = 400;
-        throw reply.badRequest();
+      } catch (error: any) {
+        throw reply.badRequest(error.message);
       }
     }
   );
