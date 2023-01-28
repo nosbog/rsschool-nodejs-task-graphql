@@ -79,7 +79,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
     },
     async function (request, reply): Promise<ProfileEntity> {
       try {
-        return this.db.profiles.change(request.params.id, request.body);
+        return await this.db.profiles.change(request.params.id, request.body);
       } catch (error: any) {
         throw reply.badRequest(error.message);
       }
