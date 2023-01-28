@@ -9,7 +9,7 @@ import type { UserEntity as DBUserEntity } from '../utils/DB/entities/DBUsers';
 
 export const UserEntity: GraphQLOutputType = new GraphQLObjectType({
   name: 'UserEntity',
-  // We need callback here, to access UserEntity in itself.
+  // We need callback here, to access UserEntity in itself. https://graphql.org/graphql-js/type/#example-6
   fields: () => ({
     id: { type: GraphQLString },
     firstName: { type: GraphQLString },
