@@ -54,8 +54,8 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
       const id = request.params.id;
       const post = await fastify.db.posts.findOne({ key: 'id', equals: id });
       if (!post) {
-        reply.statusCode = 404;
-        throw new Error('Post not found');
+        reply.statusCode = 400;
+        throw new Error('Id is incorrect');
       } else {
         return await fastify.db.posts.delete(id);
       }
@@ -74,8 +74,8 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
       const id = request.params.id;
       const post = await fastify.db.posts.findOne({ key: 'id', equals: id });
       if (!post) {
-        reply.statusCode = 404;
-        throw new Error('Post not found');
+        reply.statusCode = 400;
+        throw new Error('Id is incorrect');
       } else {
         const updatedPost = await fastify.db.posts.change(id, request.body);
         return updatedPost;

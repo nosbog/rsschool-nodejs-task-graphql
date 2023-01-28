@@ -48,8 +48,8 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         equals: id,
       });
       if (!memberType) {
-        reply.statusCode = 404;
-        throw new Error('memberType not found');
+        reply.statusCode = 400;
+        throw new Error('Id is incorrect');
       } else {
         const updatedMemberType = await fastify.db.memberTypes.change(
           id,
