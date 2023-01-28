@@ -9,12 +9,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
   fastify.get('/', async function (request, reply): Promise<
     ProfileEntity[]
   > {
-    try {
-      return await this.db.profiles.findMany();
-    } catch (error) {
-      reply.statusCode = 404;
-      throw reply.notFound();
-    }
+    return await this.db.profiles.findMany();
   });
 
   fastify.get(
@@ -25,12 +20,13 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
       },
     },
     async function (request, reply): Promise<ProfileEntity | null> {
-      try {
-        return await this.db.profiles.findOne({ key: 'id', equals: request.params.id });
-      } catch (error) {
-        reply.statusCode = 404;
-        throw reply.notFound();
+      const profile = await this.db.profiles.findOne({ key: 'id', equals: request.params.id });
+
+      if (!profile) {
+        throw reply.notFound(`Profile ${profile} not found!`);
       }
+
+      return profile;
     }
   );
 
@@ -42,15 +38,18 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
       },
     },
     async function (request, reply): Promise<ProfileEntity> {
-      try {
-        const { avatar, sex, birthday, country, street, city, userId, memberTypeId } = request.body;
-        return await this.db.profiles.create({
-          avatar, sex, birthday, country, street, city, userId, memberTypeId
-        });
-      } catch (error) {
-        reply.statusCode = 400;
-        throw reply.badRequest();
+      const profile = await this.db.profiles.findOne({ key: 'userId', equals: request.body.userId });
+      const memberTypeId = await this.db.memberTypes.findOne({ key: 'id', equals: request.body.memberTypeId });
+
+      if (profile) {
+        throw reply.badRequest(`Profile ${profile} already exist!`);
       }
+
+      if (!memberTypeId) {
+        throw reply.badRequest(`Member Type ${memberTypeId} doesn't exist!`);
+      }
+
+      return await this.db.profiles.create(request.body);
     }
   );
 
@@ -63,10 +62,9 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
     },
     async function (request, reply): Promise<ProfileEntity> {
       try {
-        return this.db.profiles.delete(request.params.id);
-      } catch (error) {
-        reply.statusCode = 400;
-        throw reply.badRequest();
+        return await this.db.profiles.delete(request.params.id);
+      } catch (error: any) {
+        throw reply.badRequest(error.message);
       }
     }
   );
@@ -82,9 +80,8 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
     async function (request, reply): Promise<ProfileEntity> {
       try {
         return this.db.profiles.change(request.params.id, request.body);
-      } catch (error) {
-        reply.statusCode = 400;
-        throw reply.badRequest();
+      } catch (error: any) {
+        throw reply.badRequest(error.message);
       }
     }
   );
