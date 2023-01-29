@@ -85,10 +85,140 @@ GraphQL variables:
 ```
 
 2.3. Get users with their posts, profiles, memberTypes.
+
+```
+query {
+  users {
+      id
+      firstName
+      lastName
+      posts{
+        id
+        title
+        content
+      }
+      profiles{
+        id
+        country
+        street
+      }
+      memberTypes{
+        id
+        discount
+        monthPostsLimit
+    }
+  }
+}
+```
+
 2.4. Get user by id with his posts, profile, memberType.
+
+```
+query($id: ID!) {
+  user(id: $id){
+      id
+      firstName
+      lastName
+      posts{
+        id
+        title
+        content
+      }
+      profile{
+        id
+        country
+        street
+      }
+      memberType{
+        id
+        discount
+        monthPostsLimit
+    }
+  }
+}
+```
+
+GraphQL variables:
+
+```json
+  {
+    "id": "1428265e-a6bb-4c22-bccf-f478258fef08",
+  }
+```
+
 2.5. Get users with their userSubscribedTo, profile.
+
+```
+query {
+  users {
+      id
+      firstName
+      lastName
+      userSubscribedTo{
+        id
+        firstName
+        lastName
+        }
+      profile{
+        id
+        country
+        street
+    }
+  }
+}
+```
+
 2.6. Get user by id with his subscribedToUser, posts.
+
+```
+query($id: ID!) {
+  user(id: $id){
+      id
+      firstName
+      lastName
+      posts{
+        id
+        title
+        content
+      }
+      subscribedToUser{
+        id
+        firstName
+        lastName
+    }
+  }
+}
+```
+
+GraphQL variables:
+
+```json
+  {
+    "id": "1428265e-a6bb-4c22-bccf-f478258fef08",
+  }
+```
+
 2.7. Get users with their userSubscribedTo, subscribedToUser (additionally for each user in userSubscribedTo, subscribedToUser add their userSubscribedTo, subscribedToUser).
+
+```
+query {
+  users {
+      id
+      firstName
+      lastName
+      userSubscribedTo {
+          id
+          firstName
+          lastName
+      }
+      subscribedToUser {
+          id
+          firstName
+          lastName
+      }
+  }
+}
+```
 
 Create gql requests examples:
 
