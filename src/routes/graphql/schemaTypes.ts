@@ -47,7 +47,7 @@ export const memberTypeType = new GraphQLObjectType({
   }),
 });
 
-export const userType = new GraphQLObjectType({
+export const userType: GraphQLObjectType = new GraphQLObjectType({
   name: 'User',
   fields: () => ({
     id: { type: new GraphQLNonNull(GraphQLID) },
@@ -55,13 +55,27 @@ export const userType = new GraphQLObjectType({
     lastName: { type: new GraphQLNonNull(GraphQLString) },
     email: { type: new GraphQLNonNull(GraphQLString) },
     subscribedToUserIds: {
-      type: new GraphQLNonNull( 
+      type: new GraphQLNonNull(
         new GraphQLList(new GraphQLNonNull(GraphQLString))
       ),
     },
+    profiles: {
+      type: new GraphQLList(profileType),
+      async resolve(
+        parent: UserEntity,
+        args,
+        context
+      ): Promise<ProfileEntity[]> {
+        return await context.db.profiles.findAll();
+      },
+    },
     profile: {
       type: profileType,
-      async resolve(parent: UserEntity, args, context): Promise<ProfileEntity[]> {
+      async resolve(
+        parent: UserEntity,
+        args,
+        context
+      ): Promise<ProfileEntity[]> {
         return await context.db.profiles.findOne({
           key: 'userId',
           equals: parent.id,
@@ -96,6 +110,33 @@ export const userType = new GraphQLObjectType({
           return memberType;
         }
         return null;
+      },
+    },
+    memberTypes: {
+      type: new GraphQLList(memberTypeType),
+      async resolve(parent: UserEntity, args, context): Promise<PostEntity> {
+        return await context.db.posts.findMany({
+          key: 'userId',
+          equals: parent.id,
+        });
+      },
+    },
+    userSubscribedTo: {
+      type: new GraphQLList(userType),
+      async resolve(parent: UserEntity, args, context): Promise<PostEntity> {
+        return await context.db.users.findMany({
+          key: 'id',
+          equalsAnyOf: parent.subscribedToUserIds,
+        });
+      },
+    },
+    subscribedToUser: {
+      type: new GraphQLList(userType),
+      async resolve(parent: UserEntity, args, context): Promise<PostEntity> {
+        return await context.db.users.findMany({
+          key: 'subscribedToUserIds',
+          inArray: parent.id,
+        });
       },
     },
   }),

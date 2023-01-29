@@ -1,7 +1,7 @@
 import { FastifyPluginAsyncJsonSchemaToTs } from '@fastify/type-provider-json-schema-to-ts';
 import { graphqlBodySchema } from "./schema";
 import { graphqlSchema } from "./graphqlSchema";
-import { graphql, buildSchema } from 'graphql';
+import { graphql } from 'graphql';
 
 // const resolvers = {
 //   Query: {
@@ -61,14 +61,14 @@ import { graphql, buildSchema } from 'graphql';
 // posts(ids: [Int]): [Post]
 // memberTypes(ids: [Int]): [MemberType]
 
-const root = {
-  users: async (_a : any, context: any) => {
-    return await context.db.users.findMany();
-  },
-  profiles: async (_a : any, context: any) => {
-    return await context.db.profiles.findMany();
-  }
-};
+// const root = {
+//   users: async (_a : any, context: any) => {
+//     return await context.db.users.findMany();
+//   },
+//   profiles: async (_a : any, context: any) => {
+//     return await context.db.profiles.findMany();
+//   }
+// };
 
 const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
   fastify
@@ -81,10 +81,11 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
       },
     },
     async (request, reply) => {
+      const {variables, query} = request.body;
       return await graphql({
         schema: graphqlSchema,
-        source: String(request.body.query),
-        // variableValues: String(request.body.variables),
+        source: String(query),
+        variableValues: variables,
         contextValue: fastify,
       });
     }
