@@ -1,5 +1,95 @@
 ## Assignment: Graphql
 
+Get gql requests examples:
+2.1. Get users, profiles, posts, memberTypes - 4 operations in one query.
+
+```
+query {
+  users {
+      id
+      email
+      firstName
+      lastName
+      subscribedToUserIds
+  }
+  profiles {
+        id
+        avatar
+        sex
+        birthday
+        country
+        street
+        city
+        userId
+        memberTypeId
+  }
+  posts {
+      id
+      userId
+      title
+      content
+  }
+  memberTypes {
+      id
+      discount
+      monthPostsLimit
+  }
+}
+```
+
+2.2. Get user, profile, post, memberType by id - 4 operations in one query.
+
+```
+query($userId: ID!, $postId: ID!, $profileId: ID!, $memberTypeId: String!) {
+  user(id: $userId) {
+      id
+      email
+      firstName
+      lastName
+      subscribedToUserIds
+  }
+    post(id: $postId) {
+     id
+      userId
+      title
+      content
+  }
+  profile(id: $profileId) {
+        id
+        avatar
+        sex
+        birthday
+        country
+        street
+        city
+        userId
+        memberTypeId
+  }
+  memberType(id: $memberTypeId) {
+      id
+      discount
+      monthPostsLimit
+  }
+}
+```
+
+GraphQL variables:
+
+```json
+{
+  "userId": "1428265e-a6bb-4c22-bccf-f478258fef08",
+  "postId": "2428265e-a6bb-4c22-bccf-f478258fef08",
+  "profileId": "3428265e-a6bb-4c22-bccf-f478258fef08",
+  "memberTypeId": "business"
+}
+```
+
+2.3. Get users with their posts, profiles, memberTypes.
+2.4. Get user by id with his posts, profile, memberType.
+2.5. Get users with their userSubscribedTo, profile.
+2.6. Get user by id with his subscribedToUser, posts.
+2.7. Get users with their userSubscribedTo, subscribedToUser (additionally for each user in userSubscribedTo, subscribedToUser add their userSubscribedTo, subscribedToUser).
+
 Create gql requests examples:
 
 2.8. Create user
@@ -33,15 +123,15 @@ GraphQL variables:
 ```
   mutation($profile: NewProfileInput!) {
       createProfile(input: $profile) {
-      id
-       avatar
-  sex
-  birthday
-  country
-  street
-  city
-  userId
-  memberTypeId
+        id
+        avatar
+        sex
+        birthday
+        country
+        street
+        city
+        userId
+        memberTypeId
      }
    }
 ```
@@ -75,9 +165,70 @@ content
 
 ```json
 {
-  "title": "Cats' life",
-  "content": "myaaaauuuuu",
-  "userId": "6428265e-a6bb-4c22-bccf-f478258fef08"
+  "post": {
+    "title": "Cats' life",
+    "content": "myaaaauuuuu",
+    "userId": "6428265e-a6bb-4c22-bccf-f478258fef08"
+  }
+}
+```
+
+Update gql requests examples:
+
+2.12. Update user
+
+```
+ mutation($id: ID!, $user: UpdatedUserInput!) {
+      updateUser(id: $id, input: $user) {
+        id
+        firstName
+        lastName
+        email
+      }
+    }
+
+```
+
+GraphQL variables:
+
+```json
+{
+  "id": "6428265e-a6bb-4c22-bccf-f478258fef08",
+  "user": {
+    "firstName": "ryzhik(updated!)",
+    "lastName": "koteev(updated!)",
+    "email": "ryzhik@gmail.com(updated!)"
+  }
+}
+```
+
+2.13 Update profile
+
+```
+mutation($id: ID!, $profile: UpdatedProfileInput!) {
+  updateProfile(id: $id, input: $profile) {
+      id
+      avatar
+      sex
+      birthday
+      country
+      street
+      city
+      userId
+      memberTypeId
+  }
+}
+```
+
+GraphQL variables:
+
+```json
+{
+  "id": "6428265e-a6bb-4c22-bccf-f478258fef08",
+  "profile": {
+    "avatar": "updatedImage.jpg(updated!)",
+    "country": "Canada(updated!)"
+  }
 }
 ```
 

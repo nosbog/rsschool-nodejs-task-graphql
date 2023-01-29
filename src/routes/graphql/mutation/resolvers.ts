@@ -26,3 +26,39 @@ export const createPost = async (
 ): Promise<PostEntity | null> => {
   return await context.db.posts.create(args.input);
 };
+
+export const updateUser = async (
+  parent: UserEntity,
+  args: {
+    id: string;
+    input: Partial<Omit<UserEntity, 'id' | 'subscribedToUserIds'>>;
+  },
+  context: FastifyInstance
+): Promise<UserEntity | null> => {
+  const id = args.id;
+  const user = await context.db.users.findOne({ key: 'id', equals: id });
+  if (!user) {
+    throw new Error('User not found');
+  } else {
+    const updatedUser = await context.db.users.change(id, args.input);
+    return updatedUser;
+  }
+};
+
+export const updateProfile = async (
+  parent: UserEntity,
+  args: { id: string; input: Omit<ProfileEntity, 'id' | 'UserId'> },
+  context: FastifyInstance
+): Promise<ProfileEntity | null> => {
+  const { id, input } = args;
+  const profile = await context.db.profiles.findOne({
+    key: 'id',
+    equals: id,
+  });
+  if (!profile) {
+    throw new Error('Profile not found');
+  } else {
+    const updatedProfile = await context.db.profiles.change(id, input);
+    return updatedProfile;
+  }
+};

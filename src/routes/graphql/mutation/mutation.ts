@@ -1,10 +1,18 @@
-import { GraphQLObjectType } from 'graphql';
+import { GraphQLObjectType, GraphQLID } from 'graphql';
 import { userType, profileType, postType } from '../entities/entitiesTypes';
-import { createUser, createProfile, createPost } from './resolvers';
+import {
+  createUser,
+  createProfile,
+  createPost,
+  updateUser,
+  updateProfile,
+} from './resolvers';
 import {
   newUserInputType,
   newProfileInputType,
   newPostInputType,
+  updatedUserInputType,
+  updatedProfileInputType,
 } from './inputTypes';
 
 export const mutationType = new GraphQLObjectType({
@@ -24,6 +32,22 @@ export const mutationType = new GraphQLObjectType({
       type: postType,
       args: { input: { type: newPostInputType } },
       resolve: createPost,
+    },
+    updateUser: {
+      type: userType,
+      args: {
+        id: { type: GraphQLID },
+        input: { type: updatedUserInputType },
+      },
+      resolve: updateUser,
+    },
+    updateProfile: {
+      type: profileType,
+      args: {
+        id: { type: GraphQLID },
+        input: { type: updatedProfileInputType },
+      },
+      resolve: updateProfile,
     },
   },
 });

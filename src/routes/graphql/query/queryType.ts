@@ -12,6 +12,7 @@ import {
   getPost,
   getAllProfiles,
   getProfile,
+  getAllMemberTypes,
   getMemberType,
 } from './resolvers';
 
@@ -47,6 +48,7 @@ export const queryType = new GraphQLObjectType({
     },
     memberTypes: {
       type: new GraphQLList(memberTypeType),
+      resolve: getAllMemberTypes,
     },
     memberType: {
       type: memberTypeType,

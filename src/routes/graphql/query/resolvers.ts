@@ -22,7 +22,7 @@ export const getUser = async (
     equals: args.id,
   });
   if (user) return user;
-  return null;
+  throw new Error('User not found');
 };
 
 export const getAllPosts = async (
@@ -61,6 +61,14 @@ export const getProfile = async (
     key: 'id',
     equals: args.id,
   });
+};
+
+export const getAllMemberTypes = async (
+  parent: unknown,
+  args: unknown,
+  context: FastifyInstance
+): Promise<MemberTypeEntity[]> => {
+  return await context.db.memberTypes.findMany();
 };
 
 export const getMemberType = async (
