@@ -23,11 +23,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         equals: request.params.id,
       });
 
-      if (!profile) {
-        throw fastify.httpErrors.notFound(
-          `Profile with id : ${request.params.id} not found`
-        );
-      }
+      if (!profile) throw fastify.httpErrors.notFound();
 
       return profile;
     }
@@ -41,14 +37,23 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
       },
     },
     async function (request, reply): Promise<ProfileEntity> {
-      const isUserExist = await fastify.db.users.findOne({
+      const profile = await fastify.db.profiles.findOne({
+        key: 'userId',
+        equals: request.body.userId,
+      });
+      const user = await fastify.db.users.findOne({
         key: 'id',
         equals: request.body.userId,
       });
-      if (!!isUserExist) {
-        return await fastify.db.profiles.create(request.body);
-      }
-      throw fastify.httpErrors.notFound('User not found');
+      const memberTypeId = await fastify.db.memberTypes.findOne({
+        key: 'id',
+        equals: request.body.memberTypeId,
+      });
+
+      if (!user || profile || !memberTypeId)
+        throw fastify.httpErrors.badRequest();
+
+      return await fastify.db.profiles.create(request.body);
     }
   );
 
@@ -63,13 +68,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
       try {
         return await fastify.db.profiles.delete(request.params.id);
       } catch (error: unknown) {
-        if (error instanceof Error)
-          throw fastify.httpErrors.badRequest(error.message);
-
-        if (typeof error === 'string')
-          throw fastify.httpErrors.badRequest(error);
-
-        throw fastify.httpErrors.badRequest('Bad request');
+        throw fastify.httpErrors.badRequest();
       }
     }
   );
@@ -89,13 +88,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
           request.body
         );
       } catch (error: unknown) {
-        if (error instanceof Error)
-          throw fastify.httpErrors.badRequest(error.message);
-
-        if (typeof error === 'string')
-          throw fastify.httpErrors.badRequest(error);
-
-        throw fastify.httpErrors.badRequest('Bad request');
+        throw fastify.httpErrors.badRequest();
       }
     }
   );

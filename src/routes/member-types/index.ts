@@ -9,7 +9,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
   fastify.get('/', async function (request, reply): Promise<
     MemberTypeEntity[]
   > {
-    return fastify.db.memberTypes.findMany();
+    return await fastify.db.memberTypes.findMany();
   });
 
   fastify.get(
@@ -26,9 +26,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
       });
 
       if (!memberType) {
-        throw fastify.httpErrors.notFound(
-          `Member type with id : ${request.params.id} not found`
-        );
+        throw fastify.httpErrors.notFound();
       }
 
       return memberType;
@@ -50,13 +48,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
           request.body
         );
       } catch (error: unknown) {
-        if (error instanceof Error)
-          throw fastify.httpErrors.badRequest(error.message);
-
-        if (typeof error === 'string')
-          throw fastify.httpErrors.badRequest(error);
-
-        throw fastify.httpErrors.badRequest('Bad request');
+        throw fastify.httpErrors.badRequest();
       }
     }
   );
