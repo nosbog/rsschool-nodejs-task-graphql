@@ -67,15 +67,6 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         throw reply.badRequest('id must be valid uuid');
       }
 
-      const userToDelete = await fastify.db.users.findOne({
-        key: 'id',
-        equals: userId,
-      });
-
-      if (!userToDelete) {
-        throw reply.notFound();
-      }
-
       const allUsers = await fastify.db.users.findMany();
       const postsToRemove = await fastify.db.posts.findMany({
         key: 'userId',
@@ -206,7 +197,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
     async function (request, reply): Promise<UserEntity> {
       const userId = (request.params as { id: string }).id;
 
-      if (!userId || !validate(userId)) {
+      if (!validate(userId)) {
         throw reply.badRequest('id must be valid uuid');
       }
 
@@ -219,12 +210,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         throw reply.notFound();
       }
 
-      const updateBody = request.body as ChangeUserDTO;
-
-      return fastify.db.users.change(userId, {
-        ...user,
-        ...updateBody,
-      });
+      return fastify.db.users.change(userId, request.body as ChangeUserDTO);
     }
   );
 };
