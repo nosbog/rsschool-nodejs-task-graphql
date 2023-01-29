@@ -8,7 +8,9 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
 ): Promise<void> => {
   fastify.get('/', async function (request, reply): Promise<
     MemberTypeEntity[]
-  > {});
+  > {
+    return fastify.db.memberTypes.findMany();
+  });
 
   fastify.get(
     '/:id',
@@ -17,7 +19,18 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         params: idParamSchema,
       },
     },
-    async function (request, reply): Promise<MemberTypeEntity> {}
+    async function (request, reply): Promise<MemberTypeEntity> {
+      if (typeof request.params.id !== "string") {
+        reply.statusCode = 400;
+        throw new Error("Id is invalid");
+      }
+      const memberType: MemberTypeEntity | null = await fastify.db.memberTypes.findOne({key: "id", equals: request.params.id});
+      if (!memberType) {
+        reply.statusCode = 404;
+        throw new Error("Post not found");
+      }
+      return memberType;
+    }
   );
 
   fastify.patch(
@@ -28,7 +41,18 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         params: idParamSchema,
       },
     },
-    async function (request, reply): Promise<MemberTypeEntity> {}
+    async function (request, reply): Promise<MemberTypeEntity> {
+      if (typeof request.params.id !== "string") {
+        reply.statusCode = 400;
+        throw new Error("Id is invalid");
+      }
+      const memberType: MemberTypeEntity | null = await fastify.db.memberTypes.findOne({key: "id", equals: request.params.id});
+      if (!memberType) {
+        reply.statusCode = 400;
+        throw new Error("Post not found");
+      }
+      return fastify.db.memberTypes.change(request.params.id, request.body);
+    }
   );
 };
 
