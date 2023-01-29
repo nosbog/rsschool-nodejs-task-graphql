@@ -1,7 +1,7 @@
-import { UserEntity } from '../../utils/DB/entities/DBUsers';
-import { MemberTypeEntity } from '../../utils/DB/entities/DBMemberTypes';
-import { ProfileEntity } from '../../utils/DB/entities/DBProfiles';
-import { PostEntity } from '../../utils/DB/entities/DBPosts';
+import { UserEntity } from '../../../utils/DB/entities/DBUsers';
+import { MemberTypeEntity } from '../../../utils/DB/entities/DBMemberTypes';
+import { ProfileEntity } from '../../../utils/DB/entities/DBProfiles';
+import { PostEntity } from '../../../utils/DB/entities/DBPosts';
 import { FastifyInstance } from 'fastify';
 
 export const getAllUsers = async (

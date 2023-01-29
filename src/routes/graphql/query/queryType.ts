@@ -4,7 +4,7 @@ import {
   GraphQLObjectType,
   GraphQLString,
 } from 'graphql';
-import { userType, profileType, postType, memberTypeType } from './schemaTypes';
+import { userType, profileType, postType, memberTypeType } from '../entities/entitiesTypes';
 import {
   getAllUsers,
   getUser,

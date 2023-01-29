@@ -7,11 +7,15 @@ import {
   GraphQLObjectType,
   //   GraphQLInputObjectType,
 } from 'graphql';
-import { UserEntity } from '../../utils/DB/entities/DBUsers';
-import { ProfileEntity } from '../../utils/DB/entities/DBProfiles';
-import { PostEntity } from '../../utils/DB/entities/DBPosts';
-import { MemberTypeEntity } from '../../utils/DB/entities/DBMemberTypes';
-// import { FastifyInstance } from 'fastify';
+import {
+  getAllProfiles,
+  getProfile,
+  getAllPosts,
+  getMemberType,
+  getAllMemberTypes,
+  getUserSubscribedTo,
+  getSubscribedToUser,
+} from './resolvers';
 
 export const postType = new GraphQLObjectType({
   name: 'Post',
@@ -61,83 +65,31 @@ export const userType: GraphQLObjectType = new GraphQLObjectType({
     },
     profiles: {
       type: new GraphQLList(profileType),
-      async resolve(
-        parent: UserEntity,
-        args,
-        context
-      ): Promise<ProfileEntity[]> {
-        return await context.db.profiles.findMany();
-      },
+      resolve: getAllProfiles,
     },
     profile: {
       type: profileType,
-      async resolve(
-        parent: UserEntity,
-        args,
-        context
-      ): Promise<ProfileEntity[]> {
-        return await context.db.profiles.findOne({
-          key: 'userId',
-          equals: parent.id,
-        });
-      },
+      resolve: getProfile,
     },
     posts: {
       type: new GraphQLList(postType),
-      async resolve(parent: UserEntity, args, context): Promise<PostEntity> {
-        return await context.db.posts.findMany({
-          key: 'userId',
-          equals: parent.id,
-        });
-      },
+      resolve: getAllPosts,
     },
     memberType: {
       type: memberTypeType,
-      async resolve(
-        parent: UserEntity,
-        args,
-        context
-      ): Promise<MemberTypeEntity | null> {
-        const profile = await context.db.profiles.findOne({
-          key: 'userId',
-          equals: parent.id,
-        });
-        if (profile) {
-          const memberType = await context.db.memberTypes.findOne({
-            key: 'id',
-            equals: profile.memberTypeId,
-          });
-          return memberType;
-        }
-        return null;
-      },
+      resolve: getMemberType,
     },
     memberTypes: {
       type: new GraphQLList(memberTypeType),
-      async resolve(parent: UserEntity, args, context): Promise<PostEntity> {
-        return await context.db.posts.findMany({
-          key: 'userId',
-          equals: parent.id,
-        });
-      },
+      resolve: getAllMemberTypes,
     },
     userSubscribedTo: {
       type: new GraphQLList(userType),
-      async resolve(parent: UserEntity, args, context): Promise<PostEntity> {
-        return await context.db.users.findMany({
-          key: 'id',
-          equalsAnyOf: parent.subscribedToUserIds,
-        });
-      },
+      resolve: getUserSubscribedTo,
     },
     subscribedToUser: {
       type: new GraphQLList(userType),
-      async resolve(parent: UserEntity, args, context): Promise<PostEntity> {
-        return await context.db.users.findMany({
-          key: 'subscribedToUserIds',
-          inArray: parent.id,
-        });
-      },
+      resolve: getSubscribedToUser,
     },
   }),
 });
