@@ -1,11 +1,15 @@
-import { GraphQLObjectType, GraphQLID } from 'graphql';
-import { userType, profileType, postType } from '../entities/entitiesTypes';
+import { GraphQLObjectType, GraphQLID, GraphQLString } from 'graphql';
+import { userType, profileType, postType, memberTypeType } from '../entities/entitiesTypes';
 import {
   createUser,
   createProfile,
   createPost,
   updateUser,
   updateProfile,
+  updatePost,
+  updateMemberType,
+  subscribeUserTo,
+  unsubscribeUser
 } from './resolvers';
 import {
   newUserInputType,
@@ -13,6 +17,9 @@ import {
   newPostInputType,
   updatedUserInputType,
   updatedProfileInputType,
+  updatedPostInputType,
+  updatedMemberTypeInputType,
+  subscriberInputType
 } from './inputTypes';
 
 export const mutationType = new GraphQLObjectType({
@@ -48,6 +55,38 @@ export const mutationType = new GraphQLObjectType({
         input: { type: updatedProfileInputType },
       },
       resolve: updateProfile,
+    },
+    updatePost: {
+      type: postType,
+      args: {
+        id: { type: GraphQLID },
+        input: { type: updatedPostInputType },
+      },
+      resolve: updatePost,
+    },
+    updateMemberType: {
+      type: memberTypeType,
+      args: {
+        id: { type: GraphQLString },
+        input: { type: updatedMemberTypeInputType },
+      },
+      resolve: updateMemberType,
+    },
+    subscribeUserTo: {
+      type: userType,
+      args: {
+        id: { type: GraphQLString },
+        input: { type: subscriberInputType },
+      },
+      resolve: subscribeUserTo,
+    },
+    unsubscribeUser: {
+      type: userType,
+      args: {
+        id: { type: GraphQLString },
+        input: { type: subscriberInputType },
+      },
+      resolve: unsubscribeUser,
     },
   },
 });

@@ -155,12 +155,12 @@ GraphQL variables:
 
 2.10. Create post.
 mutation($post: NewPostInput!) {
-createPost(input: $post) {
-id
-userId
-title
-content
-}
+    createPost(input: $post) {
+    id
+    userId
+    title
+    content
+  }
 }
 
 ```json
@@ -175,7 +175,7 @@ content
 
 Update gql requests examples:
 
-2.12. Update user
+2.12. Update user (all fields are optional)
 
 ```
  mutation($id: ID!, $user: UpdatedUserInput!) {
@@ -202,20 +202,20 @@ GraphQL variables:
 }
 ```
 
-2.13 Update profile
+2.13 Update profile (all fields are optional)
 
 ```
 mutation($id: ID!, $profile: UpdatedProfileInput!) {
   updateProfile(id: $id, input: $profile) {
-      id
-      avatar
-      sex
-      birthday
-      country
-      street
-      city
-      userId
-      memberTypeId
+    id
+    avatar
+    sex
+    birthday
+    country
+    street
+    city
+    userId
+    memberTypeId
   }
 }
 ```
@@ -231,6 +231,105 @@ GraphQL variables:
   }
 }
 ```
+
+2.14. Update post (all fields are optional)
+
+```
+mutation($id: ID!, $post: UpdatedPostInput!) {
+  updatePost(id: $id, input: $post) {
+    id
+    userId
+    title
+    content
+  }
+}
+```
+
+GraphQL variables:
+
+```json
+{
+  "id": "6428265e-a6bb-4c22-bccf-f478258fef08",
+  "post": {
+    "content": "New content(updated!)"
+  }
+}
+```
+
+2.15. Update memberType (all fields are optional) 
+
+```
+mutation($id: String!, $memberType: UpdatedMemberTypeInput!) {
+  updateMemberType(id: $id, input: $memberType) {
+      id
+      discount
+      monthPostsLimit
+  }
+}
+```
+
+GraphQL variables:
+
+```json
+{
+  "id": "business",
+  "memberType": {
+    "discount": "99"
+  }
+}
+
+```
+
+2.16. Subscribe to 
+The input contains the **subscriber** data that is similar to REST request.
+
+```
+mutation($id: String!, $subscriber: SubscriberInput!) {
+  subscribeUserTo(id: $id, input: $subscriber) {
+      id
+      email
+      firstName
+      lastName
+      subscribedToUserIds
+  }
+}
+```
+
+GraphQL variables:
+
+```json
+{
+  "id": "6428265e-a6bb-4c22-bccf-f478258fef08",
+  "subscriber": {
+    "id": "1118265e-a6bb-4c22-bccf-f478258fef08"
+  }
+}
+```
+
+Unsubscribe from
+The input contains the **unsubscribed user** data that is similar to REST request.
+
+```
+mutation($id: String!, $unsubscribed: SubscriberInput!) {
+  unsubscribeUser(id: $id, input: $unsubscribed) {
+      id
+      email
+      firstName
+      lastName
+      subscribedToUserIds
+  }
+}
+```
+
+```json
+{
+  "id": "6428265e-a6bb-4c22-bccf-f478258fef08",
+  "unsubscribed": {
+    "id": "1118265e-a6bb-4c22-bccf-f478258fef08"
+  }
+}
+```
+
 
 ### Tasks:
 

@@ -59,3 +59,29 @@ export const updatedProfileInputType = new GraphQLInputObjectType({
     memberTypeId: { type: GraphQLString },
   },
 });
+
+export const updatedPostInputType = new GraphQLInputObjectType({
+  name: 'UpdatedPostInput',
+  fields: {
+    title: { type: GraphQLString },
+    content: { type: GraphQLString },
+    userId: { type: GraphQLID },
+  },
+});
+
+export const updatedMemberTypeInputType = new GraphQLInputObjectType({
+  name: 'UpdatedMemberTypeInput',
+  fields: {
+    discount: { type: GraphQLString },
+    monthPostsLimit: { type: GraphQLString },
+  },
+});
+
+export const subscriberInputType = new GraphQLInputObjectType({
+  name: 'SubscriberInput',
+  fields: {
+    id: { type: new GraphQLNonNull(GraphQLString) },
+  },
+});
+ 
+  

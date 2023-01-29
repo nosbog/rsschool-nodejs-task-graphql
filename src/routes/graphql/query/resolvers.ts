@@ -38,10 +38,12 @@ export const getPost = async (
   args: { id: string },
   context: FastifyInstance
 ): Promise<PostEntity | null> => {
-  return await context.db.posts.findOne({
+  const post = await context.db.posts.findOne({
     key: 'id',
     equals: args.id,
   });
+  if (post) return post;
+  throw new Error('Post not found');
 };
 
 export const getAllProfiles = async (
@@ -57,10 +59,12 @@ export const getProfile = async (
   args: { id: string },
   context: FastifyInstance
 ): Promise<ProfileEntity | null> => {
-  return await context.db.profiles.findOne({
+  const profile = await context.db.profiles.findOne({
     key: 'id',
     equals: args.id,
   });
+  if (profile) return profile;
+  throw new Error('Profile not found');
 };
 
 export const getAllMemberTypes = async (
@@ -76,8 +80,10 @@ export const getMemberType = async (
   args: { id: string },
   context: FastifyInstance
 ): Promise<MemberTypeEntity | null> => {
-  return await context.db.memberTypes.findOne({
+  const memberType = await context.db.memberTypes.findOne({
     key: 'id',
     equals: args.id,
   });
+  if (memberType) return memberType;
+  throw new Error('MemberType not found');
 };

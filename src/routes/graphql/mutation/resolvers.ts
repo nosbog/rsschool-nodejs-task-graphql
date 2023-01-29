@@ -1,6 +1,7 @@
 import { UserEntity } from '../../../utils/DB/entities/DBUsers';
 import { ProfileEntity } from '../../../utils/DB/entities/DBProfiles';
 import { PostEntity } from '../../../utils/DB/entities/DBPosts';
+import { MemberTypeEntity } from '../../../utils/DB/entities/DBMemberTypes';
 import { FastifyInstance } from 'fastify';
 
 export const createUser = async (
@@ -47,7 +48,7 @@ export const updateUser = async (
 
 export const updateProfile = async (
   parent: UserEntity,
-  args: { id: string; input: Omit<ProfileEntity, 'id' | 'UserId'> },
+  args: { id: string; input: Partial<Omit<ProfileEntity, 'id' | 'UserId'>> },
   context: FastifyInstance
 ): Promise<ProfileEntity | null> => {
   const { id, input } = args;
@@ -62,3 +63,91 @@ export const updateProfile = async (
     return updatedProfile;
   }
 };
+
+export const updatePost = async (
+  parent: UserEntity,
+  args: { id: string; input: Partial<Omit<PostEntity, 'id' | 'UserId'>> },
+  context: FastifyInstance
+) => {
+  const { id, input } = args;
+  const post = await context.db.posts.findOne({ key: 'id', equals: id });
+  if (!post) {
+    throw new Error('Post not found');
+  } else {
+    const updatedPost = await context.db.posts.change(id, input);
+    return updatedPost;
+  }
+};
+
+export const updateMemberType = async (
+  parent: UserEntity,
+  args: { id: string; input: Partial<Omit<MemberTypeEntity, 'id'>> },
+  context: FastifyInstance
+) => {
+  const { id, input } = args;
+  const memberType = await context.db.memberTypes.findOne({
+    key: 'id',
+    equals: id,
+  });
+  if (!memberType) {
+    throw new Error('MemberType not found');
+  } else {
+    const updatedMemberTypes = await context.db.memberTypes.change(id, input);
+    return updatedMemberTypes;
+  }
+};
+
+export const subscribeUserTo = async (
+  parent: UserEntity,
+  args: { id: string; input: Pick<UserEntity, 'id'> },
+  context: FastifyInstance
+) => {
+  const {
+    id,
+    input: { id: subscribeUserId },
+  } = args;
+  const user = await context.db.users.findOne({
+    key: 'id',
+    equals: subscribeUserId,
+  });
+  if (!user) {
+    throw new Error('User not found!');
+  } else if (user.subscribedToUserIds.includes(id)){
+    throw new Error('User already subscribed!');
+  } else{
+    const subscribedToUserIds = [...user.subscribedToUserIds, id];
+    const updatedUser = await context.db.users.change(subscribeUserId, {
+      subscribedToUserIds,
+    });
+    return updatedUser;
+  }
+};
+
+export const unsubscribeUser = async (
+  parent: UserEntity,
+  args: { id: string; input: Pick<UserEntity, 'id'> },
+  context: FastifyInstance
+) => {
+  const {
+    id,
+    input: { id: unsubscribeUserId },
+  } = args;
+  const user = await context.db.users.findOne({
+    key: 'id',
+    equals: unsubscribeUserId,
+  });
+  if (!user) {
+    throw new Error('User not found!');
+  } else if (!user.subscribedToUserIds.includes(id)) {
+    throw new Error('User is not following this user');
+  } else {
+    const subscribedToUserIds = user.subscribedToUserIds.filter(
+      (el) => id !== el
+    );
+    const updatedUser = await context.db.users.change(unsubscribeUserId, {
+      subscribedToUserIds,
+    });
+    return updatedUser;
+  }
+};
+
