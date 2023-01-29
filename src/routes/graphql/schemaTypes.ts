@@ -66,7 +66,7 @@ export const userType: GraphQLObjectType = new GraphQLObjectType({
         args,
         context
       ): Promise<ProfileEntity[]> {
-        return await context.db.profiles.findAll();
+        return await context.db.profiles.findMany();
       },
     },
     profile: {
