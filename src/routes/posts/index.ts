@@ -1,13 +1,20 @@
 import { FastifyPluginAsyncJsonSchemaToTs } from '@fastify/type-provider-json-schema-to-ts';
 import { idParamSchema } from '../../utils/reusedSchemas';
 import { createPostBodySchema, changePostBodySchema } from './schema';
+import {
+  createPost,
+  deletePost,
+  getPostById,
+  getPosts,
+  updatePost,
+} from '../../actions/postsActions';
 import type { PostEntity } from '../../utils/DB/entities/DBPosts';
 
 const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
   fastify
 ): Promise<void> => {
   fastify.get('/', async function (request, reply): Promise<PostEntity[]> {
-    return await fastify.db.posts.findMany();
+    return await getPosts(fastify);
   });
 
   fastify.get(
@@ -18,14 +25,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
       },
     },
     async function (request, reply): Promise<PostEntity> {
-      const post = await fastify.db.posts.findOne({
-        key: 'id',
-        equals: request.params.id,
-      });
-
-      if (!post) throw fastify.httpErrors.notFound();
-
-      return post;
+      return await getPostById(request.params.id, fastify);
     }
   );
 
@@ -37,7 +37,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
       },
     },
     async function (request, reply): Promise<PostEntity> {
-      return await fastify.db.posts.create(request.body);
+      return await createPost(request.body, fastify);
     }
   );
 
@@ -49,11 +49,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
       },
     },
     async function (request, reply): Promise<PostEntity> {
-      try {
-        return await fastify.db.posts.delete(request.params.id);
-      } catch (error: unknown) {
-        throw fastify.httpErrors.badRequest();
-      }
+      return await deletePost(request.params.id, fastify);
     }
   );
 
@@ -66,11 +62,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
       },
     },
     async function (request, reply): Promise<PostEntity> {
-      try {
-        return await fastify.db.posts.change(request.params.id, request.body);
-      } catch (error: unknown) {
-        throw fastify.httpErrors.badRequest();
-      }
+      return await updatePost(request.params.id, request.body, fastify);
     }
   );
 };

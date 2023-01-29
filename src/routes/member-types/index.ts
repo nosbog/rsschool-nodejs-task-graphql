@@ -1,6 +1,11 @@
 import { FastifyPluginAsyncJsonSchemaToTs } from '@fastify/type-provider-json-schema-to-ts';
 import { idParamSchema } from '../../utils/reusedSchemas';
 import { changeMemberTypeBodySchema } from './schema';
+import {
+  getMemberTypeById,
+  getMemberTypes,
+  updateMemberType,
+} from '../../actions/memberTypesActions';
 import type { MemberTypeEntity } from '../../utils/DB/entities/DBMemberTypes';
 
 const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
@@ -9,7 +14,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
   fastify.get('/', async function (request, reply): Promise<
     MemberTypeEntity[]
   > {
-    return await fastify.db.memberTypes.findMany();
+    return await getMemberTypes(fastify);
   });
 
   fastify.get(
@@ -20,16 +25,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
       },
     },
     async function (request, reply): Promise<MemberTypeEntity> {
-      const memberType = await fastify.db.memberTypes.findOne({
-        key: 'id',
-        equals: request.params.id,
-      });
-
-      if (!memberType) {
-        throw fastify.httpErrors.notFound();
-      }
-
-      return memberType;
+      return await getMemberTypeById(request.params.id, fastify);
     }
   );
 
@@ -42,14 +38,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
       },
     },
     async function (request, reply): Promise<MemberTypeEntity> {
-      try {
-        return await fastify.db.memberTypes.change(
-          request.params.id,
-          request.body
-        );
-      } catch (error: unknown) {
-        throw fastify.httpErrors.badRequest();
-      }
+      return await updateMemberType(request.params.id, request.body, fastify);
     }
   );
 };
