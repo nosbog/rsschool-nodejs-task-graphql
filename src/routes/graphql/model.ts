@@ -8,23 +8,17 @@ import {
   GraphQLString,
 } from 'graphql';
 
-export const EntityType = new GraphQLObjectType({
-  name: 'Entity',
-  fields: () => ({
-    users: {
-      type: UserType,
-    },
-    posts: {
-      type: PostType,
-    },
-    profiles: {
-      type: ProfileType,
-    },
-    memberTypeTypes: {
-      type: MemberTypeType,
-    },
-  }),
-});
+const userDTO = {
+  firstName: {
+    type: GraphQLString,
+  },
+  lastName: {
+    type: GraphQLString,
+  },
+  email: {
+    type: GraphQLString,
+  },
+};
 
 export const UserType = new GraphQLObjectType({
   name: 'User',
@@ -32,35 +26,57 @@ export const UserType = new GraphQLObjectType({
     id: {
       type: new GraphQLNonNull(GraphQLString),
     },
-    firstName: {
-      type: GraphQLString,
-    },
-    lastName: {
-      type: GraphQLString,
-    },
-    email: {
-      type: GraphQLString,
-    },
+    ...userDTO,
     subscribedToUserIds: {
       type: new GraphQLList(GraphQLString),
     },
   }),
 });
 
-export const UserDTOType = new GraphQLInputObjectType({
-  name: 'UserDTO',
+export const UserTypeExt = new GraphQLObjectType({
+  name: 'UserExt',
   fields: () => ({
-    firstName: {
-      type: GraphQLString,
+    id: {
+      type: new GraphQLNonNull(GraphQLString),
     },
-    lastName: {
-      type: GraphQLString,
+    ...userDTO,
+    subscribedToUserIds: {
+      type: new GraphQLList(GraphQLString),
     },
-    email: {
-      type: GraphQLString,
+    subscribedToUser: {
+      type: new GraphQLList(UserType),
+    },
+    userSubscribedTo: {
+      type: new GraphQLList(UserType),
     },
   }),
 });
+
+export const UserCreateType = new GraphQLInputObjectType({
+  name: 'UserCreate',
+  fields: () => ({
+    ...userDTO,
+  }),
+});
+
+export const UserChangeType = new GraphQLInputObjectType({
+  name: 'UserChange',
+  fields: () => ({
+    ...userDTO,
+    subscribedToUserIds: {
+      type: new GraphQLList(GraphQLString),
+    },
+  }),
+});
+
+const postDTO = {
+  title: {
+    type: GraphQLString,
+  },
+  content: {
+    type: GraphQLString,
+  },
+};
 
 export const PostType = new GraphQLObjectType({
   name: 'Post',
@@ -68,32 +84,53 @@ export const PostType = new GraphQLObjectType({
     id: {
       type: new GraphQLNonNull(GraphQLString),
     },
-    title: {
-      type: GraphQLString,
-    },
-    content: {
-      type: GraphQLString,
-    },
+    ...postDTO,
     userId: {
       type: new GraphQLNonNull(GraphQLString),
     },
   }),
 });
 
-export const PostDTOType = new GraphQLInputObjectType({
-  name: 'PostDTO',
+export const PostCreateType = new GraphQLInputObjectType({
+  name: 'PostCreate',
   fields: () => ({
-    title: {
-      type: GraphQLString,
-    },
-    content: {
-      type: GraphQLString,
-    },
+    ...postDTO,
     userId: {
       type: new GraphQLNonNull(GraphQLString),
     },
   }),
 });
+
+export const PostChangeType = new GraphQLInputObjectType({
+  name: 'PostChange',
+  fields: () => ({
+    ...postDTO,
+  }),
+});
+
+const profileDTO = {
+  avatar: {
+    type: GraphQLString,
+  },
+  sex: {
+    type: GraphQLString,
+  },
+  birthday: {
+    type: GraphQLInt,
+  },
+  country: {
+    type: GraphQLString,
+  },
+  street: {
+    type: GraphQLString,
+  },
+  city: {
+    type: GraphQLString,
+  },
+  memberTypeId: {
+    type: new GraphQLNonNull(GraphQLString),
+  },
+};
 
 export const ProfileType = new GraphQLObjectType({
   name: 'Profile',
@@ -101,62 +138,38 @@ export const ProfileType = new GraphQLObjectType({
     id: {
       type: new GraphQLNonNull(GraphQLString),
     },
-    avatar: {
-      type: GraphQLString,
-    },
-    sex: {
-      type: GraphQLString,
-    },
-    birthday: {
-      type: GraphQLInt,
-    },
-    country: {
-      type: GraphQLString,
-    },
-    street: {
-      type: GraphQLString,
-    },
-    city: {
-      type: GraphQLString,
-    },
-    memberTypeId: {
-      type: new GraphQLNonNull(GraphQLString),
-    },
+    ...profileDTO,
     userId: {
       type: new GraphQLNonNull(GraphQLString),
     },
   }),
 });
 
-export const ProfileDTOType = new GraphQLInputObjectType({
-  name: 'ProfileDTO',
+export const ProfileCreateType = new GraphQLInputObjectType({
+  name: 'ProfileCreate',
   fields: () => ({
-    avatar: {
-      type: GraphQLString,
-    },
-    sex: {
-      type: GraphQLString,
-    },
-    birthday: {
-      type: GraphQLInt,
-    },
-    country: {
-      type: GraphQLString,
-    },
-    street: {
-      type: GraphQLString,
-    },
-    city: {
-      type: GraphQLString,
-    },
-    memberTypeId: {
-      type: new GraphQLNonNull(GraphQLString),
-    },
+    ...profileDTO,
     userId: {
       type: new GraphQLNonNull(GraphQLString),
     },
   }),
 });
+
+export const ProfileChangeType = new GraphQLInputObjectType({
+  name: 'ProfileChange',
+  fields: () => ({
+    ...profileDTO,
+  }),
+});
+
+const memberTypeDTO = {
+  discount: {
+    type: GraphQLFloat,
+  },
+  monthPostsLimit: {
+    type: GraphQLInt,
+  },
+};
 
 export const MemberTypeType = new GraphQLObjectType({
   name: 'MemberType',
@@ -164,23 +177,30 @@ export const MemberTypeType = new GraphQLObjectType({
     id: {
       type: new GraphQLNonNull(GraphQLString),
     },
-    discount: {
-      type: GraphQLFloat,
-    },
-    monthPostsLimit: {
-      type: GraphQLInt,
-    },
+    ...memberTypeDTO,
   }),
 });
 
-export const MemberTypeDTOType = new GraphQLInputObjectType({
-  name: 'MemberTypeDTO',
+export const MemberTypeChangeType = new GraphQLInputObjectType({
+  name: 'MemberTypeChange',
   fields: () => ({
-    discount: {
-      type: GraphQLFloat,
+    ...memberTypeDTO,
+  }),
+});
+
+export const AllDataAboutUserType = new GraphQLObjectType({
+  name: 'AllDataAboutUser',
+  fields: () => ({
+    id: {
+      type: new GraphQLNonNull(GraphQLString),
     },
-    monthPostsLimit: {
-      type: GraphQLInt,
+    ...userDTO,
+    subscribedToUser: {
+      type: new GraphQLList(UserTypeExt),
     },
+    posts: { type: new GraphQLList(PostType) },
+    profile: { type: ProfileType },
+    memberType: { type: MemberTypeType },
+    userSubscribedTo: { type: new GraphQLList(UserTypeExt) },
   }),
 });
