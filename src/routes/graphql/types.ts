@@ -12,14 +12,24 @@ export const User = new GraphQLObjectType({
   });
 
 export const createUserType = new GraphQLInputObjectType({
-        name: "userCreateType",
-        fields: () => ({
-          firstName: { type: new GraphQLNonNull(GraphQLString) },
-          lastName: { type: new GraphQLNonNull(GraphQLString) },
-          email: { type: new GraphQLNonNull(GraphQLString) }
-        }),
-    });
-  
+    name: "userCreateType",
+    fields: () => ({
+        firstName: { type: new GraphQLNonNull(GraphQLString) },
+        lastName: { type: new GraphQLNonNull(GraphQLString) },
+        email: { type: new GraphQLNonNull(GraphQLString) }
+    }),
+});
+
+export const updateUserType = new GraphQLInputObjectType({
+    name: "userUpdateType",
+    fields: () => ({
+        id: { type: new GraphQLNonNull(GraphQLString) },
+        firstName: { type: GraphQLString },
+        lastName: { type: GraphQLString },
+        email: { type: GraphQLString },
+    }),
+});
+
 export const Profile = new GraphQLObjectType({
     name: "profile",
     fields: {
@@ -50,7 +60,7 @@ export const createProfile = new GraphQLInputObjectType({
 });
   
 export const PostType = new GraphQLObjectType({
-    name: "p",
+    name: "post",
     fields: {
       id: { type: GraphQLString },
       title: { type: GraphQLString },

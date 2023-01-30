@@ -1,7 +1,7 @@
 import { FastifyPluginAsyncJsonSchemaToTs } from '@fastify/type-provider-json-schema-to-ts';
 import { graphql, GraphQLList, GraphQLObjectType, GraphQLSchema } from 'graphql';
 import { graphqlBodySchema } from './schema';
-import { createPostType, createProfile, createUserType, MemberType, PostType, Profile, User } from './types';
+import { createPostType, createProfile, createUserType, MemberType, PostType, Profile, updateUserType, User } from './types';
 
 const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
   fastify
@@ -90,6 +90,24 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
                 city: args.profileData.city,
                 memberTypeId: args.profileData.memberTypeId
               }),
+          },
+          updateUser: {
+            type: User,
+            args: {
+              userData: { type: updateUserType },
+            },
+            resolve: async (_obj, args) => {
+              const user = await fastify.db.users.findOne({ key: "id", equals: args.userData.id });
+              if (!user) throw new Error("User not found");
+              return await fastify.db.users.change(
+                args.userData.id,
+                {
+                firstName: args.userData.firstName,
+                lastName: args.userData.lastName,
+                email: args.userData.email
+                }
+              );
+            }
           }
         }
       });
