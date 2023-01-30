@@ -1,0 +1,10 @@
+type Query {
+  users: [User]
+  profiles: [Profile]
+  posts: [Post]
+  memberTypes: [MemberType]
+}
+
+type Mutation {
+  _empty: String
+}

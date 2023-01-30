@@ -1,0 +1,11 @@
+type Profile {
+  id: String
+  avatar: String
+  sex: String
+  birthday: Int
+  country: String
+  street: String
+  city: String
+  memberTypeId: String
+  userId: String
+}
