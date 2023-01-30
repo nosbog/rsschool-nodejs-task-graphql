@@ -1,7 +1,7 @@
 import { FastifyPluginAsyncJsonSchemaToTs } from '@fastify/type-provider-json-schema-to-ts';
 import { graphql, GraphQLList, GraphQLObjectType, GraphQLSchema } from 'graphql';
 import { graphqlBodySchema } from './schema';
-import { createPostType, createProfile, createUserType, MemberType, PostType, Profile, updateUserType, User } from './types';
+import { createPostType, createProfile, createUserType, MemberType, PostType, Profile, updateProfile, updateUserType, User } from './types';
 
 const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
   fastify
@@ -108,7 +108,29 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
                 }
               );
             }
-          }
+          },
+          updateProfile: {
+            type: Profile,
+            args: {
+              profileData: { type: updateProfile },
+            },
+            resolve: async (_obj, args) => {
+              const profile = await fastify.db.profiles.findOne({ key: "id", equals: args.profileData.id });
+              if (!profile) throw new Error("Profile not found");
+              return await fastify.db.profiles.change(
+                args.profileData.id,
+                {
+                avatar: args.profileData.avatar,
+                sex: args.profileData.sex,
+                birthday: args.profileData.birthday,
+                country: args.profileData.country,
+                street: args.profileData.street,
+                city: args.profileData.city,
+                memberTypeId: args.profileData.memberTypeId
+                }
+              )
+            }
+          },
         }
       });
       const schema = new GraphQLSchema({ query: queryAll, mutation: mutationUser })
