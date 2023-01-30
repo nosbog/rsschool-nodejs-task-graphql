@@ -1,7 +1,7 @@
 import { FastifyPluginAsyncJsonSchemaToTs } from '@fastify/type-provider-json-schema-to-ts';
 import { graphql, GraphQLList, GraphQLObjectType, GraphQLSchema } from 'graphql';
 import { graphqlBodySchema } from './schema';
-import { MemberType, PostType, Profile, User } from './types';
+import { createUserType, MemberType, PostType, Profile, User } from './types';
 
 const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
   fastify
@@ -14,7 +14,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
       },
     },
     async function (request, reply) {
-      const sourceReq = request.body.query || request.body.mutation || "";
+      const sourceReq: string = request.body.query || request.body.mutation || "";
 
       const queryAll = new GraphQLObjectType({
         name: "query",
@@ -46,8 +46,26 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
           },
         }
       }); 
-      const schema = new GraphQLSchema({ query: queryAll })
-      return await graphql({ schema, source: sourceReq, variableValues: request.body.variables });
+
+      const mutationUser = new GraphQLObjectType({
+        name: "mutation",
+        fields: {
+          createUser: {
+            type: User,
+            args: {
+              userData: { type: createUserType },
+            },
+            resolve: (_obj, args) =>
+              fastify.db.users.create({
+                firstName: args.userData.firstName,
+                lastName: args.userData.lastName,
+                email: args.userData.email,
+              }),
+          },
+        }
+      });
+      const schema = new GraphQLSchema({ query: queryAll, mutation: mutationUser })
+      return await graphql({ schema, source: sourceReq, contextValue: fastify, variableValues: request.body.variables });
     }
   );
   
