@@ -7,7 +7,7 @@ import isUUID from 'validator/lib/isUUID';
 const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
   fastify
 ): Promise<void> => {
-  fastify.get('/', async function (request, reply): Promise<PostEntity[]> {
+  fastify.get('/', async function (): Promise<PostEntity[]> {
     return await fastify.db.posts.findMany();
   });
 
@@ -18,9 +18,11 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         params: idParamSchema,
       },
     },
-    async function (request, reply): Promise<PostEntity> {
-      // @ts-ignore
-      const post = await fastify.db.posts.findOne({ key: 'id', equals: request.params.id })
+    async function (request): Promise<PostEntity> {
+      const post = await fastify.db.posts.findOne({
+        key: 'id',
+        equals: request.params.id,
+      });
 
       if (!post) {
         throw fastify.httpErrors.notFound();
@@ -37,8 +39,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         body: createPostBodySchema,
       },
     },
-    async function (request, reply): Promise<PostEntity> {
-      // @ts-ignore
+    async function (request): Promise<PostEntity> {
       const post = await fastify.db.posts.create(request.body);
 
       if (!post) {
@@ -56,20 +57,20 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         params: idParamSchema,
       },
     },
-    async function (request, reply): Promise<PostEntity> {
-      // @ts-ignore
+    async function (request): Promise<PostEntity> {
       if (!isUUID(request.params.id)) {
         throw fastify.httpErrors.badRequest();
       }
 
-      // @ts-ignore
-      const post = await this.db.posts.findOne({ key: 'id', equals: request.params.id });
+      const post = await fastify.db.posts.findOne({
+        key: 'id',
+        equals: request.params.id,
+      });
 
       if (!post) {
         throw fastify.httpErrors.notFound();
       }
-      // @ts-ignore
-      return await this.db.posts.delete(request.params.id);
+      return await fastify.db.posts.delete(request.params.id);
     }
   );
 
@@ -81,20 +82,20 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         params: idParamSchema,
       },
     },
-    async function (request, reply): Promise<PostEntity> {
-      // @ts-ignore
+    async function (request): Promise<PostEntity> {
       if (!isUUID(request.params.id)) {
         throw fastify.httpErrors.badRequest();
       }
 
-      // @ts-ignore
-      const post = await this.db.posts.findOne({ key: 'id', equals: request.params.id });
+      const post = await fastify.db.posts.findOne({
+        key: 'id',
+        equals: request.params.id,
+      });
 
       if (!post) {
         throw fastify.httpErrors.notFound();
       }
 
-      // @ts-ignore
       return await fastify.db.posts.change(post.id, request.body);
     }
   );
