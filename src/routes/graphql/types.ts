@@ -44,6 +44,15 @@ export const PostType = new GraphQLObjectType({
       userId: { type: GraphQLString },
     }
   });
+
+  export const createPostType = new GraphQLInputObjectType({
+    name: "postCreateType",
+    fields: () => ({
+      title: { type: new GraphQLNonNull(GraphQLString) },
+      content: { type: new GraphQLNonNull(GraphQLString)},
+      userId: { type: new GraphQLNonNull(GraphQLString) },
+    }),
+});
   
 export const MemberType = new GraphQLObjectType({
     name: "memberType",

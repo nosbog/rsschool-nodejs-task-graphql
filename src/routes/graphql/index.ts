@@ -1,7 +1,7 @@
 import { FastifyPluginAsyncJsonSchemaToTs } from '@fastify/type-provider-json-schema-to-ts';
 import { graphql, GraphQLList, GraphQLObjectType, GraphQLSchema } from 'graphql';
 import { graphqlBodySchema } from './schema';
-import { createUserType, MemberType, PostType, Profile, User } from './types';
+import { createPostType, createUserType, MemberType, PostType, Profile, User } from './types';
 
 const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
   fastify
@@ -62,6 +62,18 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
                 email: args.userData.email,
               }),
           },
+          createPost: {
+            type: PostType,
+            args: {
+              postData: { type: createPostType },
+            },
+            resolve: (_obj, args) =>
+              fastify.db.posts.create({
+                title: args.postData.title,
+                content: args.postData.content,
+                userId: args.postData.userId,
+              }),
+          }
         }
       });
       const schema = new GraphQLSchema({ query: queryAll, mutation: mutationUser })
