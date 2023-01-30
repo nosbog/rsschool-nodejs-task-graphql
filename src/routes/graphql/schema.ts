@@ -1,20 +1,12 @@
 import { createSchema } from 'graphql-yoga';
 import { loadFiles } from '@graphql-tools/load-files';
 
-import userResolver from './resolvers/user';
-import profileResolver from './resolvers/profile';
-import postResolver from './resolvers/post';
-import memberTypeResolver from './resolvers/memberType';
+import resolvers from './resolversMap';
 
 export const schema = async () =>
   createSchema({
     typeDefs: await loadFiles('src/routes/graphql/typedefs/*.graphql'),
-    resolvers: {
-      ...userResolver,
-      ...profileResolver,
-      ...postResolver,
-      ...memberTypeResolver,
-    },
+    resolvers,
   });
 
 export const graphqlBodySchema = {
