@@ -82,7 +82,7 @@ export const PostType = new GraphQLObjectType({
       content: { type: GraphQLString },
       userId: { type: GraphQLString },
     }
-  });
+});
 
 export const createPostType = new GraphQLInputObjectType({
     name: "postCreateType",
@@ -90,6 +90,15 @@ export const createPostType = new GraphQLInputObjectType({
       title: { type: new GraphQLNonNull(GraphQLString) },
       content: { type: new GraphQLNonNull(GraphQLString)},
       userId: { type: new GraphQLNonNull(GraphQLString) },
+    }),
+});
+
+export const updatePostType = new GraphQLInputObjectType({
+    name: "postUpdateType",
+    fields: () => ({
+      id: { type: new GraphQLNonNull(GraphQLString) },
+      title: { type: new GraphQLNonNull(GraphQLString) },
+      content: { type: new GraphQLNonNull(GraphQLString)},
     }),
 });
   
