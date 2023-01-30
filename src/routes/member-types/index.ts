@@ -6,7 +6,7 @@ import type { MemberTypeEntity } from '../../utils/DB/entities/DBMemberTypes';
 const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
   fastify
 ): Promise<void> => {
-  fastify.get('/', async function (request, reply): Promise<
+  fastify.get('/', async function (): Promise<
     MemberTypeEntity[]
   > {
     return await fastify.db.memberTypes.findMany();
@@ -19,9 +19,11 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         params: idParamSchema,
       },
     },
-    async function (request, reply): Promise<MemberTypeEntity> {
-      // @ts-ignore
-      const memberType = await fastify.db.memberTypes.findOne({ key: 'id', equals: request.params.id })
+    async function (request): Promise<MemberTypeEntity> {
+      const memberType = await fastify.db.memberTypes.findOne({
+        key: 'id',
+        equals: request.params.id,
+      });
 
       if (!memberType) {
         throw fastify.httpErrors.notFound();
@@ -39,15 +41,16 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         params: idParamSchema,
       },
     },
-    async function (request, reply): Promise<MemberTypeEntity> {
-      // @ts-ignore
-      const memberType = await this.db.memberTypes.findOne({ key: 'id', equals: request.params.id });
+    async function (request): Promise<MemberTypeEntity> {
+      const memberType = await fastify.db.memberTypes.findOne({
+        key: 'id',
+        equals: request.params.id,
+      });
 
       if (!memberType) {
         throw fastify.httpErrors.badRequest();
       }
 
-      // @ts-ignore
       return await fastify.db.memberTypes.change(memberType.id, request.body);
     }
   );
