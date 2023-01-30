@@ -460,6 +460,8 @@ mutation($id: String!, $unsubscribed: SubscriberInput!) {
 }
 ```
 
+4. Inside '.\src\routes\graphql\index.ts' there is a isDepthValid function for depth validation.
+
 
 ### Tasks:
 
