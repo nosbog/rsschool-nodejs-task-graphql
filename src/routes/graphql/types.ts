@@ -1,4 +1,4 @@
-import { GraphQLInputObjectType, GraphQLList, GraphQLNonNull, GraphQLObjectType, GraphQLString } from "graphql";
+import { GraphQLInputObjectType, GraphQLInt, GraphQLList, GraphQLNonNull, GraphQLObjectType, GraphQLString } from "graphql";
 
 export const User = new GraphQLObjectType({
     name: "user",
@@ -34,6 +34,20 @@ export const Profile = new GraphQLObjectType({
       userId: { type: GraphQLString },
     }
   });
+
+export const createProfile = new GraphQLInputObjectType({
+    name: "profileCreateType",
+    fields: () => ({
+      avatar: { type: new GraphQLNonNull(GraphQLString) },
+      userId: { type: new GraphQLNonNull(GraphQLString) },
+      sex: { type: new GraphQLNonNull(GraphQLString) },
+      birthday: { type: new GraphQLNonNull(GraphQLInt) },
+      country: { type: new GraphQLNonNull(GraphQLString) },
+      street: { type: new GraphQLNonNull(GraphQLString) },
+      city: { type: new GraphQLNonNull(GraphQLString) },
+      memberTypeId: { type: new GraphQLNonNull(GraphQLString) },
+    }),
+});
   
 export const PostType = new GraphQLObjectType({
     name: "p",
@@ -45,7 +59,7 @@ export const PostType = new GraphQLObjectType({
     }
   });
 
-  export const createPostType = new GraphQLInputObjectType({
+export const createPostType = new GraphQLInputObjectType({
     name: "postCreateType",
     fields: () => ({
       title: { type: new GraphQLNonNull(GraphQLString) },
