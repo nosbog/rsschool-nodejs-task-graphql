@@ -6,10 +6,13 @@ export class Validator {
   public static existenceValidation = (
     entity: any,
     fastifyInstance: FastifyInstance,
-    isBadRequest: boolean = false,
+    message: string,
+    isBadRequest: boolean,
   ): void => {
     if (!entity) {
-      throw isBadRequest ? fastifyInstance.httpErrors.badRequest('Bad request.') : fastifyInstance.httpErrors.notFound('Not found.');
+      throw isBadRequest
+        ? fastifyInstance.httpErrors.badRequest(message)
+        : fastifyInstance.httpErrors.notFound(message);
     }
   };
 
@@ -23,9 +26,10 @@ export class Validator {
     id1: UserEntity,
     id2: UserEntity,
     fastifyInstance: FastifyInstance,
+    message: string,
   ) => {
     if (id1 === id2) {
-      throw fastifyInstance.httpErrors.badRequest('Aboba.');
+      throw fastifyInstance.httpErrors.badRequest(message);
     }
   };
 
@@ -35,7 +39,7 @@ export class Validator {
     fastifyInstance: FastifyInstance,
   ) => {
     if (user2.subscribedToUserIds.includes(user1.id)) {
-      throw fastifyInstance.httpErrors.badRequest('Aboba.');
+      throw fastifyInstance.httpErrors.badRequest('User already has subscribe to target');
     }
   };
 
@@ -45,7 +49,7 @@ export class Validator {
     fastifyInstance: FastifyInstance,
   ) => {
     if (!user2.subscribedToUserIds.includes(user1.id)) {
-      throw fastifyInstance.httpErrors.badRequest('Aboba.');
+      throw fastifyInstance.httpErrors.badRequest('User has no subscribe to target');
     }
   };
 }

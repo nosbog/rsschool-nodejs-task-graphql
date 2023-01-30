@@ -14,6 +14,8 @@ import { UpdateUserInputType } from '../../types/updateUserInputType';
 import { UpdateProfileInputType } from '../../types/updateProfileInputType';
 import { UpdatePostInputType } from '../../types/updatePostInputType';
 import { UpdateMemberTypeInputType } from '../../types/updateMemberTypeInputType';
+import { UnsubscribeInputType } from '../../types/UnsubscribeInputType';
+import { SubscribeInputType } from '../../types/SubscribeInputType';
 
 export const getRequestSchema = (fastify: FastifyInstance) => new GraphQLSchema({
   query: new GraphQLObjectType({
@@ -43,7 +45,7 @@ export const getRequestSchema = (fastify: FastifyInstance) => new GraphQLSchema(
         resolve: async (_, { id }) => {
           const memberType = await fastify.db.memberTypes.findOne({ key: 'id', equals: id });
 
-          Validator.existenceValidation(memberType, fastify);
+          Validator.existenceValidation(memberType, fastify, 'MemberType not found.', false);
 
           return memberType;
         },
@@ -58,7 +60,7 @@ export const getRequestSchema = (fastify: FastifyInstance) => new GraphQLSchema(
 
           const user = await fastify.db.users.findOne({ key: 'id', equals: id });
 
-          Validator.existenceValidation(user, fastify);
+          Validator.existenceValidation(user, fastify, 'User not found.', false);
 
           return user;
         },
@@ -73,7 +75,7 @@ export const getRequestSchema = (fastify: FastifyInstance) => new GraphQLSchema(
 
           const profile = await fastify.db.profiles.findOne({ key: 'id', equals: id });
 
-          Validator.existenceValidation(profile, fastify);
+          Validator.existenceValidation(profile, fastify, 'Profile not found.', false);
 
           return profile;
         },
@@ -88,11 +90,16 @@ export const getRequestSchema = (fastify: FastifyInstance) => new GraphQLSchema(
 
           const post = await fastify.db.posts.findOne({ key: 'id', equals: id });
 
-          Validator.existenceValidation(post, fastify);
+          Validator.existenceValidation(post, fastify, 'Post not found', false);
 
           return post;
         },
       },
+    },
+  }),
+  mutation: new GraphQLObjectType({
+    name: 'mutation',
+    fields: {
       createUser: {
         type: UserEntity,
         args: {
@@ -115,8 +122,8 @@ export const getRequestSchema = (fastify: FastifyInstance) => new GraphQLSchema(
           const user = await fastify.db.users.findOne({ key: 'id', equals: body.userId });
           const memberType = await fastify.db.memberTypes.findOne({ key: 'id', equals: body.memberTypeId });
 
-          Validator.existenceValidation(user, fastify, true);
-          Validator.existenceValidation(memberType, fastify, true);
+          Validator.existenceValidation(user, fastify, 'User not found.', true);
+          Validator.existenceValidation(memberType, fastify, 'MemberType not found.', true);
 
           return fastify.db.profiles.create(body);
         },
@@ -133,7 +140,7 @@ export const getRequestSchema = (fastify: FastifyInstance) => new GraphQLSchema(
 
           const user = await fastify.db.users.findOne({ key: 'id', equals: body.userId });
 
-          Validator.existenceValidation(user, fastify, true);
+          Validator.existenceValidation(user, fastify, 'User not found.', true);
 
           return fastify.db.posts.create(body);
         },
@@ -169,7 +176,7 @@ export const getRequestSchema = (fastify: FastifyInstance) => new GraphQLSchema(
 
           const memberType = await fastify.db.memberTypes.findOne({ key: 'id', equals: body.memberTypeId });
 
-          Validator.existenceValidation(memberType, fastify, true);
+          Validator.existenceValidation(memberType, fastify, 'MemberType not found.', true);
 
           try {
             return await fastify.db.profiles.change(id, body);
@@ -215,19 +222,20 @@ export const getRequestSchema = (fastify: FastifyInstance) => new GraphQLSchema(
       subscribeUserTo: {
         type: UserEntity,
         args: {
-          id: { type: IdInputType },
-          userSubscribeToId: { type: IdInputType },
+          body: { type: SubscribeInputType },
         },
-        resolve: async (_, { id, userSubscribeToId }) => {
-          Validator.sameUserIdsValidation(id, userSubscribeToId, fastify);
+        resolve: async (_, { body }) => {
+          const { id, userSubscribeToId } = body;
+
+          Validator.sameUserIdsValidation(id, userSubscribeToId, fastify, 'User cannot subscribe to himself');
           Validator.uuidValidation(id, fastify);
           Validator.uuidValidation(userSubscribeToId, fastify);
 
           const currentUser = await fastify.db.users.findOne({ key: 'id', equals: id });
           const targetUser = await fastify.db.users.findOne({ key: 'id', equals: userSubscribeToId });
 
-          Validator.existenceValidation(currentUser, fastify, true);
-          Validator.existenceValidation(targetUser, fastify, true);
+          Validator.existenceValidation(currentUser, fastify, 'User not found.', true);
+          Validator.existenceValidation(targetUser, fastify, 'User not found.', true);
           Validator.userAlreadySubscribedValidation(currentUser!, targetUser!, fastify);
 
           return fastify.db.users.change(userSubscribeToId, {
@@ -238,19 +246,20 @@ export const getRequestSchema = (fastify: FastifyInstance) => new GraphQLSchema(
       unsubscribeUserFrom: {
         type: UserEntity,
         args: {
-          id: { type: IdInputType },
-          userUnsubscribeFromId: { type: IdInputType },
+          body: { type: UnsubscribeInputType },
         },
-        resolve: async (_, { id, userUnsubscribeFromId }) => {
-          Validator.sameUserIdsValidation(id, userUnsubscribeFromId, fastify);
+        resolve: async (_, { body }) => {
+          const { id, userUnsubscribeFromId } = body;
+
+          Validator.sameUserIdsValidation(id, userUnsubscribeFromId, fastify, 'User cannot unsubscribe himself');
           Validator.uuidValidation(id, fastify);
           Validator.uuidValidation(userUnsubscribeFromId, fastify);
 
           const currentUser = await fastify.db.users.findOne({ key: 'id', equals: id });
           const targetUser = await fastify.db.users.findOne({ key: 'id', equals: userUnsubscribeFromId });
 
-          Validator.existenceValidation(currentUser, fastify, true);
-          Validator.existenceValidation(targetUser, fastify, true);
+          Validator.existenceValidation(currentUser, fastify, 'User not found.', true);
+          Validator.existenceValidation(targetUser, fastify, 'User not found.', true);
           Validator.userHasNoSubscribeToUserValidation(currentUser!, targetUser!, fastify);
 
           return fastify.db.users.change(userUnsubscribeFromId, {
