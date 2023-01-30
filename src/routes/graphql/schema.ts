@@ -32,3 +32,9 @@ export const graphqlBodySchema = {
     },
   ],
 } as const;
+
+export const schemaMercurius = `
+  type Query {
+    helloWorld():String
+  }
+`
