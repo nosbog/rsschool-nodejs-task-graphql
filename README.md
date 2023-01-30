@@ -1,6 +1,8 @@
 ## Assignment: Graphql
 
 Get gql requests examples:
+
+
 2.1. Get users, profiles, posts, memberTypes - 4 operations in one query.
 
 ```
@@ -460,7 +462,7 @@ mutation($id: String!, $unsubscribed: SubscriberInput!) {
 }
 ```
 
-4. Inside '.\src\routes\graphql\index.ts' there is a isDepthValid function for depth validation.
+4. Inside '.\src\routes\graphql\index.ts' there is a isDepthValid function for depth validation. [Link to place where it was used](https://github.com/LiliyaSm/rsschool-nodejs-task-graphql/blob/7c5c6c4c080b2e370046b9fdc04451fd311b5d09/src/routes/graphql/index.ts#L36)
 
 
 ### Tasks:
