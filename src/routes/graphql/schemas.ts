@@ -3,14 +3,14 @@ import { GraphQLSchema } from 'graphql';
 import { QueryType } from './types/queries.js';
 import { MutationType } from './types/mutations.js';
 
-export const gqlResponse = Type.Partial(
+export const gqlResponseSchema = Type.Partial(
   Type.Object({
     data: Type.Any(),
     errors: Type.Any(),
   }),
 );
 
-export const createGqlResponse = {
+export const createGqlResponseSchema = {
   body: Type.Object(
     {
       query: Type.String(),
