@@ -7,7 +7,6 @@ import {
   GraphQLObjectType,
   GraphQLString,
 } from 'graphql';
-import '../../../plugins/db.js';
 import { FastifyInstance } from 'fastify';
 
 export const QueryType = new GraphQLObjectType({
