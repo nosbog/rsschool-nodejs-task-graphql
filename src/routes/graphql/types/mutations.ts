@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   GraphQLFloat,
   GraphQLInputObjectType,
@@ -26,10 +29,10 @@ export const UserInputType = new GraphQLInputObjectType({
 const createUser = {
   type: UserType,
   args: {
-    input: { type: new GraphQLNonNull(UserInputType) },
+    data: { type: new GraphQLNonNull(UserInputType) },
   },
-  resolve: async (_source: any, args: { input: any }, context: FastifyInstance) => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    return await context.prisma.user.create(args.input);
+
+  resolve: async (_source: any, args: any, { prisma }: FastifyInstance) => {
+    return await prisma.user.create(args);
   },
 };

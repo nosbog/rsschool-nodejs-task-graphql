@@ -29,5 +29,3 @@ export const UUIDType = new GraphQLScalarType({
     return undefined;
   },
 });
-
-const UserType = {};

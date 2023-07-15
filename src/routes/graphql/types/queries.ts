@@ -1,11 +1,14 @@
-import { FastifyInstance } from 'fastify';
 import {
   GraphQLFloat,
   GraphQLID,
+  GraphQLInt,
   GraphQLList,
+  GraphQLNonNull,
   GraphQLObjectType,
   GraphQLString,
 } from 'graphql';
+import '../../../plugins/db.js';
+import { FastifyInstance } from 'fastify';
 
 export const QueryType = new GraphQLObjectType({
   name: 'Query',
@@ -18,18 +21,23 @@ export const UserType = new GraphQLObjectType({
   name: 'User',
   fields: () => ({
     name: { type: GraphQLString },
-    id: { type: GraphQLID },
+    id: { type: new GraphQLNonNull(GraphQLID) },
     balance: { type: GraphQLFloat },
   }),
 });
 
 export const users = {
   type: new GraphQLList(UserType),
-  resolve: async (context: FastifyInstance) => {
-    return await context.prisma.user.findMany();
+  resolve: async (_source: any, _args: any, { prisma }: FastifyInstance) => {
+    return await prisma.user.findMany();
   },
 };
 
-// export const memberType = {
-//   type:
-// };
+export const memberTypeType = new GraphQLObjectType({
+  name: 'MemberType',
+  fields: () => ({
+    id: { type: GraphQLString },
+    discont: { type: GraphQLFloat },
+    postsLimitPerMonth: { type: GraphQLInt },
+  }),
+});
