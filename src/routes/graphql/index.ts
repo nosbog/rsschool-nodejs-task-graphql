@@ -22,6 +22,12 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
         mutation: await getMutationType(fastify),
       });
 
+      const validationErrors = validateDepth(schema, req.body.query);
+
+      if (validationErrors.length > 0) {
+        return await res.send({ data: null, errors: validationErrors });
+      }
+
       return await graphql({
         schema,
         source: req.body.query,
