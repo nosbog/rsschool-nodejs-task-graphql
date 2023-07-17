@@ -34,7 +34,7 @@ export const updatePost = async (id: string, post: Post, fastify: FastifyInstanc
 
   const newPost = await fastify.prisma.post.update({
     where: {
-      id
+      id,
     },
     data: {
       title,

@@ -74,7 +74,7 @@ export const unsubscribeFrom = async (
     data: {
       userSubscribedTo: {
         deleteMany: {
-          "authorId": unsubscribeFromUserId,
+          authorId: unsubscribeFromUserId,
         },
       },
     },

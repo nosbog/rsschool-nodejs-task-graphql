@@ -105,10 +105,8 @@ export const getMutationType = async (
           userId: { type: new GraphQLNonNull(UUIDType) },
           authorId: { type: new GraphQLNonNull(UUIDType) },
         },
-        resolve: async (
-          _,
-          { userId, authorId }: { userId: string; authorId: string },
-        ) => subscribeTo(userId, authorId, fastify),
+        resolve: async (_, { userId, authorId }: { userId: string; authorId: string }) =>
+          subscribeTo(userId, authorId, fastify),
       },
 
       unsubscribeFrom: {
@@ -117,10 +115,8 @@ export const getMutationType = async (
           userId: { type: new GraphQLNonNull(UUIDType) },
           authorId: { type: new GraphQLNonNull(UUIDType) },
         },
-        resolve: async (
-          _,
-          { userId, authorId }: { userId: string; authorId: string },
-        ) => unsubscribeFrom(userId, authorId, fastify),
+        resolve: async (_, { userId, authorId }: { userId: string; authorId: string }) =>
+          unsubscribeFrom(userId, authorId, fastify),
       },
     },
   });
