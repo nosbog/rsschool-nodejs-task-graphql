@@ -38,3 +38,81 @@ Useful things:
 - Tests modify the db, so if it seems to you that the db has become too large,
   you can clear it: npx prisma migrate reset (also triggers seeding)
 - Swagger: /docs
+
+memberTypes {
+   id
+   discount
+   postsLimitPerMonth
+}
+
+memberType(id: "basic") {
+   id
+   discount
+   postsLimitPerMonth
+}
+
+posts {
+   id,
+   authorId,
+   title,
+   content
+}
+
+post(id: "39a43ed1-0f6b-48ca-a815-356b7eed6ea5") {
+   id,
+   authorId,
+   title,
+   content
+}
+
+profiles {
+    id,
+    isMale,
+    yearOfBirth,
+    userId,
+    memberTypeId,
+}
+
+profile(id: "2b7142ee-1b8d-4b61-a4eb-eb7b7d394370") {
+    id,
+    isMale,
+    yearOfBirth,
+    userId,
+    memberTypeId,
+}
+
+users {
+    id,
+    name,
+    balance,
+}
+
+user(id: "38c230a0-ad54-4e9e-b84d-ecd4f42af5d6") {
+    id,
+    name,
+    balance,
+}
+------
+mutation {
+  createUser(input: {
+      name: "second1",
+      balance: 1,
+  }) {
+    name
+    balance
+  }
+}
+
+mutation {
+  createProfile(input: {      
+          isMale: true,
+          yearOfBirth: 2022,
+          memberTypeId: "business",
+          userId: "profile1",
+  }) {
+    isMale
+    yearOfBirth
+    memberTypeId
+    userId
+  }
+}
