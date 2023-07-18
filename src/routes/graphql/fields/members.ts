@@ -19,7 +19,7 @@ export const MemberType = new GraphQLObjectType({
     })
 })
 
-export const memberFields = {
+export const memberQueryFields = {
     memberType: {
         type: MemberType,
         args: {id: {type: MemberId}},

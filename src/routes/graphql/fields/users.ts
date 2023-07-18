@@ -67,7 +67,7 @@ export const UserType = new GraphQLObjectType({
     })
 })
 
-export const userFields = {
+export const userQueryFields = {
     user: {
         type: UserType,
         args: {id: {type: UUIDType}},

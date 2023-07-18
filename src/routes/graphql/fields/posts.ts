@@ -14,7 +14,7 @@ export const PostType = new GraphQLObjectType({
     })
 })
 
-export const postFields = {
+export const postQueryFields = {
     post: {
         type: PostType,
         args: {id: {type: UUIDType}},

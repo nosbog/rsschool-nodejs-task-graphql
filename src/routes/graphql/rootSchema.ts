@@ -1,16 +1,16 @@
 import {GraphQLObjectType, GraphQLSchema} from "graphql";
-import {memberFields} from "./fields/members.js";
-import {postFields} from "./fields/posts.js";
-import {userFields} from "./fields/users.js";
-import {profileFields} from "./fields/profiles.js";
+import {memberQueryFields} from "./fields/members.js";
+import {postQueryFields} from "./fields/posts.js";
+import {userQueryFields} from "./fields/users.js";
+import {profileQueryFields} from "./fields/profiles.js";
 
 const rootQuery = new GraphQLObjectType({
     name: 'RootQuery',
     fields: {
-        ...memberFields,
-        ...postFields,
-        ...userFields,
-        ...profileFields,
+        ...memberQueryFields,
+        ...postQueryFields,
+        ...userQueryFields,
+        ...profileQueryFields,
     }
 })
 

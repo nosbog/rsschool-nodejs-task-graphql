@@ -26,7 +26,7 @@ export const ProfileType = new GraphQLObjectType({
     })
 })
 
-export const profileFields = {
+export const profileQueryFields = {
     profile: {
         type: ProfileType,
         args: {id: {type: UUIDType}},
