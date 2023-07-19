@@ -1,6 +1,5 @@
 import { Type } from '@fastify/type-provider-typebox';
 import { GraphQLBoolean, GraphQLFloat, GraphQLInt, GraphQLList, GraphQLObjectType, GraphQLSchema, GraphQLString, GraphQLUnionType } from 'graphql';
-import { gqlPrisma } from './index.js';
 import { UUIDType } from './types/uuid.js'
 
   export const gqlResponseSchema = Type.Partial(
@@ -87,32 +86,33 @@ const RootQuery  = new GraphQLObjectType({
   fields: {
     memberTypes: {
       type: new GraphQLList(MemberType),
-      async resolve () {
-        const res = await gqlPrisma.memberType.findMany();
+      async resolve (context) {
+
+        const res = await context.prisma.memberType.findMany();
 
         return res;
       }
     },
     posts: {
       type: new GraphQLList(Post),
-      async resolve () {
-        const res = await gqlPrisma.post.findMany();
+      async resolve (context) {
+        const res = await context.prisma.post.findMany();
 
         return res;
       }
     },
     users: {
       type: new GraphQLList(User),
-      async resolve () {
-        const res = await gqlPrisma.user.findMany();
+      async resolve (context) {
+        const res = await context.prisma.user.findMany();
 
         return res;
       }
     },
     profiles: {
       type: new GraphQLList(Profile),
-      async resolve () {
-        const res = await gqlPrisma.profile.findMany();
+      async resolve (context) {
+        const res = await context.prisma.profile.findMany();
 
         return res;
       }
