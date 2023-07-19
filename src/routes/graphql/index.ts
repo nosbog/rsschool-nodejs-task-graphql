@@ -17,7 +17,7 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
         async handler(req) {
             const {query, variables} = req.body;
 
-            const checkLimit = validate(rootSchema, parse(query), [depthLimit(5)])
+            const checkLimit = validate(rootSchema, parse(query), [depthLimit(5)]).length
 
             const result = await graphql({
                 schema: rootSchema,
@@ -28,11 +28,11 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
             console.log('VARIABLES: ', variables); //todo: remove
             console.log('QUERY: ', result); // todo: remove
             console.log('ERRORS: ', result.errors) // todo: remove
-            console.log('LIMIT: ', checkLimit) // todo: remove
+            // console.log('LIMIT: ', checkLimit) // todo: remove
 
             return {
-                data: checkLimit ? null : result.data,
-                errors: checkLimit ? checkLimit : result.errors
+                data: checkLimit > 0 ? null : result.data,
+                errors: checkLimit > 0 ? [{message: 'exceeds maximum operation depth of 5'}] : result.errors
             };
         },
     });
