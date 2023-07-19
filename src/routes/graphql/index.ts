@@ -20,8 +20,10 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
                 source: query,
                 variableValues: variables,
             });
+            console.log('VARIABLES: ', variables); //todo: remove
             console.log('QUERY: ', result); // todo: remove
-            return {data: result.data};
+            console.log('ERRORS: ', result.errors) // todo: remove
+            return {data: result.data, errors: result.errors};
         },
     });
 };

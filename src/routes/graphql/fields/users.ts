@@ -1,8 +1,9 @@
-import {GraphQLFloat, GraphQLList, GraphQLObjectType} from "graphql";
+import {GraphQLFloat, GraphQLInputObjectType, GraphQLList, GraphQLNonNull, GraphQLObjectType} from "graphql";
 import {PrismaClient} from "@prisma/client";
 import {UUIDType} from "../types/uuid.js";
 import {ProfileType} from "./profiles.js";
 import {PostType} from "./posts.js";
+import {Void} from "../types/void.js";
 
 const prisma = new PrismaClient()
 
@@ -67,6 +68,22 @@ export const UserType = new GraphQLObjectType({
     })
 })
 
+export const CreateUserInput = new GraphQLInputObjectType({
+    name: 'CreateUserInput',
+    fields: () => ({
+        name: {type: new GraphQLNonNull(UUIDType)},
+        balance: {type: new GraphQLNonNull(GraphQLFloat)},
+    })
+})
+
+export const ChangeUserInput = new GraphQLInputObjectType({
+    name: 'ChangeUserInput',
+    fields: () => ({
+        name: {type: UUIDType},
+        balance: {type: GraphQLFloat},
+    })
+})
+
 export const userQueryFields = {
     user: {
         type: UserType,
@@ -89,4 +106,78 @@ export const userQueryFields = {
             return prisma.user.findMany();
         }
     }
+}
+
+export const userMutationFields = {
+    createUser: {
+        type: UserType,
+        args: {dto: {type: CreateUserInput}},
+        resolve(parent, args: { dto: { name: string, balance: number } }) {
+            return prisma.user.create({
+                data: args.dto,
+            });
+        }
+    },
+    deleteUser: {
+        type: Void,
+        args: {id: {type: UUIDType}},
+        async resolve(parent, args: { id: string }) {
+            await prisma.user.delete({
+                where: {
+                    id: args.id,
+                },
+            });
+        }
+    },
+    changeUser: {
+        type: UserType,
+        args: {
+            id: {type: UUIDType},
+            dto: {type: ChangeUserInput}
+        },
+        resolve(parent, args: { id: string, dto: { name?: string, balance?: number } }) {
+            return prisma.user.update({
+                where: {id: args.id},
+                data: args.dto,
+            });
+        }
+    },
+    subscribeTo: {
+        type: UserType,
+        args: {
+            userId: {type: UUIDType},
+            authorId: {type: UUIDType}
+        },
+        resolve(parent, args: { userId: string, authorId: string }) {
+            return prisma.user.update({
+                where: {
+                    id: args.userId,
+                },
+                data: {
+                    userSubscribedTo: {
+                        create: {
+                            authorId: args.authorId,
+                        },
+                    },
+                },
+            });
+        }
+    },
+    unsubscribeFrom: {
+        type: Void,
+        args: {
+            userId: {type: UUIDType},
+            authorId: {type: UUIDType}
+        },
+        async resolve(parent, args: { userId: string, authorId: string }) {
+            await prisma.subscribersOnAuthors.delete({
+                where: {
+                    subscriberId_authorId: {
+                        subscriberId: args.userId,
+                        authorId: args.authorId,
+                    },
+                },
+            });
+        }
+    },
 }
