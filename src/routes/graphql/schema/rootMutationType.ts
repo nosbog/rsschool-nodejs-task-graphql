@@ -1,7 +1,11 @@
 import { GraphQLObjectType } from 'graphql';
-import { CreatePostField, DeletePostField } from './types/post.js';
-import { CreateUserField, DeleteUserField } from './types/user.js';
-import { CreateProfileField, DeleteProfileField } from './types/profile.js';
+import { ChangePostField, CreatePostField, DeletePostField } from './types/post.js';
+import { ChangeUserField, CreateUserField, DeleteUserField } from './types/user.js';
+import {
+  ChangeProfileField,
+  CreateProfileField,
+  DeleteProfileField,
+} from './types/profile.js';
 
 export const RootMutationType = new GraphQLObjectType({
   name: 'RootMutationType',
@@ -12,5 +16,8 @@ export const RootMutationType = new GraphQLObjectType({
     deletePost: DeletePostField,
     deleteUser: DeleteUserField,
     deleteProfile: DeleteProfileField,
+    changeUser: ChangeUserField,
+    changePost: ChangePostField,
+    changeProfile: ChangeProfileField,
   },
 });

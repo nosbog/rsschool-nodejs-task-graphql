@@ -137,3 +137,50 @@ export const DeletePostField = {
   args: deletePostArgs,
   resolve: deletePostResolver,
 };
+
+// Update Post
+const changePostDto = new GraphQLInputObjectType({
+  name: 'ChangePostInput',
+  fields: () => ({
+    title: {
+      type: GraphQLString,
+    },
+    content: {
+      type: GraphQLString,
+    },
+    authorId: {
+      type: UUIDType,
+    },
+  }),
+});
+
+const changePostArgs = {
+  id: {
+    type: new GraphQLNonNull(UUIDType),
+  },
+  dto: {
+    type: new GraphQLNonNull(changePostDto),
+  },
+};
+
+interface ChangePostArgs {
+  id: string;
+  dto: {
+    title: string;
+    content: string;
+    authorId: string;
+  };
+}
+
+const changePostResolver = (_parent, args: ChangePostArgs, fastify: FastifyInstance) => {
+  return fastify.prisma.post.update({
+    where: { id: args.id },
+    data: args.dto,
+  });
+};
+
+export const ChangePostField = {
+  type: PostType,
+  args: changePostArgs,
+  resolve: changePostResolver,
+};

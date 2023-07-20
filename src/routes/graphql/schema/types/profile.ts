@@ -166,3 +166,58 @@ export const DeleteProfileField = {
   args: deleteProfileArgs,
   resolve: deleteProfileResolver,
 };
+
+// Update Profile
+const changeProfileDto = new GraphQLInputObjectType({
+  name: 'ChangeProfileInput',
+  fields: () => ({
+    userId: {
+      type: UUIDType,
+    },
+    memberTypeId: {
+      type: MemberTypeId,
+    },
+    isMale: {
+      type: GraphQLBoolean,
+    },
+    yearOfBirth: {
+      type: GraphQLInt,
+    },
+  }),
+});
+
+const changeProfileArgs = {
+  id: {
+    type: new GraphQLNonNull(UUIDType),
+  },
+  dto: {
+    type: new GraphQLNonNull(changeProfileDto),
+  },
+};
+
+interface ChangeProfileArgs {
+  id: string;
+  dto: {
+    userId: string;
+    memberTypeId: string;
+    isMale: boolean;
+    yearOfBirth: number;
+  };
+}
+
+const changeProfileResolver = (
+  _parent,
+  args: ChangeProfileArgs,
+  fastify: FastifyInstance,
+) => {
+  return fastify.prisma.profile.update({
+    where: { id: args.id },
+    data: args.dto,
+  });
+};
+
+export const ChangeProfileField = {
+  type: ProfileType,
+  args: changeProfileArgs,
+  resolve: changeProfileResolver,
+};

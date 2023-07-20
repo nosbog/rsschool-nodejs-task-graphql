@@ -197,3 +197,47 @@ export const DeleteUserField = {
   args: deleteUserArgs,
   resolve: deleteUserResolver,
 };
+
+// Update User
+
+const changeUserDto = new GraphQLInputObjectType({
+  name: 'ChangeUserInput',
+  fields: () => ({
+    name: {
+      type: GraphQLString,
+    },
+    balance: {
+      type: GraphQLFloat,
+    },
+  }),
+});
+
+const changeUserArgs = {
+  id: {
+    type: new GraphQLNonNull(UUIDType),
+  },
+  dto: {
+    type: new GraphQLNonNull(changeUserDto),
+  },
+};
+
+interface ChangeUserArgs {
+  id: string;
+  dto: {
+    name: string;
+    balance: number;
+  };
+}
+
+const changeUserResolver = (_parent, args: ChangeUserArgs, fastify: FastifyInstance) => {
+  return fastify.prisma.user.update({
+    where: { id: args.id },
+    data: args.dto,
+  });
+};
+
+export const ChangeUserField = {
+  type: UserType,
+  args: changeUserArgs,
+  resolve: changeUserResolver,
+};
