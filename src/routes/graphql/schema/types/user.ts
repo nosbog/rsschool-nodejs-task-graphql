@@ -1,4 +1,11 @@
-import { GraphQLFloat, GraphQLList, GraphQLObjectType, GraphQLString } from 'graphql';
+import {
+  GraphQLFloat,
+  GraphQLInputObjectType,
+  GraphQLList,
+  GraphQLNonNull,
+  GraphQLObjectType,
+  GraphQLString,
+} from 'graphql';
 import { UUIDType } from '../../types/uuid.js';
 import { FastifyInstance } from 'fastify';
 import { ProfileType } from './profile.js';
@@ -118,4 +125,44 @@ export const UserTypeField = {
 export const UsersTypeField = {
   type: ManyUsersType,
   resolve: manyUserTypesResolver,
+};
+
+// Mutations
+
+// Create User
+const createUserDto = new GraphQLInputObjectType({
+  name: 'CreateUserInput',
+  fields: () => ({
+    name: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    balance: {
+      type: new GraphQLNonNull(GraphQLFloat),
+    },
+  }),
+});
+
+const createUserArgs = {
+  dto: {
+    type: new GraphQLNonNull(createUserDto),
+  },
+};
+
+interface CreateUserArgs {
+  dto: {
+    name: string;
+    balance: number;
+  };
+}
+
+const createUserResolver = (_parent, args: CreateUserArgs, fastify: FastifyInstance) => {
+  return fastify.prisma.user.create({
+    data: args.dto,
+  });
+};
+
+export const CreateUserField = {
+  type: UserType,
+  args: createUserArgs,
+  resolve: createUserResolver,
 };
