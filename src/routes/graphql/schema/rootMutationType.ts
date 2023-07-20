@@ -1,7 +1,7 @@
 import { GraphQLObjectType } from 'graphql';
-import { CreatePostField } from './types/post.js';
-import { CreateUserField } from './types/user.js';
-import { CreateProfileField } from './types/profile.js';
+import { CreatePostField, DeletePostField } from './types/post.js';
+import { CreateUserField, DeleteUserField } from './types/user.js';
+import { CreateProfileField, DeleteProfileField } from './types/profile.js';
 
 export const RootMutationType = new GraphQLObjectType({
   name: 'RootMutationType',
@@ -9,5 +9,8 @@ export const RootMutationType = new GraphQLObjectType({
     createPost: CreatePostField,
     createUser: CreateUserField,
     createProfile: CreateProfileField,
+    deletePost: DeletePostField,
+    deleteUser: DeleteUserField,
+    deleteProfile: DeleteProfileField,
   },
 });

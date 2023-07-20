@@ -1,4 +1,5 @@
 import {
+  GraphQLBoolean,
   GraphQLInputObjectType,
   GraphQLList,
   GraphQLNonNull,
@@ -105,4 +106,34 @@ export const CreatePostField = {
   type: PostType,
   args: createPostArgs,
   resolve: createPostResolver,
+};
+
+// Delete Post
+
+const deletePostArgs = {
+  id: {
+    type: new GraphQLNonNull(UUIDType),
+  },
+};
+
+interface DeletePostArgs {
+  id: string;
+}
+
+const deletePostResolver = async (
+  _parent,
+  args: DeletePostArgs,
+  fastify: FastifyInstance,
+) => {
+  await fastify.prisma.post.delete({
+    where: {
+      id: args.id,
+    },
+  });
+};
+
+export const DeletePostField = {
+  type: GraphQLBoolean,
+  args: deletePostArgs,
+  resolve: deletePostResolver,
 };

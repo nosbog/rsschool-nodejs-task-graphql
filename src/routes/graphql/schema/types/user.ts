@@ -1,4 +1,5 @@
 import {
+  GraphQLBoolean,
   GraphQLFloat,
   GraphQLInputObjectType,
   GraphQLList,
@@ -165,4 +166,34 @@ export const CreateUserField = {
   type: UserType,
   args: createUserArgs,
   resolve: createUserResolver,
+};
+
+// Delete User
+
+const deleteUserArgs = {
+  id: {
+    type: new GraphQLNonNull(UUIDType),
+  },
+};
+
+interface DeleteUserArgs {
+  id: string;
+}
+
+const deleteUserResolver = async (
+  _parent,
+  args: DeleteUserArgs,
+  fastify: FastifyInstance,
+) => {
+  await fastify.prisma.user.delete({
+    where: {
+      id: args.id,
+    },
+  });
+};
+
+export const DeleteUserField = {
+  type: GraphQLBoolean,
+  args: deleteUserArgs,
+  resolve: deleteUserResolver,
 };

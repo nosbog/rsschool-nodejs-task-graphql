@@ -136,3 +136,33 @@ export const CreateProfileField = {
   args: createProfileArgs,
   resolve: createProfileResolver,
 };
+
+// Delete Profile
+
+const deleteProfileArgs = {
+  id: {
+    type: new GraphQLNonNull(UUIDType),
+  },
+};
+
+interface DeleteProfileArgs {
+  id: string;
+}
+
+const deleteProfileResolver = async (
+  _parent,
+  args: DeleteProfileArgs,
+  fastify: FastifyInstance,
+) => {
+  await fastify.prisma.profile.delete({
+    where: {
+      id: args.id,
+    },
+  });
+};
+
+export const DeleteProfileField = {
+  type: GraphQLBoolean,
+  args: deleteProfileArgs,
+  resolve: deleteProfileResolver,
+};
