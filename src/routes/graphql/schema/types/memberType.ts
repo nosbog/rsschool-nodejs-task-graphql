@@ -21,7 +21,7 @@ export const MemberTypeId = new GraphQLEnumType({
 });
 
 // MemberType Type
-export const MemberTypeType = new GraphQLObjectType({
+export const MemberTypeType: GraphQLObjectType = new GraphQLObjectType({
   name: 'memberType',
   fields: () => ({
     id: { type: MemberTypeId },
@@ -58,7 +58,7 @@ export const memberTypeResolver = async (
 // Many MemberTypes Resolver
 export const manyMemberTypesResolver = async (
   _parent,
-  _args: MemberTypeArgs,
+  _args,
   { prisma }: FastifyInstance,
 ) => {
   return prisma.memberType.findMany();
