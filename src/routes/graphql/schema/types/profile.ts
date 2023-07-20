@@ -1,7 +1,7 @@
 import { GraphQLBoolean, GraphQLInt, GraphQLList, GraphQLObjectType } from 'graphql';
 import { UUIDType } from '../../types/uuid.js';
 import { FastifyInstance } from 'fastify';
-import { MemberTypeId } from './memberType.js';
+import { MemberTypeId, MemberTypeType } from './memberType.js';
 
 // ProfileType
 export const ProfileType = new GraphQLObjectType({
@@ -22,20 +22,24 @@ export const ProfileType = new GraphQLObjectType({
     memberTypeId: {
       type: MemberTypeId,
     },
+    memberType: {
+      type: MemberTypeType,
+      resolve: postMemberTypeResolver,
+    },
   }),
 });
 
 // ManyProfilesType
-export const ManyProfilesType = new GraphQLList(ProfileType);
+const ManyProfilesType = new GraphQLList(ProfileType);
 
 // Profile args
-export interface ProfileTypeArgs {
+interface ProfileTypeArgs {
   id: string;
 }
-export const profileTypeArgs = { id: { type: UUIDType } };
+const profileTypeArgs = { id: { type: UUIDType } };
 
 // Profile resolver
-export const profileTypeResolver = async (
+const profileTypeResolver = (
   _parent,
   args: ProfileTypeArgs,
   { prisma }: FastifyInstance,
@@ -48,12 +52,17 @@ export const profileTypeResolver = async (
 };
 
 // Many Profiles resolver
-export const manyProfileTypeResolver = async (
-  _parent,
+const manyProfileTypeResolver = (_parent, _args, { prisma }: FastifyInstance) => {
+  return prisma.profile.findMany();
+};
+
+// MemberType resolver
+const postMemberTypeResolver = (
+  parent: { memberTypeId: string },
   _args,
   { prisma }: FastifyInstance,
 ) => {
-  return prisma.profile.findMany();
+  return prisma.memberType.findUnique({ where: { id: parent.memberTypeId } });
 };
 
 // ProfileType Field

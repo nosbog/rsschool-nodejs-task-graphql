@@ -37,21 +37,17 @@ export const UserType: GraphQLObjectType = new GraphQLObjectType({
 });
 
 // ManyUsersType
-export const ManyUsersType = new GraphQLList(UserType);
+const ManyUsersType = new GraphQLList(UserType);
 
 // User args
-export interface UserTypeArgs {
+interface UserTypeArgs {
   id: string;
 }
-export const userTypeArgs = { id: { type: UUIDType } };
+const userTypeArgs = { id: { type: UUIDType } };
 
 // User resolver
-export const userTypeResolver = async (
-  _parent,
-  args: UserTypeArgs,
-  { prisma }: FastifyInstance,
-) => {
-  return await prisma.user.findUnique({
+const userTypeResolver = (_parent, args: UserTypeArgs, { prisma }: FastifyInstance) => {
+  return prisma.user.findUnique({
     where: {
       id: args.id,
     },
@@ -59,16 +55,12 @@ export const userTypeResolver = async (
 };
 
 // Many Users resolver
-export const manyUserTypesResolver = async (
-  _parent,
-  _args,
-  { prisma }: FastifyInstance,
-) => {
+const manyUserTypesResolver = (_parent, _args, { prisma }: FastifyInstance) => {
   return prisma.user.findMany();
 };
 
 // subscribedToUser resolver
-export const subscribedToUserResolver = (
+const subscribedToUserResolver = (
   parent: { id: string },
   _args,
   { prisma }: FastifyInstance,
@@ -85,7 +77,7 @@ export const subscribedToUserResolver = (
 };
 
 // userSubscribedTo resolver
-export const userSubscribedToResolver = (
+const userSubscribedToResolver = (
   parent: { id: string },
   _args,
   { prisma }: FastifyInstance,
@@ -102,7 +94,7 @@ export const userSubscribedToResolver = (
 };
 
 // Profile resolver
-export const userProfileResolver = (
+const userProfileResolver = (
   parent: { id: string },
   _args,
   { prisma }: FastifyInstance,
@@ -111,11 +103,7 @@ export const userProfileResolver = (
 };
 
 // Post Resolver
-export const userPostResolver = (
-  parent: { id: string },
-  _args,
-  { prisma }: FastifyInstance,
-) => {
+const userPostResolver = (parent: { id: string }, _args, { prisma }: FastifyInstance) => {
   return prisma.post.findMany({ where: { authorId: parent.id } });
 };
 

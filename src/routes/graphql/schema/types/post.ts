@@ -25,17 +25,13 @@ export const PostType = new GraphQLObjectType({
 export const ManyPostsType = new GraphQLList(PostType);
 
 // Post args
-export interface PostTypeArgs {
+interface PostTypeArgs {
   id: string;
 }
-export const postTypeArgs = { id: { type: UUIDType } };
+const postTypeArgs = { id: { type: UUIDType } };
 
 // Post resolver
-export const postTypeResolver = async (
-  _parent,
-  args: PostTypeArgs,
-  { prisma }: FastifyInstance,
-) => {
+const postTypeResolver = (_parent, args: PostTypeArgs, { prisma }: FastifyInstance) => {
   return prisma.post.findUnique({
     where: {
       id: args.id,
@@ -44,11 +40,7 @@ export const postTypeResolver = async (
 };
 
 // Many Post resolver
-export const manyPostTypeResolver = async (
-  _parent,
-  _args,
-  { prisma }: FastifyInstance,
-) => {
+const manyPostTypeResolver = (_parent, _args, { prisma }: FastifyInstance) => {
   return prisma.post.findMany();
 };
 

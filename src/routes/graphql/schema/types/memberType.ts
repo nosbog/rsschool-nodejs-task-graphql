@@ -31,24 +31,24 @@ export const MemberTypeType: GraphQLObjectType = new GraphQLObjectType({
 });
 
 // Many MemberTypes Type
-export const ManyMemberTypesType = new GraphQLList(MemberTypeType);
+const ManyMemberTypesType = new GraphQLList(MemberTypeType);
 
 // MemberType Args
-export interface MemberTypeArgs {
+interface MemberTypeArgs {
   id: string;
 }
 
-export const memberTypeArgs = {
+const memberTypeArgs = {
   id: { type: MemberTypeId },
 };
 
 // MemberType Resolver
-export const memberTypeResolver = async (
+const memberTypeResolver = (
   _parent,
   args: MemberTypeArgs,
   { prisma }: FastifyInstance,
 ) => {
-  return await prisma.memberType.findUnique({
+  return prisma.memberType.findUnique({
     where: {
       id: args.id,
     },
@@ -56,11 +56,7 @@ export const memberTypeResolver = async (
 };
 
 // Many MemberTypes Resolver
-export const manyMemberTypesResolver = async (
-  _parent,
-  _args,
-  { prisma }: FastifyInstance,
-) => {
+const manyMemberTypesResolver = (_parent, _args, { prisma }: FastifyInstance) => {
   return prisma.memberType.findMany();
 };
 
