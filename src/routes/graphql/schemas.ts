@@ -1,9 +1,12 @@
 import { Type } from '@fastify/type-provider-typebox';
 import { GraphQLBoolean, GraphQLFloat, GraphQLInt, GraphQLList, GraphQLObjectType, GraphQLSchema, GraphQLString, GraphQLEnumType,GraphQLNonNull, GraphQLUnionType } from 'graphql';
 import { UUIDType } from './types/uuid.js';
-import {MemberTypeId, MemberType} from './types/member.js'
+import {MemberTypeId, MemberType} from './types/member-type.js';
+import { User } from './types/user.js';
+import { Post } from './types/post.js';
+import { Profile } from './types/profile.js';
 
-  export const gqlResponseSchema = Type.Partial(
+export const gqlResponseSchema = Type.Partial(
   Type.Object({
     data: Type.Any(),
     errors: Type.Any(),
@@ -23,51 +26,6 @@ export const createGqlResponseSchema = {
 };
 
 
-const Post = new GraphQLObjectType ({
-  name: 'post',
-  fields: () => ({
-    id: {
-      type: UUIDType!
-    },
-    title: {
-      type: GraphQLInt
-    },
-    content: {
-      type: GraphQLString
-    }  
-  })
-});
-
-const User = new GraphQLObjectType ({
-  name: 'user',
-  fields: () => ({
-    id: {
-      type: UUIDType!
-    },
-    name: {
-      type: GraphQLString
-    },
-    balance: {
-      type: GraphQLFloat
-    }  
-  })
-});
-
-const Profile = new GraphQLObjectType ({
-  name: 'profile',
-  fields: () => ({
-    id: {
-      type: UUIDType!
-    },
-    isMale: {
-      type: GraphQLBoolean!
-    },
-    yearOfBirth: {
-      type: GraphQLInt!
-    }  
-  })
-});
-
 const RootQuery  = new GraphQLObjectType({
   name: 'RootQuery',
   fields: {
@@ -76,8 +34,6 @@ const RootQuery  = new GraphQLObjectType({
       type: new GraphQLList(MemberType),
       async resolve (parent, {id}, context) {
 
-        console.log('hello!')
-
         const  res = await context.prisma.memberType.findMany();
 
         return res;
@@ -85,14 +41,13 @@ const RootQuery  = new GraphQLObjectType({
     },
     memberType: {
       type: new GraphQLNonNull( MemberType),
-
       args: {
         id: {type: MemberTypeId}
       },
 
-      async resolve (root, {id}, context, ) {
+      async resolve (root, { id }, context, ) {
 
-        console.log('input: ', id);
+        console.log('memberType id: ', id);
 
         const res = await context.prisma.memberType.findUnique({
           where: {
@@ -106,12 +61,30 @@ const RootQuery  = new GraphQLObjectType({
 
     posts: {
       type: new GraphQLList(Post),
-      async resolve (parent, {id}, context) {
+      async resolve (parent, { id }, context) {
         const res = await context.prisma.post.findMany();
 
         return res;
       }
     },
+    post: {
+      type: Post,
+      args: { 
+        id: { type: new GraphQLNonNull(UUIDType) } 
+      },
+            
+      resolve: async (parent, { id }, context) => {
+
+        console.log('post id: ', id);
+
+        return await context.prisma.post.findFirst({
+          where: {
+            id: id,
+          },
+        });
+      },
+    },
+
     users: {
       type: new GraphQLList(User),
       async resolve (parent, {id}, context) {
@@ -120,6 +93,24 @@ const RootQuery  = new GraphQLObjectType({
         return res;
       }
     },
+    user: {
+      type: User,
+      args: {
+        id: { type: new GraphQLNonNull(UUIDType) },
+      },
+      resolve: async (parent, { id }, context) => {
+
+        console.log('user id: ', id);
+
+        return await context.prisma.user.findFirst({
+          where: {
+            id: id,
+          },
+        });
+      },
+    },
+
+    
     profiles: {
       type: new GraphQLList(Profile),
       async resolve (parent, {id}, context) {
@@ -127,7 +118,26 @@ const RootQuery  = new GraphQLObjectType({
 
         return res;
       }
-    }
+    },
+    profile: {
+      type: Profile,
+      args: { 
+        id: { type: new GraphQLNonNull(UUIDType) } 
+      },
+      resolve: async (parent, { id }, context) => {
+
+        console.log('profile id: ', id);
+
+        const res = await context.prisma.profile.findUnique({
+          where: {
+            id: id,
+          },
+        });
+
+        return res;
+      },
+    },
+
   }
 })
 
