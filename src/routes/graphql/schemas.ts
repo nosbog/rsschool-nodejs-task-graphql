@@ -109,7 +109,6 @@ const RootQuery  = new GraphQLObjectType({
         });
       },
     },
-
     
     profiles: {
       type: new GraphQLList(Profile),
