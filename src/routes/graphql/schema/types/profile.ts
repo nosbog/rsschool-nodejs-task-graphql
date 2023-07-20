@@ -171,9 +171,6 @@ export const DeleteProfileField = {
 const changeProfileDto = new GraphQLInputObjectType({
   name: 'ChangeProfileInput',
   fields: () => ({
-    userId: {
-      type: UUIDType,
-    },
     memberTypeId: {
       type: MemberTypeId,
     },
@@ -198,7 +195,6 @@ const changeProfileArgs = {
 interface ChangeProfileArgs {
   id: string;
   dto: {
-    userId: string;
     memberTypeId: string;
     isMale: boolean;
     yearOfBirth: number;

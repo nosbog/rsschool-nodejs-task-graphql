@@ -241,3 +241,69 @@ export const ChangeUserField = {
   args: changeUserArgs,
   resolve: changeUserResolver,
 };
+
+// Subscribe to Author (User)
+
+const subscribeToAuthorArgs = {
+  userId: {
+    type: new GraphQLNonNull(UUIDType),
+  },
+  authorId: {
+    type: new GraphQLNonNull(UUIDType),
+  },
+};
+
+interface SubscribeToAuthorArgs {
+  userId: string;
+  authorId: string;
+}
+
+const subscribeToAuthorResolver = (
+  _parent,
+  args: SubscribeToAuthorArgs,
+  fastify: FastifyInstance,
+) => {
+  return fastify.prisma.user.update({
+    where: {
+      id: args.userId,
+    },
+    data: {
+      userSubscribedTo: {
+        create: {
+          authorId: args.authorId,
+        },
+      },
+    },
+  });
+};
+
+export const SubscribeToField = {
+  type: UserType,
+  args: subscribeToAuthorArgs,
+  resolve: subscribeToAuthorResolver,
+};
+
+// Unsubscribe to Author (User)
+
+const unsubscribeFromAuthorResolver = async (
+  _parent,
+  args: SubscribeToAuthorArgs,
+  fastify: FastifyInstance,
+) => {
+  await fastify.prisma.subscribersOnAuthors.delete({
+    where: {
+      subscriberId_authorId: {
+        subscriberId: args.userId,
+        authorId: args.authorId,
+      },
+    },
+  });
+
+  return null;
+};
+
+export const UnsubscribeFromField = {
+  type: GraphQLBoolean,
+  args: subscribeToAuthorArgs,
+  resolve: unsubscribeFromAuthorResolver,
+};
