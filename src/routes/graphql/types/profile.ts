@@ -6,7 +6,7 @@ import {
   GraphQLNonNull,
   GraphQLObjectType,
 } from 'graphql';
-import { UUIDType } from '../../types/uuid.js';
+import { UUIDType } from './uuid.js';
 import { FastifyInstance } from 'fastify';
 import { MemberTypeId, MemberTypeType } from './memberType.js';
 

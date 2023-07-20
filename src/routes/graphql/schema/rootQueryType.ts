@@ -1,8 +1,8 @@
 import { GraphQLObjectType } from 'graphql';
-import { MemberTypeField, MemberTypesField } from './types/memberType.js';
-import { UserTypeField, UsersTypeField } from './types/user.js';
-import { ProfileTypeField, ProfilesTypeField } from './types/profile.js';
-import { PostTypeField, PostsTypeField } from './types/post.js';
+import { MemberTypeField, MemberTypesField } from '../types/memberType.js';
+import { UserTypeField, UsersTypeField } from '../types/user.js';
+import { ProfileTypeField, ProfilesTypeField } from '../types/profile.js';
+import { PostTypeField, PostsTypeField } from '../types/post.js';
 
 export const RootQueryType = new GraphQLObjectType({
   name: 'RootQueryType',

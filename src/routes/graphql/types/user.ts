@@ -7,7 +7,7 @@ import {
   GraphQLObjectType,
   GraphQLString,
 } from 'graphql';
-import { UUIDType } from '../../types/uuid.js';
+import { UUIDType } from './uuid.js';
 import { FastifyInstance } from 'fastify';
 import { ProfileType } from './profile.js';
 import { ManyPostsType } from './post.js';
