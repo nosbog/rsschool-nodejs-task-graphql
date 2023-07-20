@@ -1,6 +1,7 @@
 import { Type } from '@fastify/type-provider-typebox';
-import { GraphQLBoolean, GraphQLFloat, GraphQLInt, GraphQLList, GraphQLObjectType, GraphQLSchema, GraphQLString, GraphQLUnionType } from 'graphql';
-import { UUIDType } from './types/uuid.js'
+import { GraphQLBoolean, GraphQLFloat, GraphQLInt, GraphQLList, GraphQLObjectType, GraphQLSchema, GraphQLString, GraphQLEnumType,GraphQLNonNull, GraphQLUnionType } from 'graphql';
+import { UUIDType } from './types/uuid.js';
+import {MemberTypeId, MemberType} from './types/member.js'
 
   export const gqlResponseSchema = Type.Partial(
   Type.Object({
@@ -21,20 +22,6 @@ export const createGqlResponseSchema = {
   ),
 };
 
-const MemberType = new GraphQLObjectType ({
-  name: 'memberType',
-  fields: () => ({
-    id: {
-      type: GraphQLString!
-    },
-    discount: {
-      type: GraphQLFloat!
-    },
-    postsLimitPerMonth: {
-      type: GraphQLInt!
-    }  
-  })
-});
 
 const Post = new GraphQLObjectType ({
   name: 'post',
@@ -84,18 +71,42 @@ const Profile = new GraphQLObjectType ({
 const RootQuery  = new GraphQLObjectType({
   name: 'RootQuery',
   fields: {
+
     memberTypes: {
       type: new GraphQLList(MemberType),
-      async resolve (context) {
+      async resolve (parent, {id}, context) {
 
-        const res = await context.prisma.memberType.findMany();
+        console.log('hello!')
+
+        const  res = await context.prisma.memberType.findMany();
 
         return res;
       }
     },
+    memberType: {
+      type: new GraphQLNonNull( MemberType),
+
+      args: {
+        id: {type: MemberTypeId}
+      },
+
+      async resolve (root, {id}, context, ) {
+
+        console.log('input: ', id);
+
+        const res = await context.prisma.memberType.findUnique({
+          where: {
+            id: id,
+          },
+        });
+        return res;
+    
+      }
+    },
+
     posts: {
       type: new GraphQLList(Post),
-      async resolve (context) {
+      async resolve (parent, {id}, context) {
         const res = await context.prisma.post.findMany();
 
         return res;
@@ -103,7 +114,7 @@ const RootQuery  = new GraphQLObjectType({
     },
     users: {
       type: new GraphQLList(User),
-      async resolve (context) {
+      async resolve (parent, {id}, context) {
         const res = await context.prisma.user.findMany();
 
         return res;
@@ -111,7 +122,7 @@ const RootQuery  = new GraphQLObjectType({
     },
     profiles: {
       type: new GraphQLList(Profile),
-      async resolve (context) {
+      async resolve (parent, {id}, context) {
         const res = await context.prisma.profile.findMany();
 
         return res;
