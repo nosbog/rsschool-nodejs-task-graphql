@@ -29,17 +29,15 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
       const query = req.body?.query;
       const variables = req.body?.variables;
 
-      console.log('query: ', req.body, query)
-
       const validateErrors = validate(gqlSchema, parse(query), [depthLimit(5)]);
       if (validateErrors && validateErrors.length !== 0) {
         return { data: '', errors: validateErrors };
       }
 
+      console.log('body: ', query, variables)
+
       const gqlRes = await graphql({schema: gqlSchema, source: query, contextValue: gqlContext, variableValues: variables});
-
-      console.log ('gqlRes: ', gqlRes);
-
+      console.log('gqlRes: ', gqlRes);
       return { data: gqlRes.data, errors: gqlRes.errors };
 
     },

@@ -1,6 +1,7 @@
 // import { Type } from '@fastify/type-provider-typebox';
 import { GraphQLEnumType, GraphQLObjectType } from 'graphql';
-import { GraphQLFloat, GraphQLInt } from 'graphql';
+import { GraphQLFloat, GraphQLInt, GraphQLNonNull } from 'graphql';
+import { User } from './user.js';
 
 
 export const MemberTypeId = new GraphQLEnumType({
@@ -15,14 +16,27 @@ export const MemberType = new GraphQLObjectType({
   name: 'MemberType',
   fields: () => ({
     id: {
-      type: MemberTypeId,
+      type: new GraphQLNonNull(MemberTypeId),
     },
     discount: {
-      type: GraphQLFloat!,
+      type: new GraphQLNonNull(GraphQLFloat),
     },
     postsLimitPerMonth: {
-      type: GraphQLInt!,
+      type: new GraphQLNonNull(GraphQLInt),
     },
-  }),
-  
+
+/*
+    user: {
+      type: new GraphQLNonNull(User),
+      resolve: async ({ userId }, args, context) => {
+        return context.prisma.user.findFirst({
+          where: {
+            id: userId,
+          },
+        });
+      },
+    },
+*/  
+    }),
+ 
 });

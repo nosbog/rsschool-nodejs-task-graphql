@@ -1,19 +1,39 @@
-import { GraphQLObjectType } from 'graphql';
 import { UUIDType } from './uuid.js';
-import { GraphQLBoolean, GraphQLInt } from 'graphql';
+import { GraphQLBoolean, GraphQLInt, GraphQLNonNull, 
+  GraphQLObjectType, GraphQLString } from 'graphql';
+import { MemberType, MemberTypeId } from './member-type.js';
 
 export const Profile = new GraphQLObjectType ({
     name: 'profile',
     fields: () => ({
       id: {
-        type: UUIDType!
+        type: new GraphQLNonNull(UUIDType),
       },
       isMale: {
-        type: GraphQLBoolean!
+        type: new GraphQLNonNull(GraphQLBoolean),
       },
       yearOfBirth: {
-        type: GraphQLInt!
-      }  
+        type: new GraphQLNonNull(GraphQLInt),
+      },
+      userId: {
+        type: new GraphQLNonNull(GraphQLString),
+      },
+
+      memberType: {
+        type: MemberType,
+        resolve: async (parent, args, context) => {
+          
+          console.log('Profile.MemberType: ', parent, args);
+          
+          return context.prisma.memberType.findFirst({
+            where: {
+              id: parent.memberType,
+            },
+          });
+        },
+
+      },
+
     })
 });
   

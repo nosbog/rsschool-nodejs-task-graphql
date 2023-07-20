@@ -1,5 +1,5 @@
 import { Type } from '@fastify/type-provider-typebox';
-import { GraphQLBoolean, GraphQLFloat, GraphQLInt, GraphQLList, GraphQLObjectType, GraphQLSchema, GraphQLString, GraphQLEnumType,GraphQLNonNull, GraphQLUnionType } from 'graphql';
+import { GraphQLList, GraphQLObjectType, GraphQLSchema, GraphQLNonNull } from 'graphql';
 import { UUIDType } from './types/uuid.js';
 import {MemberTypeId, MemberType} from './types/member-type.js';
 import { User } from './types/user.js';
@@ -40,12 +40,12 @@ const RootQuery  = new GraphQLObjectType({
       }
     },
     memberType: {
-      type: new GraphQLNonNull( MemberType),
+      type: MemberType,
       args: {
-        id: {type: MemberTypeId}
+        id: {type: new GraphQLNonNull(MemberTypeId)}
       },
 
-      async resolve (root, { id }, context, ) {
+      async resolve (parent, { id }, context, ) {
 
         console.log('memberType id: ', id);
 
