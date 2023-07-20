@@ -3,8 +3,13 @@ import {createGqlResponseSchema, gqlResponseSchema} from './schemas.js';
 import {graphql, parse, validate} from 'graphql';
 import {rootSchema} from "./rootSchema.js";
 import depthLimit from 'graphql-depth-limit'
+import {PrismaClient} from "@prisma/client";
+
+export let dbClient: PrismaClient;
 
 const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
+    dbClient = fastify.prisma;
+
     fastify.route({
         url: '/',
         method: 'POST',
@@ -24,11 +29,6 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
                 source: query,
                 variableValues: variables,
             });
-
-            console.log('VARIABLES: ', variables); //todo: remove
-            console.log('QUERY: ', result); // todo: remove
-            console.log('ERRORS: ', result.errors) // todo: remove
-            // console.log('LIMIT: ', checkLimit) // todo: remove
 
             return {
                 data: checkLimit > 0 ? null : result.data,

@@ -6,12 +6,10 @@ import {
     GraphQLNonNull,
     GraphQLObjectType
 } from "graphql";
-import {PrismaClient} from "@prisma/client";
 import {UUIDType} from "../types/uuid.js";
 import {MemberId, MemberType} from "./members.js";
 import {Void} from "../types/void.js";
-
-const prisma = new PrismaClient()
+import {dbClient} from "../index.js";
 
 export const ProfileType = new GraphQLObjectType({
     name: 'Profile',
@@ -24,7 +22,7 @@ export const ProfileType = new GraphQLObjectType({
         memberType: {
             type: MemberType,
             resolve(parent: Record<string, string>) {
-                return prisma.memberType.findUnique({
+                return dbClient.memberType.findUnique({
                     where: {
                         id: parent.memberTypeId
                     }
@@ -57,8 +55,8 @@ export const profileQueryFields = {
     profile: {
         type: ProfileType,
         args: {id: {type: UUIDType}},
-        resolve(parent, args: Record<string, string>) {
-            const profile = prisma.profile.findUnique({
+        async resolve(parent, args: Record<string, string>) {
+            const profile = dbClient.profile.findUnique({
                 where: {
                     id: args.id,
                 },
@@ -72,7 +70,7 @@ export const profileQueryFields = {
     profiles: {
         type: new GraphQLList(ProfileType),
         resolve() {
-            return prisma.profile.findMany();
+            return dbClient.profile.findMany();
         }
     }
 }
@@ -89,7 +87,7 @@ export const profileMutationFields = {
                 memberTypeId: string
             }
         }) {
-            return prisma.profile.create({
+            return dbClient.profile.create({
                 data: args.dto,
             });
         },
@@ -98,7 +96,7 @@ export const profileMutationFields = {
         type: Void,
         args: {id: {type: UUIDType}},
         async resolve(parent, args: { id: string }) {
-            await prisma.profile.delete({
+            await dbClient.profile.delete({
                 where: {
                     id: args.id,
                 },
@@ -120,7 +118,7 @@ export const profileMutationFields = {
                 memberTypeId?: string
             }
         }) {
-            return prisma.profile.update({
+            return dbClient.profile.update({
                 where: {id: args.id},
                 data: args.dto,
             });

@@ -1,7 +1,5 @@
 import {GraphQLEnumType, GraphQLFloat, GraphQLInt, GraphQLList, GraphQLObjectType} from "graphql";
-import {PrismaClient} from "@prisma/client";
-
-const prisma = new PrismaClient()
+import {dbClient} from "../index.js";
 
 export const MemberId = new GraphQLEnumType({
     name: "MemberTypeId",
@@ -10,6 +8,7 @@ export const MemberId = new GraphQLEnumType({
         business: {value: 'business'}
     },
 })
+
 export const MemberType = new GraphQLObjectType({
     name: 'MemberType',
     fields: () => ({
@@ -23,8 +22,8 @@ export const memberQueryFields = {
     memberType: {
         type: MemberType,
         args: {id: {type: MemberId}},
-        resolve(parent, args: Record<string, string>) {
-            const member = prisma.memberType.findUnique({
+        async resolve(parent, args: Record<string, string>) {
+            const member = dbClient.memberType.findUnique({
                 where: {
                     id: args.id,
                 },
@@ -38,7 +37,7 @@ export const memberQueryFields = {
     memberTypes: {
         type: new GraphQLList(MemberType),
         resolve() {
-            return prisma.memberType.findMany();
+            return dbClient.memberType.findMany();
         }
     }
 }

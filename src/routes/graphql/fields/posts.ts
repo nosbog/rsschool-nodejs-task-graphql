@@ -1,9 +1,7 @@
 import {GraphQLInputObjectType, GraphQLList, GraphQLNonNull, GraphQLObjectType, GraphQLString} from "graphql";
-import {PrismaClient} from "@prisma/client";
 import {UUIDType} from "../types/uuid.js";
 import {Void} from "../types/void.js";
-
-const prisma = new PrismaClient()
+import {dbClient} from "../index.js";
 
 export const PostType = new GraphQLObjectType({
     name: 'Post',
@@ -39,7 +37,7 @@ export const postQueryFields = {
         type: PostType,
         args: {id: {type: UUIDType}},
         resolve(parent, args: Record<string, string>) {
-            const post = prisma.post.findUnique({
+            const post = dbClient.post.findUnique({
                 where: {
                     id: args.id,
                 },
@@ -53,7 +51,7 @@ export const postQueryFields = {
     posts: {
         type: new GraphQLList(PostType),
         resolve() {
-            return prisma.post.findMany();
+            return dbClient.post.findMany();
         }
     }
 }
@@ -63,7 +61,7 @@ export const postMutationFields = {
         type: PostType,
         args: {dto: {type: CreatePostInput}},
         resolve(parent, args: { dto: { title: string, content: string, authorId: string } }) {
-            return prisma.post.create({
+            return dbClient.post.create({
                 data: args.dto,
             })
         }
@@ -72,7 +70,7 @@ export const postMutationFields = {
         type: Void,
         args: {id: {type: UUIDType}},
         async resolve(parent, args: { id: string }) {
-            await prisma.post.delete({
+            await dbClient.post.delete({
                 where: {
                     id: args.id,
                 },
@@ -86,7 +84,7 @@ export const postMutationFields = {
             dto: {type: ChangePostInput}
         },
         resolve(parent, args: { id: string, dto: { title?: string, content?: string, authorId?: string } }) {
-            return prisma.post.update({
+            return dbClient.post.update({
                 where: {id: args.id},
                 data: args.dto,
             });

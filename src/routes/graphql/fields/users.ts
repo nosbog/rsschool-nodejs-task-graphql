@@ -1,11 +1,9 @@
 import {GraphQLFloat, GraphQLInputObjectType, GraphQLList, GraphQLNonNull, GraphQLObjectType} from "graphql";
-import {PrismaClient} from "@prisma/client";
 import {UUIDType} from "../types/uuid.js";
 import {ProfileType} from "./profiles.js";
 import {PostType} from "./posts.js";
 import {Void} from "../types/void.js";
-
-const prisma = new PrismaClient()
+import {dbClient} from "../index.js";
 
 export const UserType = new GraphQLObjectType({
     name: 'User',
@@ -15,8 +13,8 @@ export const UserType = new GraphQLObjectType({
         balance: {type: GraphQLFloat},
         profile: {
             type: ProfileType,
-            resolve(parent: Record<string, string>) {
-                const profile = prisma.profile.findUnique({
+            async resolve(parent: Record<string, string>) {
+                const profile = await dbClient.profile.findUnique({
                     where: {
                         userId: parent.id,
                     },
@@ -30,7 +28,7 @@ export const UserType = new GraphQLObjectType({
         posts: {
             type: new GraphQLList(PostType),
             resolve(parent) {
-                return prisma.post.findMany({
+                return dbClient.post.findMany({
                     where: {
                         authorId: parent.id,
                     },
@@ -40,7 +38,7 @@ export const UserType = new GraphQLObjectType({
         userSubscribedTo: {
             type: new GraphQLList(UserType),
             resolve(parent) {
-                return prisma.user.findMany({
+                return dbClient.user.findMany({
                     where: {
                         subscribedToUser: {
                             some: {
@@ -54,7 +52,7 @@ export const UserType = new GraphQLObjectType({
         subscribedToUser: {
             type: new GraphQLList(UserType),
             resolve(parent) {
-                return prisma.user.findMany({
+                return dbClient.user.findMany({
                     where: {
                         userSubscribedTo: {
                             some: {
@@ -89,7 +87,7 @@ export const userQueryFields = {
         type: UserType,
         args: {id: {type: UUIDType}},
         async resolve(parent, args: Record<string, string>) {
-            const user = await prisma.user.findUnique({
+            const user = await dbClient.user.findUnique({
                 where: {
                     id: args.id,
                 },
@@ -103,7 +101,7 @@ export const userQueryFields = {
     users: {
         type: new GraphQLList(UserType),
         resolve() {
-            return prisma.user.findMany();
+            return dbClient.user.findMany();
         }
     }
 }
@@ -113,7 +111,7 @@ export const userMutationFields = {
         type: UserType,
         args: {dto: {type: CreateUserInput}},
         resolve(parent, args: { dto: { name: string, balance: number } }) {
-            return prisma.user.create({
+            return dbClient.user.create({
                 data: args.dto,
             });
         }
@@ -122,7 +120,7 @@ export const userMutationFields = {
         type: Void,
         args: {id: {type: UUIDType}},
         async resolve(parent, args: { id: string }) {
-            await prisma.user.delete({
+            await dbClient.user.delete({
                 where: {
                     id: args.id,
                 },
@@ -136,7 +134,7 @@ export const userMutationFields = {
             dto: {type: ChangeUserInput}
         },
         resolve(parent, args: { id: string, dto: { name?: string, balance?: number } }) {
-            return prisma.user.update({
+            return dbClient.user.update({
                 where: {id: args.id},
                 data: args.dto,
             });
@@ -149,7 +147,7 @@ export const userMutationFields = {
             authorId: {type: UUIDType}
         },
         resolve(parent, args: { userId: string, authorId: string }) {
-            return prisma.user.update({
+            return dbClient.user.update({
                 where: {
                     id: args.userId,
                 },
@@ -170,7 +168,7 @@ export const userMutationFields = {
             authorId: {type: UUIDType}
         },
         async resolve(parent, args: { userId: string, authorId: string }) {
-            await prisma.subscribersOnAuthors.delete({
+            await dbClient.subscribersOnAuthors.delete({
                 where: {
                     subscriberId_authorId: {
                         subscriberId: args.userId,
