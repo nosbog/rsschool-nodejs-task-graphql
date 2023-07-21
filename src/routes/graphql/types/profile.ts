@@ -4,7 +4,7 @@ import { GraphQLBoolean, GraphQLInt, GraphQLNonNull,
 import { MemberType, MemberTypeId } from './member-type.js';
 
 export const Profile = new GraphQLObjectType ({
-    name: 'profile',
+    name: 'Profile',
     fields: () => ({
       id: {
         type: new GraphQLNonNull(UUIDType),

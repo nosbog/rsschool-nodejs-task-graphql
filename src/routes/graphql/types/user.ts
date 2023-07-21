@@ -5,7 +5,7 @@
         import { Post } from './post.js'; 
 
         export const User = new GraphQLObjectType ({
-            name: 'user',
+            name: 'User',
             fields: () => ({
             id: {
                 type: new GraphQLNonNull(UUIDType),

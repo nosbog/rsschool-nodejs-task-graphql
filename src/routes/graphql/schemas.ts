@@ -3,7 +3,7 @@ import { GraphQLList, GraphQLObjectType, GraphQLSchema, GraphQLNonNull } from 'g
 import { UUIDType } from './types/uuid.js';
 import {MemberTypeId, MemberType} from './types/member-type.js';
 import { User } from './types/user.js';
-import { Post } from './types/post.js';
+import { createPostInput, Post } from './types/post.js';
 import { Profile } from './types/profile.js';
 
 export const gqlResponseSchema = Type.Partial(
@@ -140,6 +140,26 @@ const RootQuery  = new GraphQLObjectType({
   }
 })
 
+const RootMutation = new GraphQLObjectType({
+  name: 'RootMutation',
+  fields: {
+    createPost: {
+      type: Post,
+      args: {
+        dto: { type: createPostInput }
+      },
+      async resolve (parent, { dto: data }, context) {
+
+        const  res = await context.prisma.post.create({ data });
+
+        return res;
+      }
+
+    },
+  },
+});
+
 export const gqlSchema = new GraphQLSchema({
-  query: RootQuery
+  query: RootQuery,
+  mutation: RootMutation 
 });
