@@ -2,9 +2,9 @@ import { Type } from '@fastify/type-provider-typebox';
 import { GraphQLList, GraphQLObjectType, GraphQLSchema, GraphQLNonNull } from 'graphql';
 import { UUIDType } from './types/uuid.js';
 import {MemberTypeId, MemberType} from './types/member-type.js';
-import { User } from './types/user.js';
-import { createPostInput, Post } from './types/post.js';
-import { Profile } from './types/profile.js';
+import { CreateUserInput, User } from './types/user.js';
+import { CreatePostInput, Post } from './types/post.js';
+import { CreateProfileInput, Profile } from './types/profile.js';
 
 export const gqlResponseSchema = Type.Partial(
   Type.Object({
@@ -146,7 +146,7 @@ const RootMutation = new GraphQLObjectType({
     createPost: {
       type: Post,
       args: {
-        dto: { type: createPostInput }
+        dto: { type: CreatePostInput }
       },
       async resolve (parent, { dto: data }, context) {
 
@@ -156,6 +156,35 @@ const RootMutation = new GraphQLObjectType({
       }
 
     },
+
+    createUser: {
+      type: User,
+      args: {
+        dto: { type: CreateUserInput }
+      },
+      async resolve (parent, { dto: data }, context) {
+
+        const  res = await context.prisma.user.create({ data });
+
+        return res;
+      }
+
+    },
+
+    createProfile: {
+      type: Profile,
+      args: {
+        dto: { type: CreateProfileInput }
+      },
+      async resolve (parent, { dto: data }, context) {
+
+        const  res = await context.prisma.profile.create({ data });
+
+        return res;
+      }
+
+    },
+
   },
 });
 
