@@ -25,18 +25,6 @@ export const MemberType = new GraphQLObjectType({
       type: new GraphQLNonNull(GraphQLInt),
     },
 
-/*
-    user: {
-      type: new GraphQLNonNull(User),
-      resolve: async ({ userId }, args, context) => {
-        return context.prisma.user.findFirst({
-          where: {
-            id: userId,
-          },
-        });
-      },
-    },
-*/  
     }),
  
 });
