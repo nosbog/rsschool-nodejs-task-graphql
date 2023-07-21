@@ -186,6 +186,22 @@ const RootMutation = new GraphQLObjectType({
       }
 
     },
+    deleteUser: {
+      type: UUIDType,
+      args: {
+        id: { type: new GraphQLNonNull(UUIDType) }
+      },
+      async resolve (parent, { id }, context) {
+        try { 
+          const  res = await context.prisma.user.delete({ where: { id }});
+
+          return id;
+        } catch {
+          return null;
+        }
+      }
+      
+    },
 
     createProfile: {
       type: Profile,
@@ -199,6 +215,22 @@ const RootMutation = new GraphQLObjectType({
         return res;
       }
 
+    },
+    deleteProfile: {
+      type: UUIDType,
+      args: {
+        id: { type: new GraphQLNonNull(UUIDType) }
+      },
+      async resolve (parent, { id }, context) {
+        try { 
+          const  res = await context.prisma.profile.delete({ where: { id }});
+
+          return id;
+        } catch {
+          return null;
+        }
+      }
+      
     },
 
   },
