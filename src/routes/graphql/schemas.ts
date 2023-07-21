@@ -2,9 +2,9 @@ import { Type } from '@fastify/type-provider-typebox';
 import { GraphQLList, GraphQLObjectType, GraphQLSchema, GraphQLNonNull } from 'graphql';
 import { UUIDType } from './types/uuid.js';
 import {MemberTypeId, MemberType} from './types/member-type.js';
-import { CreateUserInput, User } from './types/user.js';
-import { CreatePostInput, ChangePostInput, Post } from './types/post.js';
-import { CreateProfileInput, Profile } from './types/profile.js';
+import { ChangeUserInput, CreateUserInput, User } from './types/user.js';
+import { ChangePostInput, CreatePostInput, Post } from './types/post.js';
+import { ChangeProfileInput, CreateProfileInput, Profile } from './types/profile.js';
 
 export const gqlResponseSchema = Type.Partial(
   Type.Object({
@@ -222,6 +222,26 @@ const RootMutation = new GraphQLObjectType({
       }
       
     },
+    changeUser: {
+      type: User,
+      args: {
+        id: { type: new GraphQLNonNull(UUIDType) },
+        dto: { type: ChangeUserInput }
+      },
+      async resolve (parent, { id, dto: data }, context) {
+        try { 
+          const  res = await context.prisma.user.update({ 
+            where: { id },
+            data
+          });
+
+          return res;
+        } catch {
+          return null;
+        }
+      }
+            
+    },
 
     createProfile: {
       type: Profile,
@@ -251,6 +271,26 @@ const RootMutation = new GraphQLObjectType({
         }
       }
       
+    },
+    changeProfile: {
+      type: Post,
+      args: {
+        id: { type: new GraphQLNonNull(UUIDType) },
+        dto: { type: ChangeProfileInput }
+      },
+      async resolve (parent, { id, dto: data }, context) {
+        try { 
+          const  res = await context.prisma.profile.update({ 
+            where: { id },
+            data
+          });
+
+          return res;
+        } catch {
+          return null;
+        }
+      }
+            
     },
 
   },
