@@ -4,6 +4,9 @@ import {ProfileType} from "./profiles.js";
 import {PostType} from "./posts.js";
 import {Void} from "../types/void.js";
 import {dbClient} from "../index.js";
+import {postsLoader} from "../loaders/postLoader.js";
+import {profilesLoader} from "../loaders/profileLoader.js";
+import {subscribedToUserLoader, userSubscribedToLoader} from "../loaders/userLoader.js";
 
 export const UserType = new GraphQLObjectType({
     name: 'User',
@@ -14,11 +17,7 @@ export const UserType = new GraphQLObjectType({
         profile: {
             type: ProfileType,
             async resolve(parent: Record<string, string>) {
-                const profile = await dbClient.profile.findUnique({
-                    where: {
-                        userId: parent.id,
-                    },
-                });
+                const profile = await profilesLoader.load(parent.id)
                 if (profile === null) {
                     return null;
                 }
@@ -28,39 +27,19 @@ export const UserType = new GraphQLObjectType({
         posts: {
             type: new GraphQLList(PostType),
             resolve(parent) {
-                return dbClient.post.findMany({
-                    where: {
-                        authorId: parent.id,
-                    },
-                });
+                return postsLoader.load(parent.id)
             }
         },
         userSubscribedTo: {
             type: new GraphQLList(UserType),
             resolve(parent) {
-                return dbClient.user.findMany({
-                    where: {
-                        subscribedToUser: {
-                            some: {
-                                subscriberId: parent.id,
-                            },
-                        },
-                    },
-                });
+                return userSubscribedToLoader.load(parent.id)
             }
         },
         subscribedToUser: {
             type: new GraphQLList(UserType),
             resolve(parent) {
-                return dbClient.user.findMany({
-                    where: {
-                        userSubscribedTo: {
-                            some: {
-                                authorId: parent.id,
-                            },
-                        },
-                    },
-                });
+                return subscribedToUserLoader.load(parent.id)
             }
         }
     })

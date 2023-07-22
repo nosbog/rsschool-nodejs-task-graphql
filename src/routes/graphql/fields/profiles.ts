@@ -10,6 +10,7 @@ import {UUIDType} from "../types/uuid.js";
 import {MemberId, MemberType} from "./members.js";
 import {Void} from "../types/void.js";
 import {dbClient} from "../index.js";
+import {membersLoader} from "../loaders/memberLoader.js";
 
 export const ProfileType = new GraphQLObjectType({
     name: 'Profile',
@@ -22,11 +23,7 @@ export const ProfileType = new GraphQLObjectType({
         memberType: {
             type: MemberType,
             resolve(parent: Record<string, string>) {
-                return dbClient.memberType.findUnique({
-                    where: {
-                        id: parent.memberTypeId
-                    }
-                })
+                return membersLoader.load(parent.memberTypeId)
             }
         }
     })
