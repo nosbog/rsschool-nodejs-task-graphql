@@ -9,6 +9,8 @@ import {
 } from 'graphql';
 import { UUIDType } from './types/uuid.js';
 import { UserType } from './types/user.js';
+import { PostType } from './types/post.js';
+import { ProfileType } from './types/profile.js';
 
 const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
   const { prisma } = fastify;
@@ -43,6 +45,48 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
             type: new GraphQLList(UserType),
             resolve: async () => {
               return await prisma.user.findMany();
+            },
+          },
+
+          post: {
+            type: PostType,
+            args: {
+              id: { type: new GraphQLNonNull(UUIDType) },
+            },
+            resolve: async (_, arg: { id: string }) => {
+              return await prisma.post.findUnique({
+                where: {
+                  id: arg.id,
+                },
+              });
+            },
+          },
+
+          posts: {
+            type: new GraphQLList(PostType),
+            resolve: async () => {
+              return await prisma.post.findMany();
+            },
+          },
+
+          profile: {
+            type: ProfileType,
+            args: {
+              id: { type: new GraphQLNonNull(UUIDType) },
+            },
+            resolve: async (_, arg: { id: string }) => {
+              return await prisma.profile.findUnique({
+                where: {
+                  id: arg.id,
+                },
+              });
+            },
+          },
+
+          profiles: {
+            type: new GraphQLList(ProfileType),
+            resolve: async () => {
+              return await prisma.profile.findMany();
             },
           },
         },
