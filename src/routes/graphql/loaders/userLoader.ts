@@ -16,7 +16,9 @@ export const userSubscribedToLoader = new DataLoader(async ids => {
             subscriberId: {in: <string[]>ids},
         },
     });
-    return ids.map(id => data.map(({subscriberId, authorId}) => subscriberId === id ? {id: authorId} : null))
+    return ids.map(id => data.map(({subscriberId, authorId}) => {
+        if (subscriberId === id) return  {id: authorId}
+    }))
 })
 
 export const subscribedToUserLoader = new DataLoader(async ids => {
@@ -27,5 +29,7 @@ export const subscribedToUserLoader = new DataLoader(async ids => {
             },
         },
     });
-    return ids.map(id => data.map(({subscriberId, authorId}) => authorId === id ? {id: subscriberId} : null))
+    return ids.map(id => data.map(({subscriberId, authorId}) => {
+        if (authorId === id) return {id: subscriberId}
+    }))
 })
