@@ -18,7 +18,7 @@ export const Post = new GraphQLObjectType ({
         type: new GraphQLNonNull(GraphQLString),
       }  
     })
-});
+}); 
 
 export const CreatePostInput = new GraphQLInputObjectType({
   name: 'CreatePostInput',

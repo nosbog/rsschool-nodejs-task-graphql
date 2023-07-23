@@ -3,9 +3,11 @@ import { createGqlResponseSchema, gqlResponseSchema, gqlSchema } from './schemas
 import { graphql, parse, validate } from 'graphql';
 import depthLimit from 'graphql-depth-limit';
 import { PrismaClient } from '@prisma/client';
+import DataLoader from 'dataloader';
 
 interface GqlContext {
   prisma?: PrismaClient;
+  dataloaders?: any;
 }
 
 const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
@@ -13,6 +15,7 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
 
   const gqlContext: GqlContext = {};
   gqlContext.prisma = {prisma}.prisma;
+  gqlContext.dataloaders = new WeakMap();   
    
   fastify.route({
     url: '/',
@@ -25,7 +28,7 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
     },
     
     async handler(req) {
-
+      
       const query = req.body?.query;
       const variables = req.body?.variables;
 

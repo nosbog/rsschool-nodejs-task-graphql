@@ -61,11 +61,12 @@
 
         posts: {
           type: new GraphQLList(Post),
-          async resolve (parent, { id }, context) {
+          async resolve (parent, {id}, context) {
             const res = await context.prisma.post.findMany();
 
             return res;
           }
+
         },
         post: {
           type: Post,
@@ -75,13 +76,14 @@
                 
           resolve: async (parent, { id }, context) => {
 
-            console.log('post id: ', id);
-
-            return await context.prisma.post.findFirst({
+            const res = await context.prisma.post.findFirst({
               where: {
                 id: id,
               },
             });
+
+            return res;
+
           },
         },
 
