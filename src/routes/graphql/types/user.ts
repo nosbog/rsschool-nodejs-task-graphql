@@ -4,6 +4,7 @@ import { UUIDType } from './uuid.js';
 import { Profile } from './profile.js'
 import { Post } from './post.js'; 
 import DataLoader from 'dataloader';
+import { MemberType } from './member-type.js';
 
 export const User = new GraphQLObjectType ({
     name: 'User',
@@ -20,6 +21,7 @@ export const User = new GraphQLObjectType ({
 
         profile: {
             type: Profile,
+//            type: new GraphQLList(Profile),
             resolve: async (parent, args, context, info) => {
             
                 const {dataloaders} = context;
@@ -31,34 +33,31 @@ export const User = new GraphQLObjectType ({
                     dl = new DataLoader(async (ids: any) => {
                     
                         const rows = await context.prisma.profile.findMany({
-                            where: {userId: parent.id}
+                            where: {userId: {in: ids}}
                         });
 
-                        console.log('DB user profiles:', rows);
+                        console.log('DB user profiles ids rows:', ids, rows);
                         
-                        const sortedInIdsOrder = ids.map(id => rows.find(x => x.id === id));
-                        return sortedInIdsOrder;
+                        const sortedInIdsOrder = ids.map(id => rows.find(x => x.userId === id));
+
+                        console.log('sortedInIdsOrder: ', sortedInIdsOrder) 
+
+                        return sortedInIdsOrder;    
                     })
                     dataloaders.set(info.fieldNodes, dl);
 
-                    console.log('DB users profiles dl.load:', dl.load(parent.id));
-                    return dl.load(parent.id);
+                }    
 
-                } else {
+                const user = dl.load(parent.id);
+                console.log('User from dl.load:', user);
+                return user;
 
-                    console.log('Map users profiles dl.load:', dl.load(parent.id));
-                    return dl.load(parent.id);
-
-                }
-
-//                return await context.prisma.profile.findFirst({
-//                    where: {userId: parent.id}
-//                });
             },
         },
 
         posts: {
-            type: new GraphQLList(Post!),
+            type: Post,
+//            type: new GraphQLList(Post),
             resolve: async (parent, args, context, info) => {
 
                 const {dataloaders} = context;
@@ -67,33 +66,24 @@ export const User = new GraphQLObjectType ({
 
                 let dl = dataloaders.get(info.fieldNodes);
                 if (!dl) {
+
                     dl = new DataLoader(async (ids: any) => {
                     
                         const rows = await context.prisma.post.findMany({
-                            where: {authorId: parent.id}
+                            where: {authorId: {in: ids}}
                         });
 
                         console.log('DB user posts:', rows);
                         
-                        const sortedInIdsOrder = ids.map(id => rows.find(x => x.id === id));
+                        const sortedInIdsOrder = ids.map(id => rows.find(x => x.authorId === id));
                         return sortedInIdsOrder;
                     })
                     dataloaders.set(info.fieldNodes, dl);
 
-                    console.log('DB users posts dl.load:', dl.load(parent.id));
-                    return dl.load(parent.id);
+                } 
 
-                } else {
+                return dl.load(parent.id);
 
-                    console.log('Map users posts dl.load:', dl.load(parent.id));
-                    return dl.load(parent.id);
-
-                }
-
-
-//                return await context.prisma.post.findMany({
-//                where: {authorId: parent.id}
-//            });
             },
         },
 
@@ -127,6 +117,12 @@ export const User = new GraphQLObjectType ({
             }
 
         },
+        memberType: {
+            type: new GraphQLList( new GraphQLNonNull( MemberType)),
+            resolve: async (parent, args, context, info) => {
+            console.log ('MemberType: ', parent);
+            }
+        }
 
     })
 });

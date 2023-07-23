@@ -1,7 +1,8 @@
 import { UUIDType } from './uuid.js';
-import { GraphQLBoolean, GraphQLInputObjectType, GraphQLInt, GraphQLNonNull, 
-  GraphQLObjectType, GraphQLString } from 'graphql';
+import { GraphQLBoolean, GraphQLInputObjectType, GraphQLInt, GraphQLList, GraphQLNonNull, 
+  GraphQLObjectType, GraphQLScalarType, GraphQLString } from 'graphql';
 import { MemberType, MemberTypeId } from './member-type.js';
+import DataLoader from 'dataloader';
 
 export const Profile = new GraphQLObjectType ({
   name: 'Profile',
@@ -21,15 +22,27 @@ export const Profile = new GraphQLObjectType ({
 
     memberType: {
       type: MemberType,
-      resolve: async (parent, args, context) => {
+      resolve: async (parent, args, context, info) => {
         
-        console.log('Profile.MemberType: ', parent, args);
-        
-        return context.prisma.memberType.findFirst({
-          where: {
-            id: parent.memberType,
-          },
-        });
+        const {dataloaders} = context;
+
+        let dl = dataloaders.get(info.fieldNodes);
+        if (!dl) {
+            dl = new DataLoader(async (ids: any) => {
+            
+                const rows = await context.prisma.memberType.findMany({
+                    where: {id: {in: ids}}
+                });
+                
+                const sortedInIdsOrder = ids.map(id => rows.find(x => x.memberTypeId === id));
+                return sortedInIdsOrder;
+            })
+            dataloaders.set(info.fieldNodes, dl);
+
+        }
+
+        const profile = dl.load(parent.id);
+        return profile;
       },
 
     },

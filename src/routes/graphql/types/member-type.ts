@@ -20,7 +20,7 @@ export const MemberType = new GraphQLObjectType({
     },
     discount: {
       type: new GraphQLNonNull(GraphQLFloat),
-    },
+    },  
     postsLimitPerMonth: {
       type: new GraphQLNonNull(GraphQLInt),
     },
