@@ -12,6 +12,7 @@ import { UserType } from './types/user.js';
 import { PostType } from './types/post.js';
 import { ProfileType } from './types/profile.js';
 import { MemberType, MemberTypeId } from './types/member.js';
+import { IContext, IParent } from './types/common.js';
 
 const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
   const { prisma } = fastify;
@@ -27,7 +28,6 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
     },
 
     async handler(req) {
-      // console.log(">>>>>>>>>>", prisma)
       const query = new GraphQLObjectType({
         name: 'Query',
         fields: {
@@ -36,7 +36,7 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
             args: {
               id: { type: new GraphQLNonNull(UUIDType) },
             },
-            resolve: async (parent, args: { id: string }) => {
+            resolve: async (args: { id: string }) => {
               return await prisma.user.findUnique({
                 where: { id: args.id },
               });
@@ -51,11 +51,11 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
           },
 
           post: {
-            type: PostType,
+            type: PostType as GraphQLObjectType<IParent, IContext>,
             args: {
               id: { type: new GraphQLNonNull(UUIDType) },
             },
-            resolve: async (parent, args: { id: string }) => {
+            resolve: async (args: { id: string }) => {
               return await prisma.post.findUnique({
                 where: {
                   id: args.id,
@@ -72,11 +72,11 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
           },
 
           profile: {
-            type: ProfileType,
+            type: ProfileType as GraphQLObjectType<IParent, IContext>,
             args: {
               id: { type: new GraphQLNonNull(UUIDType) },
             },
-            resolve: async (parent, args: { id: string }) => {
+            resolve: async (args: { id: string }) => {
               return await prisma.profile.findUnique({
                 where: {
                   id: args.id,
@@ -93,11 +93,11 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
           },
 
           memberType: {
-            type: MemberType,
+            type: MemberType as GraphQLObjectType<IParent, IContext>,
             args: {
               id: { type: new GraphQLNonNull(MemberTypeId) },
             },
-            resolve: async (parent, args: { id: string }) => {
+            resolve: async (args: { id: string }) => {
               return await prisma.memberType.findUnique({
                 where: {
                   id: args.id,
@@ -128,7 +128,7 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
         variableValues,
         contextValue: { prisma },
       });
-
+      console.log(errors);
       return { data, errors };
     },
   });

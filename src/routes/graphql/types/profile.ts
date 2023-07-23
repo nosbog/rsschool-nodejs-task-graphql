@@ -14,7 +14,7 @@ export const ProfileType = new GraphQLObjectType({
     memberTypeId: { type: new GraphQLNonNull(MemberTypeId) },
     memberType: {
       type: new GraphQLNonNull(MemberType),
-      resolve: async (parent: IParent, args, context: IContext) => {
+      resolve: async (parent: IParent, _args, context: IContext) => {
         return await context.prisma.memberType.findUnique({
           where: { id: parent.memberTypeId },
         });
@@ -22,7 +22,7 @@ export const ProfileType = new GraphQLObjectType({
     },
     user: {
       type: new GraphQLNonNull(UserType),
-      resolve: async (parent: IParent, args, context: IContext) => {
+      resolve: async (parent: IParent, _args, context: IContext) => {
         return context.prisma.user.findUnique({
           where: { id: parent.userId },
         });

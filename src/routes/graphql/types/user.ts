@@ -1,9 +1,14 @@
-import graphql, { GraphQLList } from 'graphql';
+import {
+  GraphQLList,
+  GraphQLObjectType,
+  GraphQLString,
+  GraphQLNonNull,
+  GraphQLFloat,
+} from 'graphql';
 import { UUIDType } from './uuid.js';
 import { PostType } from './post.js';
 import { IContext, IParent } from './common.js';
 import { ProfileType } from './profile.js';
-const { GraphQLObjectType, GraphQLString, GraphQLNonNull, GraphQLFloat } = graphql;
 
 export const UserType = new GraphQLObjectType({
   name: 'User',
@@ -12,22 +17,22 @@ export const UserType = new GraphQLObjectType({
     name: { type: GraphQLString },
     balance: { type: GraphQLFloat },
     profile: {
-      type: ProfileType,
-      resolve: async (source: IParent, args, context: IContext) => {
+      type: ProfileType as GraphQLObjectType<IParent, IContext>,
+      resolve: async (source: IParent, _args, context: IContext) => {
         return await context.prisma.profile.findUnique({ where: { userId: source.id } });
       },
     },
     posts: {
       type: new GraphQLList(PostType),
-      resolve: async (source: IParent, args, context: IContext) => {
+      resolve: async (source: IParent, _args, context: IContext) => {
         return await context.prisma.post.findMany({
           where: { authorId: source.id },
         });
       },
     },
     userSubscribedTo: {
-      type: new GraphQLList(PostType),
-      resolve: async (source: IParent, args, context: IContext) => {
+      type: new GraphQLList(UserType),
+      resolve: async (source: IParent, _args, context: IContext) => {
         return await context.prisma.user.findMany({
           where: {
             subscribedToUser: {
@@ -40,8 +45,8 @@ export const UserType = new GraphQLObjectType({
       },
     },
     subscribedToUser: {
-      type: new GraphQLList(PostType),
-      resolve: async (source: IParent, args, context: IContext) => {
+      type: new GraphQLList(UserType),
+      resolve: async (source: IParent, _args, context: IContext) => {
         return await context.prisma.user.findMany({
           where: {
             userSubscribedTo: {
