@@ -14,8 +14,8 @@ import { Post, Profile, User } from '@prisma/client';
 const MemberTypeId = new GraphQLEnumType({
   name: 'MemberTypeId',
   values: {
-  BASIC: { value: 'basic' }, 
-  BUSINESS: { value: 'business' },
+  basic: { value: 'basic' }, 
+  business: { value: 'business' },
   }
   });
   
@@ -25,7 +25,7 @@ const MemberType = new GraphQLObjectType({
     fields: () => ({
       id: { type: new GraphQLNonNull(MemberTypeId) },
       discount: {type: GraphQLFloat},
-      postsLimitPerMonth: {type: GraphQLInt}
+      postsLimitPerMonth: {type: GraphQLInt},
     })
 });
 
@@ -185,7 +185,7 @@ const Users: GraphQLObjectType = new GraphQLObjectType({
         resolve: async (_, args, { prisma}: FastifyInstance) => (await prisma.profile. findMany())
       },
       profile: {
-       type: Users,
+       type: Profiles,
        args: {id:{type: UUIDType}},
        resolve: async (_, args: { id: string}, { prisma}: FastifyInstance) => {
          const res = await prisma.profile.findUnique({ where: {id: args.id}});
