@@ -1,7 +1,8 @@
+import { GraphQLEnumType } from 'graphql';
 import {
-  GraphQLEnumType,
   GraphQLFloat,
   GraphQLInt,
+  GraphQLList,
   GraphQLNonNull,
   GraphQLObjectType,
   GraphQLString,
@@ -22,7 +23,7 @@ export const MemberType = new GraphQLObjectType({
       type: new GraphQLNonNull(GraphQLInt),
     },
     profiles: {
-      type: new GraphQLNonNull(ProfileType),
+      type: new GraphQLList(ProfileType),
       resolve: async (source: IParent, args, context: IContext) => {
         return await context.prisma.profile.findMany({
           where: { memberTypeId: source.id },
