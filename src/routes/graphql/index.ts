@@ -93,56 +93,45 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
 
   const SubscribedToUser = new GraphQLObjectType({
     name: 'SubscribedToUser',
-    fields: {
+    fields: () => ({
       id: { type: GraphQLString },
       userSubscribedTo: {
-        type: new GraphQLObjectType({
-          name: 'UserSubscribedToInternal',
-          fields: {
-            id: { type: GraphQLString },
-          },
-        }),
-        // resolve: (root, args: { id: string }) => {
-        //   console.log("===========", args);
-        //   return prisma.user.findMany({
-        //     where: {
-        //       userSubscribedTo: {
-        //         some: {
-        //           authorId: args.id,
-        //         },
-        //       },
-        //     },
-        //   });
-        // }
+        type: new GraphQLList(UserSubscribedTo),
+        resolve: (root: { id: string }) => {
+          return prisma.user.findMany({
+            where: {
+              subscribedToUser: {
+                some: {
+                  subscriberId: root.id,
+                },
+              }, 
+              
+            },
+          });
+        },
       },
-    },
+    }),
   });
 
   const UserSubscribedTo = new GraphQLObjectType({
     name: 'UserSubscribedTo',
-    fields: {
+    fields: () => ({
       id: { type: GraphQLString },
       subscribedToUser: {
-        type: new GraphQLObjectType({
-          name: 'SubscribedToUserInternal',
-          fields: {
-            id: { type: GraphQLString },
-          },
-        }),
-        // resolve: (root, args: { id: string }) => {
-        //   console.log("===========", args);
-        //   return prisma.user.findMany({
-        //     where: {
-        //       userSubscribedTo: {
-        //         some: {
-        //           authorId: args.id,
-        //         },
-        //       },
-        //     },
-        //   });
-        // }
-      },
-    },
+        type: new GraphQLList(SubscribedToUser),
+        resolve: (root: { id: string }) => {
+          return prisma.user.findMany({
+            where: {
+              userSubscribedTo: {
+                some: {
+                  authorId: root.id,
+                },
+              },
+            },
+          });
+        },
+      }
+    }),
   });
 
   const User = new GraphQLObjectType({
@@ -171,8 +160,34 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
           });
         },
       },
-      // userSubscribedTo: { type: new GraphQLList(UserSubscribedTo) },
-      // subscribedToUser: { type: new GraphQLList(SubscribedToUser) },
+      userSubscribedTo: {
+        type: new GraphQLList(UserSubscribedTo),
+        resolve: (root: { id: string }) => {
+          return prisma.user.findMany({
+            where: {
+              subscribedToUser: {
+                some: {
+                  subscriberId: root.id,
+                },
+              },
+            },
+          });
+        },
+      },
+      subscribedToUser: {
+        type: new GraphQLList(SubscribedToUser),
+        resolve: (root: { id: string }) => {
+          return prisma.user.findMany({
+            where: {
+              userSubscribedTo: {
+                some: {
+                  authorId: root.id,
+                },
+              },
+            },
+          });
+        },
+      },
     }),
   });
 
@@ -272,40 +287,6 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
           } catch (e) {
             return null;
           }
-        },
-      },
-      userSubscribedTo: {
-        type: UserSubscribedTo,
-        args: {
-          id: { type: new GraphQLNonNull(UUIDType) },
-        },
-        resolve: (root, args: { id: string }) => {
-          return prisma.user.findMany({
-            where: {
-              userSubscribedTo: {
-                some: {
-                  authorId: args.id,
-                },
-              },
-            },
-          });
-        },
-      },
-      subscribedToUser: {
-        type: SubscribedToUser,
-        args: {
-          id: { type: new GraphQLNonNull(UUIDType) },
-        },
-        resolve: (root, args: { id: string }) => {
-          return prisma.user.findMany({
-            where: {
-              subscribedToUser: {
-                some: {
-                  subscriberId: args.id,
-                },
-              },
-            },
-          });
         },
       },
     }),
