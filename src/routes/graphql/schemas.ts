@@ -93,7 +93,9 @@
 
           async resolve (parent, {id}, context, info) {
             
-            const res = await context.prisma.user.findMany();
+            const res = await context.prisma.user.findMany({
+              include: {profile: true}
+            });
 
             return res;
           }
@@ -107,11 +109,13 @@
 
             console.log('user id: ', id);
 
-            return await context.prisma.user.findFirst({
+            const user =  await context.prisma.user.findFirst({
               where: {
                 id: id,
               },
             });
+            console.log('user: ', user);
+            return user;
           },
         },
         

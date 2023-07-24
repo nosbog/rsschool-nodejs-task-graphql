@@ -1,7 +1,6 @@
 // import { Type } from '@fastify/type-provider-typebox';
 import { GraphQLEnumType, GraphQLObjectType } from 'graphql';
 import { GraphQLFloat, GraphQLInt, GraphQLNonNull } from 'graphql';
-import { User } from './user.js';
 
 
 export const MemberTypeId = new GraphQLEnumType({

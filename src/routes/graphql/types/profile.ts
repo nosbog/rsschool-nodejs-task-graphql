@@ -22,26 +22,84 @@ export const Profile = new GraphQLObjectType ({
 
     memberType: {
       type: MemberType,
-      resolve: async (parent, args, context, info) => {
-        
+      resolve: async (source, args, context, info) => {
+
         const {dataloaders} = context;
 
         let dl = dataloaders.get(info.fieldNodes);
         if (!dl) {
             dl = new DataLoader(async (ids: any) => {
             
-                const rows = await context.prisma.memberType.findMany({
-                    where: {id: {in: ids}}
+              console.log('profile ids: ', ids)
+
+
+
+                const rowsM = await context.prisma.memberType.findMany({
+//                  where: {
+//                    profiles: {
+//                        some: {
+//                          id: {in: ids}
+//                       }
+//                      } 
+//                  },
                 });
-                
-                const sortedInIdsOrder = ids.map(id => rows.find(x => x.memberTypeId === id));
+
+                const rowsP = await context.prisma.profile.findMany({
+                  where: {
+                    id: {in: ids}
+                  },
+                });
+                const rowsS = ids.map(id => rowsP.find(x => x.id === id));
+
+                const rows: (typeof MemberType)[] = [];
+
+                for (let index = 0; index < rowsS.length; index++) {
+                  if (rowsS[index].memberTypeId === 'basic') {
+                    const basicItem = rowsM.find(e => e.id === 'basic');
+                    rows.push(basicItem)
+                  } else {
+                    const basinessItem = rowsM.find(e => e.id === 'business');
+                    rows.push(basinessItem);
+                  }
+                }
+
+/*
+                const rows = await context.prisma.profile.findMany({
+                  where: {
+                    AND: [
+                      {
+                        id: { in: ids}
+                      },
+                      {
+                        OR: [
+                          {
+                            memberType: {
+                                id: {in: ['basic', 'business']}
+                            } 
+                          },
+                          {
+                            memberTypeId: null
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                });
+*/
+
+                const sortedInIdsOrder = rows; //ids.map(id => rows.find(x => x.id === id));
+
+                console.log('profile.memberType ids info.fieldNodes: ',  ids, info.fieldNodes);
+
+                console.log('sortedInIdsOrder ids rows: ', ids, sortedInIdsOrder);
                 return sortedInIdsOrder;
             })
             dataloaders.set(info.fieldNodes, dl);
 
         }
 
-        const profile = dl.load(parent.id);
+        const profile = dl.load(source.id);
+        console.log('memberType loaded: ', profile, source.id);
         return profile;
       },
 

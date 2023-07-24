@@ -21,48 +21,40 @@ export const User = new GraphQLObjectType ({
 
         profile: {
             type: Profile,
-//            type: new GraphQLList(Profile),
             resolve: async (parent, args, context, info) => {
             
                 const {dataloaders} = context;
-
-                console.log('user.profile: ', parent, dataloaders)
 
                 let dl = dataloaders.get(info.fieldNodes);
                 if (!dl) {
                     dl = new DataLoader(async (ids: any) => {
                     
                         const rows = await context.prisma.profile.findMany({
-                            where: {userId: {in: ids}}
+                            where: {userId: {in: ids}},
                         });
 
-                        console.log('DB user profiles ids rows:', ids, rows);
-                        
                         const sortedInIdsOrder = ids.map(id => rows.find(x => x.userId === id));
+                        //console.log('Users buff: ', ids, rows, sortedInIdsOrder)
 
-                        console.log('sortedInIdsOrder: ', sortedInIdsOrder) 
+                        console.log('user.profile ids info.fieldNodes: ',  ids, info.fieldNodes);
 
                         return sortedInIdsOrder;    
                     })
                     dataloaders.set(info.fieldNodes, dl);
 
+
                 }    
 
-                const user = dl.load(parent.id);
-                console.log('User from dl.load:', user);
-                return user;
-
+                const profile = dl.load(parent.id);
+                return profile;
             },
         },
 
         posts: {
-            type: Post,
-//            type: new GraphQLList(Post),
+            type: new GraphQLList(Post),
             resolve: async (parent, args, context, info) => {
 
                 const {dataloaders} = context;
-
-                console.log('user.post: ', parent, dataloaders)
 
                 let dl = dataloaders.get(info.fieldNodes);
                 if (!dl) {
@@ -73,47 +65,105 @@ export const User = new GraphQLObjectType ({
                             where: {authorId: {in: ids}}
                         });
 
-                        console.log('DB user posts:', rows);
-                        
                         const sortedInIdsOrder = ids.map(id => rows.find(x => x.authorId === id));
+
+                        console.log('user.posts ids info.fieldNodes: ',  ids, info.fieldNodes);
+
                         return sortedInIdsOrder;
                     })
                     dataloaders.set(info.fieldNodes, dl);
 
                 } 
 
-                return dl.load(parent.id);
+                const user = dl.load(parent.id);
+                const users = [user];
+                return users;
 
             },
         },
 
         userSubscribedTo: {
-            type: new GraphQLList(User!),
-            resolve: async (parent, args, context) => {
+            type: new GraphQLList(User),
+            resolve: async (parent, args, context, info) => {
 
-                console.log('user.userSubscribedTo: ', parent, args)  
+                const {dataloaders} = context;
+
+                let dl = dataloaders.get(info.fieldNodes);
+                if (!dl) {
+
+                    dl = new DataLoader(async (ids: any) => {
+                    
+                        const rows = await context.prisma.user.findMany({
+                            where: { subscribedToUser: { some: { subscriberId: {in: ids} } } } 
+//                            where: {authorId: {in: ids}}
+//                            where: { subscribedToUser: { some: { subscriberId: parent.id } } } 
+                        });
+
+                        console.log('rows: ', rows);
+
+                        const sortedInIdsOrder = rows; //ids.map(id => rows.find(x => x.id === id));
+
+                        console.log('userSubscribedTo ids parent.id rows: ',  ids, parent.id, sortedInIdsOrder)
+
+                        return sortedInIdsOrder;
+                    })
+                    dataloaders.set(info.fieldNodes, dl);
+
+                } 
+
+                const user = dl.load(parent.id);
+                const users = [user];
+                return users;
     
-                return await context.prisma.user.findMany({
-                    where: { subscribedToUser: { some: { subscriberId: parent.id } } } 
-                })
+//                return await context.prisma.user.findMany({
+//                    where: { subscribedToUser: { some: { subscriberId: parent.id } } } 
+//                })
             }
         },
 
         subscribedToUser: {
-            type: new GraphQLList(User!),
-            resolve: async (parent, args, context) => {
+            type: new GraphQLList(User),
+            resolve: async (parent, args, context, info) => {
 
-                console.log('user.subscribedToUser: ', parent, args)  
+                const {dataloaders} = context;
+
+                let dl = dataloaders.get(info.fieldNodes);
+                if (!dl) {
+
+                    dl = new DataLoader(async (ids: any) => {
                     
-                return await context.prisma.user.findMany({
-                    where: {
-                        userSubscribedTo: {
-                            some: {
-                                authorId: parent.id,
-                            }
-                        }
-                    }
-                })
+                        const rows = await context.prisma.user.findMany({
+                            where: { userSubscribedTo: { some: { authorId: {in  : ids} } } } 
+//                            where: {authorId: {in: ids}}
+//                            where: { subscribedToUser: { some: { subscriberId: parent.id } } } 
+                        });
+
+                        console.log('rows: ', rows);
+
+                        const sortedInIdsOrder = rows; //ids.map(id => rows.find(x => x.id === id));
+
+                        console.log('subscribedToUser ids parent.id rows: ',  ids, parent.id, sortedInIdsOrder)
+
+                        return sortedInIdsOrder;
+                    })
+                    dataloaders.set(info.fieldNodes, dl);
+
+                } 
+
+//                console.log()
+                const user = dl.load(parent.id);
+                const users = [user];
+                return users;
+                    
+//                return await context.prisma.user.findMany({
+//                    where: {
+//                        userSubscribedTo: {
+//                            some: {
+//                                authorId: parent.id,
+//                            }
+//                        }
+//                    }
+//                })
             }
 
         },
