@@ -10,7 +10,7 @@ import {
   GraphQLEnumType,
   GraphQLInputObjectType,
 } from 'graphql';
-import { PrismaClient } from '@prisma/client';
+import { Post, PrismaClient } from '@prisma/client';
 import { UUIDType } from './types/uuid.js';
 import { doesNotReject } from 'assert';
 
@@ -265,6 +265,30 @@ const CreateProfileInput = new GraphQLInputObjectType({
   },
 });
 
+const ChangePostInput = new GraphQLInputObjectType({
+  name: 'ChangePostInput',
+  fields: {
+    title: { type: GraphQLString },
+    //   content: { type: GraphQLString },
+  },
+});
+
+const ChangeProfileInput = new GraphQLInputObjectType({
+  name: 'ChangeProfileInput',
+  fields: {
+    isMale: { type: GraphQLBoolean },
+    //   yearOfBirth: { type: GraphQLInt },
+  },
+});
+
+const ChangeUserInput = new GraphQLInputObjectType({
+  name: 'ChangeUserInput',
+  fields: {
+    name: { type: GraphQLString },
+    //   balance: { type: GraphQLFloat },
+  },
+});
+
 const Mutations = new GraphQLObjectType({
   name: 'Mutation',
   fields: () => ({
@@ -357,6 +381,123 @@ const Mutations = new GraphQLObjectType({
         return createdPost;
       },
     },
+    deletePost: {
+      type: GraphQLBoolean,
+      args: {
+        id: { type: new GraphQLNonNull(UUIDType) },
+      },
+      async resolve(parent, { id }: { id: string }, context) {
+        try {
+          await prisma.post.delete({
+            where: {
+              id: id,
+            },
+          });
+          return true;
+        } catch (error) {
+          return false;
+        }
+      },
+    },
+    deleteProfile: {
+      type: GraphQLBoolean,
+      args: {
+        id: { type: new GraphQLNonNull(UUIDType) },
+      },
+      async resolve(parent, { id }: { id: string }, context) {
+        try {
+          await prisma.profile.delete({
+            where: {
+              id: id,
+            },
+          });
+          return true;
+        } catch (error) {
+          return false;
+        }
+      },
+    },
+    deleteUser: {
+      type: GraphQLBoolean,
+      args: {
+        id: { type: new GraphQLNonNull(UUIDType) },
+      },
+      async resolve(parent, { id }: { id: string }, context) {
+        try {
+          await prisma.user.delete({
+            where: {
+              id: id,
+            },
+          });
+          return true;
+        } catch (error) {
+          return false;
+        }
+      },
+    },
+    changePost: {
+      type: Post,
+      args: {
+        id: { type: new GraphQLNonNull(UUIDType) },
+        dto: { type: new GraphQLNonNull(ChangePostInput) },
+      },
+
+      async resolve(
+        parent,
+        { id, dto }: { id: string; dto: any },
+        context,
+      ) {
+        const updatedPost = await prisma.post.update({
+          where: {
+            id: id,
+          },
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          data: {
+            ...dto,
+          },
+        });
+        return updatedPost;
+      },
+    },
+    changeProfile: {
+        type: Profile,
+        args: {
+          id: { type: new GraphQLNonNull(UUIDType) },
+          dto: { type: new GraphQLNonNull(ChangeProfileInput) },
+        },
+        async resolve(parent, { id, dto }:  { id: string; dto: any }, context) {
+          const updatedProfile = await prisma.profile.update({
+            where: {
+              id: id,
+            },
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            data: {
+              ...dto,
+            },
+          });
+          return updatedProfile;
+        },
+      },
+      changeUser: {
+        type: User,
+        args: {
+          id: { type: new GraphQLNonNull(UUIDType) },
+          dto: { type: new GraphQLNonNull(ChangeUserInput) },
+        },
+        async resolve(parent, { id, dto }:  { id: string; dto: any }, context) {
+            console.log(id, dto);
+          const updatedUser = await prisma.user.update({
+            where: {
+              id: id,
+            },
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            data: {
+              ...dto,
+            },
+          });
+          return updatedUser;
+        },
+      },
   }),
 });
 
