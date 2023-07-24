@@ -10,7 +10,8 @@ export const queries = new GraphQLObjectType({
       users: {
         type: new GraphQLList(Users),
         
-        resolve: async (_, args, { prisma}: FastifyInstance) => {return await prisma.user.findMany()} 
+        resolve: async (_, args, { prisma }: FastifyInstance) => {
+          return await prisma.user.findMany()} 
       },
       user: {
          type: Users,
@@ -23,7 +24,7 @@ export const queries = new GraphQLObjectType({
 
       posts: {
         type: new GraphQLList(Posts),
-        resolve: async (_, args, { prisma}: FastifyInstance) => (await prisma.post.findMany ())
+        resolve: async (_, args, { prisma}: FastifyInstance) => (await prisma.post.findMany())
       },
       post: {
         type: Posts,
@@ -41,7 +42,7 @@ export const queries = new GraphQLObjectType({
       profile: {
        type: Profiles,
        args: {id:{type: UUIDType}},
-       resolve: async (_, args: { id: string}, { prisma}: FastifyInstance) => {
+       resolve: async (_, args: { id: string}, { prisma }: FastifyInstance) => {
          const res = await prisma.profile.findUnique({ where: {id: args.id}});
          return res || null;
        }
@@ -49,7 +50,9 @@ export const queries = new GraphQLObjectType({
 
       memberTypes: {
         type: new GraphQLList(MemberType),
-        resolve: async (_, args, { prisma}: FastifyInstance) => { return await prisma. memberType.findMany()}
+        resolve: async (_, args, { prisma}: FastifyInstance) => { 
+          return await prisma. memberType.findMany()
+        }
       },
       memberType: {
         type: MemberType,

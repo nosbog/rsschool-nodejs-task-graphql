@@ -6,7 +6,7 @@ import { mutations } from './mutations.js';
 import depthLimit from 'graphql-depth-limit';
 
 const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
-
+  const { prisma } = fastify;
 
   fastify.route({
     url: '/',
@@ -33,8 +33,10 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
       const res = await graphql({
         schema: queriesShema,
         source: req.body.query,
-        contextValue: fastify,
-        variableValues: req.body.variables,
+        contextValue: { prisma, 
+          dataloaders: new WeakMap(),
+        },
+          variableValues: req.body.variables,
       });
       return res;
     },

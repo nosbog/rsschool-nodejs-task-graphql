@@ -124,8 +124,8 @@ export const mutations = new GraphQLObjectType({
     subscribeTo: {
       type: Users,
       args: {
-        userId: { type: UUIDType },
-        authorId: {type: UUIDType }
+        userId: { type: new GraphQLNonNull(UUIDType) },
+        authorId: {type: new GraphQLNonNull(UUIDType) }
       },
       resolve: async(parent, args, { prisma }: FastifyInstance) => {
         return await prisma.user.update({
@@ -144,8 +144,8 @@ export const mutations = new GraphQLObjectType({
     unsubscribeFrom: {
       type: GraphQLBoolean,
       args: {
-        userId: { type: UUIDType },
-        authorId: {type: UUIDType }
+        userId: { type: new GraphQLNonNull(UUIDType) },
+        authorId: {type: new GraphQLNonNull(UUIDType) }
       },
       resolve: async(parent, args, { prisma }: FastifyInstance) => {
         const res = await prisma.subscribersOnAuthors.delete({
