@@ -30,16 +30,7 @@ export const Profile = new GraphQLObjectType ({
         if (!dl) {
             dl = new DataLoader(async (ids: any) => {
             
-              console.log('profile ids: ', ids)
-
               const rowsM = await context.prisma.memberType.findMany({
-//                  where: {
-//                    profiles: {
-//                        some: {
-//                          id: {in: ids}
-//                       }
-//                      } 
-//                  },
                 });
 
                 const rowsP = await context.prisma.profile.findMany({
@@ -87,9 +78,6 @@ export const Profile = new GraphQLObjectType ({
 
                 const sortedInIdsOrder = rows; //ids.map(id => rows.find(x => x.id === id));
 
-                console.log('profile.memberType ids info.fieldNodes: ',  ids, info.fieldNodes);
-
-                console.log('sortedInIdsOrder ids rows: ', ids, sortedInIdsOrder);
                 return sortedInIdsOrder;
             })
             dataloaders.set(info.fieldNodes, dl);
@@ -97,7 +85,6 @@ export const Profile = new GraphQLObjectType ({
         }
 
         const profile = dl.load(source.id);
-        console.log('memberType loaded: ', profile, source.id);
         return profile;
       },
 

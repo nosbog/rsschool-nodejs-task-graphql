@@ -7,19 +7,12 @@ import { PrismaClient } from '@prisma/client';
 interface GqlContext {
   prisma?: PrismaClient;
   dataloaders?: any;
-  userLoaderKey: number;
-  postLoaderKey: number;
-  profileLoaderKey: number;
 }
 
 const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
   const {prisma} = fastify;
 
-  const gqlContext: GqlContext = {
-    userLoaderKey: 1,
-    postLoaderKey: 2,
-    profileLoaderKey: 3
-  };
+  const gqlContext: GqlContext = {};
   gqlContext.prisma = {prisma}.prisma;
   gqlContext.dataloaders = new WeakMap();
    
@@ -43,10 +36,10 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
         return { data: '', errors: validateErrors };
       }
 
-      console.log('body: ', query, variables)
+//      console.log('body: ', query, variables)
 
       const gqlRes = await graphql({schema: gqlSchema, source: query, contextValue: gqlContext, variableValues: variables});
-      console.log('gqlRes: ', gqlRes);
+//      console.log('gqlRes: ', gqlRes);
       return { data: gqlRes.data, errors: gqlRes.errors };
 
     },

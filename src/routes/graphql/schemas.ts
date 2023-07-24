@@ -48,8 +48,6 @@
 
           async resolve (parent, { id }, context, ) {
 
-            console.log('memberType id: ', id);
-
             const res = await context.prisma.memberType.findUnique({
               where: {
                 id: id,
@@ -107,14 +105,11 @@
           },
           resolve: async (parent, { id }, context) => {
 
-            console.log('user id: ', id);
-
             const user =  await context.prisma.user.findFirst({
               where: {
                 id: id,
               },
             });
-            console.log('user: ', user);
             return user;
           },
         },
@@ -133,8 +128,6 @@
             id: { type: new GraphQLNonNull(UUIDType) } 
           },
           resolve: async (parent, { id }, context) => {
-
-            console.log('profile id: ', id);
 
             const res = await context.prisma.profile.findUnique({
               where: {
@@ -335,8 +328,6 @@
               const  res = await context.prisma.subscribersOnAuthors.delete({
                 where: { subscriberId_authorId: { subscriberId, authorId } },
               });
-
-              console.log('unsubscribeFrom delete: ', res, subscriberId, authorId)
 
               return authorId;
       

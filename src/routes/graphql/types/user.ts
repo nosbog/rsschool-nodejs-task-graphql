@@ -34,14 +34,10 @@ export const User = new GraphQLObjectType ({
                         });
 
                         const sortedInIdsOrder = ids.map(id => rows.find(x => x.userId === id));
-                        //console.log('Users buff: ', ids, rows, sortedInIdsOrder)
-
-                        console.log('user.profile ids info.fieldNodes: ',  ids, info.fieldNodes);
 
                         return sortedInIdsOrder;    
                     })
                     dataloaders.set(info.fieldNodes, dl);
-
 
                 }    
 
@@ -66,8 +62,6 @@ export const User = new GraphQLObjectType ({
                         });
 
                         const sortedInIdsOrder = ids.map(id => rows.find(x => x.authorId === id));
-
-                        console.log('user.posts ids info.fieldNodes: ',  ids, info.fieldNodes);
 
                         return sortedInIdsOrder;
                     })
@@ -95,20 +89,11 @@ export const User = new GraphQLObjectType ({
                     
                         const rows = await context.prisma.user.findMany({
                             where: { subscribedToUser: { some: { subscriberId: {in: ids} } } } 
-//                            where: {authorId: {in: ids}}
-//                            where: { subscribedToUser: { some: { subscriberId: parent.id } } } 
                         });
-
-                        console.log('rows: ', rows);
-
-//                        const sortedInIdsOrder = ids.map(id => rows.find(x => x.id === id));
-                        const sortedInIdsOrder = rows; //ids.map(id => rows.find(x => x.id === id));
 
                         const rowsN = ids.map(id => rows.find(x => x.id === id));
 
                         if (rows.length != ids.length) {
-
-                            console.log('before userSubscribedTo ids rows newrows: ', ids, rows, rowsN)
 
                             let index = 0;
                             while (index < rowsN.length) {
@@ -116,18 +101,12 @@ export const User = new GraphQLObjectType ({
                                 if (el) {
                                     index ++
                                 } else {
-                                    console.log('1. ids, rowsN')
                                     rowsN.splice(index, 1);
                                     ids.splice(index, 1);
-                                    console.log('2. ids, rowsN')
                                 }
                             }
 
-                            console.log('after userSubscribedTo ids rows newrows: ', ids, rows, rowsN)
-
                         }
-
-                        //console.log('userSubscribedTo ids parent.id rows: ',  ids, parent.id, sortedInIdsOrder)
 
                         return rows; //sortedInIdsOrder;
                     })
@@ -139,9 +118,6 @@ export const User = new GraphQLObjectType ({
                 const users = [user];
                 return users;
     
-//                return await context.prisma.user.findMany({
-//                    where: { subscribedToUser: { some: { subscriberId: parent.id } } } 
-//                })
             }
         },
 
@@ -158,17 +134,11 @@ export const User = new GraphQLObjectType ({
                     
                         const rows = await context.prisma.user.findMany({
                             where: { userSubscribedTo: { some: { authorId: {in  : ids} } } } 
-//                            where: {authorId: {in: ids}}
-//                            where: { subscribedToUser: { some: { subscriberId: parent.id } } } 
                         });
-
-                        console.log('rows: ', rows);
-
+                        
                         const rowsN = ids.map(id => rows.find(x => x.id === id));
 
                         if (rows.length != ids.length) {
-
-                            console.log('before subscribedToUser ids rows newrows: ', ids, rows, rowsN)
 
                             let index = 0;
                             while (index < rowsN.length) {
@@ -176,27 +146,14 @@ export const User = new GraphQLObjectType ({
                                 if (el) {
                                     index ++
                                 } else {
-                                    console.log('1. ids, rowsN')
                                     rowsN.splice(index, 1);
                                     ids.splice(index, 1);
-                                    console.log('2. ids, rowsN')
                                 }
                             }
 
-                            console.log('after subscribedToUser ids rows newrows: ', ids, rows, rowsN)
-
                         }
 
-//                        const sortedInIdsOrder = ids.map(id => rows.find(x => x.id === id));
                         const sortedInIdsOrder = rows; //ids.map(id => rows.find(x => x.id === id));
-
-                        if (rows.length != ids.length) {
-                            const rowsN = ids.map(id => rows.find(x => x.id === id));
-
-                            console.log('subscribedToUser ids rows newrows: ', ids, rows, rowsN)
-                        }
-
-                        //console.log('subscribedToUser ids parent.id rows: ',  ids, parent.id, sortedInIdsOrder)
 
                         return sortedInIdsOrder;
                     })
@@ -204,27 +161,16 @@ export const User = new GraphQLObjectType ({
 
                 } 
 
-//                console.log()
                 const user = dl.load(parent.id);
                 const users = [user];
                 return users;
                     
-//                return await context.prisma.user.findMany({
-//                    where: {
-//                        userSubscribedTo: {
-//                            some: {
-//                                authorId: parent.id,
-//                            }
-//                        }
-//                    }
-//                })
             }
 
         },
         memberType: {
             type: new GraphQLList( new GraphQLNonNull( MemberType)),
             resolve: async (parent, args, context, info) => {
-            console.log ('MemberType: ', parent);
             }
         }
 
