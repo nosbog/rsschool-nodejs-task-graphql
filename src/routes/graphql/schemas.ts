@@ -5,7 +5,6 @@
     import { ChangeUserInput, CreateUserInput, User } from './types/user.js';
     import { ChangePostInput, CreatePostInput, Post } from './types/post.js';
     import { ChangeProfileInput, CreateProfileInput, Profile } from './types/profile.js';
-    import DataLoader from 'dataloader';
 
     export const gqlResponseSchema = Type.Partial(
       Type.Object({

@@ -17,7 +17,7 @@ export const MemberType = new GraphQLObjectType({
     id: {
       type: new GraphQLNonNull(MemberTypeId),
     },
-    discount: {
+    discount  : {
       type: new GraphQLNonNull(GraphQLFloat),
     },  
     postsLimitPerMonth: {
