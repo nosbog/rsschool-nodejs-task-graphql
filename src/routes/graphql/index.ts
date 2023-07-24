@@ -23,7 +23,6 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
           }
       const err = validationErrors(query)
       
-
       if (err.length > 0) {
         return {
           errors: [{
@@ -41,7 +40,6 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
         variableValues: variables,
       }); 
       return err ? res : res
-    // }
     },
   });
 };

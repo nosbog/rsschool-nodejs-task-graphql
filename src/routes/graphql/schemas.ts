@@ -9,7 +9,6 @@ import {
   GraphQLString,
   GraphQLNonNull,
   GraphQLList,
-  GraphQLID,
   GraphQLInputObjectType,
 } from 'graphql';
 import { MemberTypeId, UUIDType } from './types/uuid.js';
@@ -88,45 +87,6 @@ const UserType: GraphQLObjectType = new GraphQLObjectType({
 });
 
 
-
-const SubscribersOnAuthorsType: GraphQLObjectType = new GraphQLObjectType({
-  name: 'SubscribersOnAuthors',
-  fields: () => ({
-    subscriber: {
-      type: UserType,
-      resolve: async (parent: { subscriberId: string; authorId: string }) => {
-        const subscriber = await prisma.subscribersOnAuthors
-          .findUnique({
-            where: {
-              subscriberId_authorId: {
-                subscriberId: parent.subscriberId,
-                authorId: parent.authorId,
-              },
-            },
-          })
-          .subscriber();
-        return subscriber;
-      },
-    },
-    author: {
-      type: UserType,
-      resolve: async (parent) => {
-        const author = await prisma.subscribersOnAuthors
-          .findUnique({
-            where: {
-              subscriberId_authorId: {
-                subscriberId: parent.subscriberId,
-                authorId: parent.authorId,
-              },
-            },
-          })
-          .author();
-        return author;
-      },
-    },
-  }),
-});
-
 const ProfileType: GraphQLObjectType = new GraphQLObjectType({
   name: 'Profile',
   fields: () => ({
@@ -153,7 +113,6 @@ const ProfileType: GraphQLObjectType = new GraphQLObjectType({
 });
 
 
-
 const PostType: GraphQLObjectType = new GraphQLObjectType({
   name: 'Post',
   fields: () => ({
@@ -171,7 +130,6 @@ const PostType: GraphQLObjectType = new GraphQLObjectType({
     },
   }),
 });
-
 
 
 const MemberType: GraphQLObjectType = new GraphQLObjectType({
@@ -310,16 +268,6 @@ const ChangeProfileInput = new GraphQLInputObjectType({
     yearOfBirth: {type: GraphQLInt},
   })
 })
-
-// const ChangeProfileInput = new GraphQLInputObjectType({
-//   name: "ChangeProfileInput",
-//   fields: () => ({
-//     memberTypeId: {type: GraphQLString},
-//     isMale: { type: GraphQLBoolean },
-//     yearOfBirth: {type: GraphQLInt},
-//   })
-// })
-
 
 const Mutation = new GraphQLObjectType({
   name: "Mutation",
