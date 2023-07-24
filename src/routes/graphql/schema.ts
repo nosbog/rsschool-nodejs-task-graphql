@@ -10,9 +10,8 @@ import {
   GraphQLEnumType,
   GraphQLInputObjectType,
 } from 'graphql';
-import { Post, PrismaClient } from '@prisma/client';
+import { Post, PrismaClient, Profile, User as UserType } from '@prisma/client';
 import { UUIDType } from './types/uuid.js';
-import { doesNotReject } from 'assert';
 
 const prisma = new PrismaClient();
 
@@ -442,16 +441,11 @@ const Mutations = new GraphQLObjectType({
         dto: { type: new GraphQLNonNull(ChangePostInput) },
       },
 
-      async resolve(
-        parent,
-        { id, dto }: { id: string; dto: any },
-        context,
-      ) {
+      async resolve(parent, { id, dto }: { id: string; dto: Post }, context) {
         const updatedPost = await prisma.post.update({
           where: {
             id: id,
           },
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           data: {
             ...dto,
           },
@@ -460,44 +454,99 @@ const Mutations = new GraphQLObjectType({
       },
     },
     changeProfile: {
-        type: Profile,
-        args: {
-          id: { type: new GraphQLNonNull(UUIDType) },
-          dto: { type: new GraphQLNonNull(ChangeProfileInput) },
-        },
-        async resolve(parent, { id, dto }:  { id: string; dto: any }, context) {
-          const updatedProfile = await prisma.profile.update({
-            where: {
-              id: id,
+      type: Profile,
+      args: {
+        id: { type: new GraphQLNonNull(UUIDType) },
+        dto: { type: new GraphQLNonNull(ChangeProfileInput) },
+      },
+      async resolve(parent, { id, dto }: { id: string; dto: Profile }, context) {
+        const updatedProfile = await prisma.profile.update({
+          where: {
+            id: id,
+          },
+          data: {
+            ...dto,
+          },
+        });
+        return updatedProfile;
+      },
+    },
+    changeUser: {
+      type: User,
+      args: {
+        id: { type: new GraphQLNonNull(UUIDType) },
+        dto: { type: new GraphQLNonNull(ChangeUserInput) },
+      },
+      async resolve(parent, { id, dto }: { id: string; dto: UserType }, context) {
+        console.log(id, dto);
+        const updatedUser = await prisma.user.update({
+          where: {
+            id: id,
+          },
+          data: {
+            ...dto,
+          },
+        });
+        return updatedUser;
+      },
+    },
+    subscribeTo: {
+      type: User,
+      args: {
+        userId: { type: new GraphQLNonNull(UUIDType) },
+        authorId: { type: new GraphQLNonNull(UUIDType) },
+      },
+      async resolve(
+        parent,
+        { userId, authorId }: { userId: string; authorId: string },
+        context,
+      ) {
+        //   // Implement your subscribeTo logic here
+        //   await subscribeTo(app, userId, authorId);
+        await prisma.user.update({
+          where: {
+            id: userId,
+          },
+          data: {
+            userSubscribedTo: {
+              create: {
+                authorId: authorId,
+              },
             },
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-            data: {
-              ...dto,
+          },
+        });
+
+        // Fetch and return the subscribed user
+        const subscribedUser = await prisma.user.findUnique({ where: { id: userId } });
+        return subscribedUser;
+      },
+    },
+    unsubscribeFrom: {
+      type: GraphQLBoolean,
+      args: {
+        userId: { type: new GraphQLNonNull(UUIDType) },
+        authorId: { type: new GraphQLNonNull(UUIDType) },
+      },
+      async resolve(
+        parent,
+        { userId, authorId }: { userId: string; authorId: string },
+        context,
+      ) {
+        try {
+          await prisma.subscribersOnAuthors.delete({
+            where: {
+              subscriberId_authorId: {
+                subscriberId: userId,
+                authorId: authorId,
+              },
             },
           });
-          return updatedProfile;
-        },
+          return true;
+        } catch (error) {
+          return false;
+        }
       },
-      changeUser: {
-        type: User,
-        args: {
-          id: { type: new GraphQLNonNull(UUIDType) },
-          dto: { type: new GraphQLNonNull(ChangeUserInput) },
-        },
-        async resolve(parent, { id, dto }:  { id: string; dto: any }, context) {
-            console.log(id, dto);
-          const updatedUser = await prisma.user.update({
-            where: {
-              id: id,
-            },
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-            data: {
-              ...dto,
-            },
-          });
-          return updatedUser;
-        },
-      },
+    },
   }),
 });
 
