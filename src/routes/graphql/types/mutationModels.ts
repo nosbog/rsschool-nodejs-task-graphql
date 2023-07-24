@@ -1,4 +1,4 @@
-import { GraphQLBoolean, GraphQLFloat, GraphQLInputObjectType, GraphQLInt, GraphQLString } from "graphql";
+import { GraphQLBoolean, GraphQLFloat, GraphQLInputObjectType, GraphQLInt, GraphQLNonNull, GraphQLString } from "graphql";
 import { UUIDType } from "./uuid.js";
 import { MemberTypeIdEnum } from "./models.js";
 
@@ -6,27 +6,27 @@ import { MemberTypeIdEnum } from "./models.js";
 export const createPost = new GraphQLInputObjectType({
   name: 'CreatePostInput',
   fields: ()=>({
-    title: { type: GraphQLString },
-    content: { type: GraphQLString },
-    authorId: { type: UUIDType }
+    title: { type: new GraphQLNonNull(GraphQLString) },
+    content: { type: new GraphQLNonNull(GraphQLString) },
+    authorId: { type: new GraphQLNonNull(UUIDType) }
   })
 })
 
 export const createProfile = new GraphQLInputObjectType({
   name: 'CreateProfileInput',
   fields: () => ({
-    isMale: { type: GraphQLBoolean },
-    yearOfBirth: { type: GraphQLInt },
-    memberTypeId: { type: MemberTypeIdEnum },
-    userId: { type: UUIDType },
+    isMale: { type: new GraphQLNonNull(GraphQLBoolean) },
+    yearOfBirth: { type: new GraphQLNonNull(GraphQLInt) },
+    memberTypeId: { type: new GraphQLNonNull(MemberTypeIdEnum) },
+    userId: { type: new GraphQLNonNull(UUIDType) },
   })
 })
 
 export const createUser = new GraphQLInputObjectType({
   name: 'CreateUserInput',
   fields: () => ({
-    name: { type: GraphQLString },
-    balance: { type: GraphQLFloat },
+    name: { type: new GraphQLNonNull(GraphQLString) },
+    balance: { type: new GraphQLNonNull(GraphQLFloat) },
   })
 })
 
