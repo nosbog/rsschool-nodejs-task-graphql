@@ -4,26 +4,26 @@ import { MemberTypeIdEnum } from "./models.js";
 
 
 export const createPost = new GraphQLInputObjectType({
-  name: 'createPostInput',
+  name: 'CreatePostInput',
   fields: ()=>({
     title: { type: GraphQLString },
     content: { type: GraphQLString },
-    authorId: {type: UUIDType }
+    authorId: { type: UUIDType }
   })
 })
 
 export const createProfile = new GraphQLInputObjectType({
-  name: 'createProfileInput',
+  name: 'CreateProfileInput',
   fields: () => ({
     isMale: { type: GraphQLBoolean },
     yearOfBirth: { type: GraphQLInt },
-    memberTypeId: {type: MemberTypeIdEnum},
-    userId: {type: UUIDType},
+    memberTypeId: { type: MemberTypeIdEnum },
+    userId: { type: UUIDType },
   })
 })
 
 export const createUser = new GraphQLInputObjectType({
-  name: 'createUserInput',
+  name: 'CreateUserInput',
   fields: () => ({
     name: { type: GraphQLString },
     balance: { type: GraphQLFloat },
@@ -31,24 +31,24 @@ export const createUser = new GraphQLInputObjectType({
 })
 
 export const updatePost = new GraphQLInputObjectType({
-  name: 'updatePostInput',
-  fields: ()=>({
+  name: 'ChangePostInput', 
+  fields: () => ({
     title: { type: GraphQLString },
-    content: { type: GraphQLString },
+    content: { type: GraphQLString }
   })
 })
 
 export const updateProfile = new GraphQLInputObjectType({
-  name: 'updateProfileInput',
+  name: 'ChangeProfileInput',
   fields: () => ({
     isMale: { type: GraphQLBoolean },
     yearOfBirth: { type: GraphQLInt },
-    memberTypeId: {type: MemberTypeIdEnum},
+    memberTypeId: {type: MemberTypeIdEnum}
   })
 })
 
 export const updateUser = new GraphQLInputObjectType({
-  name: 'updateUserInput',
+  name: 'ChangeUserInput',
   fields: () => ({
     name: { type: GraphQLString },
     balance: { type: GraphQLFloat },
