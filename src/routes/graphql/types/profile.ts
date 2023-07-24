@@ -32,9 +32,7 @@ export const Profile = new GraphQLObjectType ({
             
               console.log('profile ids: ', ids)
 
-
-
-                const rowsM = await context.prisma.memberType.findMany({
+              const rowsM = await context.prisma.memberType.findMany({
 //                  where: {
 //                    profiles: {
 //                        some: {

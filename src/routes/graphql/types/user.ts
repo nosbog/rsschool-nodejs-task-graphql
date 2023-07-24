@@ -101,11 +101,35 @@ export const User = new GraphQLObjectType ({
 
                         console.log('rows: ', rows);
 
+//                        const sortedInIdsOrder = ids.map(id => rows.find(x => x.id === id));
                         const sortedInIdsOrder = rows; //ids.map(id => rows.find(x => x.id === id));
 
-                        console.log('userSubscribedTo ids parent.id rows: ',  ids, parent.id, sortedInIdsOrder)
+                        const rowsN = ids.map(id => rows.find(x => x.id === id));
 
-                        return sortedInIdsOrder;
+                        if (rows.length != ids.length) {
+
+                            console.log('before userSubscribedTo ids rows newrows: ', ids, rows, rowsN)
+
+                            let index = 0;
+                            while (index < rowsN.length) {
+                                const el = rowsN[index];
+                                if (el) {
+                                    index ++
+                                } else {
+                                    console.log('1. ids, rowsN')
+                                    rowsN.splice(index, 1);
+                                    ids.splice(index, 1);
+                                    console.log('2. ids, rowsN')
+                                }
+                            }
+
+                            console.log('after userSubscribedTo ids rows newrows: ', ids, rows, rowsN)
+
+                        }
+
+                        //console.log('userSubscribedTo ids parent.id rows: ',  ids, parent.id, sortedInIdsOrder)
+
+                        return rows; //sortedInIdsOrder;
                     })
                     dataloaders.set(info.fieldNodes, dl);
 
@@ -140,9 +164,39 @@ export const User = new GraphQLObjectType ({
 
                         console.log('rows: ', rows);
 
+                        const rowsN = ids.map(id => rows.find(x => x.id === id));
+
+                        if (rows.length != ids.length) {
+
+                            console.log('before subscribedToUser ids rows newrows: ', ids, rows, rowsN)
+
+                            let index = 0;
+                            while (index < rowsN.length) {
+                                const el = rowsN[index];
+                                if (el) {
+                                    index ++
+                                } else {
+                                    console.log('1. ids, rowsN')
+                                    rowsN.splice(index, 1);
+                                    ids.splice(index, 1);
+                                    console.log('2. ids, rowsN')
+                                }
+                            }
+
+                            console.log('after subscribedToUser ids rows newrows: ', ids, rows, rowsN)
+
+                        }
+
+//                        const sortedInIdsOrder = ids.map(id => rows.find(x => x.id === id));
                         const sortedInIdsOrder = rows; //ids.map(id => rows.find(x => x.id === id));
 
-                        console.log('subscribedToUser ids parent.id rows: ',  ids, parent.id, sortedInIdsOrder)
+                        if (rows.length != ids.length) {
+                            const rowsN = ids.map(id => rows.find(x => x.id === id));
+
+                            console.log('subscribedToUser ids rows newrows: ', ids, rows, rowsN)
+                        }
+
+                        //console.log('subscribedToUser ids parent.id rows: ',  ids, parent.id, sortedInIdsOrder)
 
                         return sortedInIdsOrder;
                     })
