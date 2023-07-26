@@ -51,7 +51,7 @@ export const queries = new GraphQLObjectType({
       memberTypes: {
         type: new GraphQLList(MemberType),
         resolve: async (_, args, { prisma}: FastifyInstance) => { 
-          return await prisma. memberType.findMany()
+          return await prisma.memberType.findMany()
         }
       },
       memberType: {
