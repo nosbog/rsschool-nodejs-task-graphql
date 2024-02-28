@@ -12,12 +12,24 @@ import { MemberTypeId } from '../member-types/schemas.js';
 import { Context } from './types/context.js';
 import { UUIDType } from './types/uuid.js';
 
+const ProfileType = new GraphQLObjectType({
+  name: 'Profile',
+  fields: {
+    id: { type: UUIDType },
+    isMale: { type: GraphQLBoolean },
+    yearOfBirth: { type: GraphQLInt },
+    userId: { type: UUIDType },
+    memberTypeId: { type: GraphQLString },
+  },
+});
+
 const UserType = new GraphQLObjectType({
   name: 'User',
   fields: {
     id: { type: UUIDType },
     name: { type: GraphQLString },
     balance: { type: GraphQLFloat },
+    profile: { type: ProfileType },
   },
 });
 
@@ -45,17 +57,6 @@ const PostType = new GraphQLObjectType({
     title: { type: GraphQLString },
     content: { type: GraphQLString },
     authorId: { type: UUIDType },
-  },
-});
-
-const ProfileType = new GraphQLObjectType({
-  name: 'Profile',
-  fields: {
-    id: { type: UUIDType },
-    isMale: { type: GraphQLBoolean },
-    yearOfBirth: { type: GraphQLInt },
-    userId: { type: UUIDType },
-    memberTypeId: { type: GraphQLString },
   },
 });
 
