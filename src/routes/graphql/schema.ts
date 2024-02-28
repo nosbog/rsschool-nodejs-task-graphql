@@ -23,6 +23,16 @@ const ProfileType = new GraphQLObjectType({
   },
 });
 
+const PostType = new GraphQLObjectType({
+  name: 'Post',
+  fields: {
+    id: { type: UUIDType },
+    title: { type: GraphQLString },
+    content: { type: GraphQLString },
+    authorId: { type: UUIDType },
+  },
+});
+
 const UserType = new GraphQLObjectType({
   name: 'User',
   fields: {
@@ -30,6 +40,7 @@ const UserType = new GraphQLObjectType({
     name: { type: GraphQLString },
     balance: { type: GraphQLFloat },
     profile: { type: ProfileType },
+    posts: { type: new GraphQLList(PostType) },
   },
 });
 
@@ -47,16 +58,6 @@ const MemberTypeType = new GraphQLObjectType({
     id: { type: MemberTypeIdEnum },
     discount: { type: GraphQLFloat },
     postsLimitPerMonth: { type: GraphQLInt },
-  },
-});
-
-const PostType = new GraphQLObjectType({
-  name: 'Post',
-  fields: {
-    id: { type: UUIDType },
-    title: { type: GraphQLString },
-    content: { type: GraphQLString },
-    authorId: { type: UUIDType },
   },
 });
 
@@ -82,6 +83,44 @@ const rootQuery = new GraphQLObjectType({
         });
 
         return user;
+      },
+    },
+    subscribedToUser: {
+      type: new GraphQLList(UserType),
+      args: {
+        userId: { type: UUIDType },
+      },
+      resolve: async (_, args: { userId: string }, context: Context) => {
+        const users = await context.prisma.user.findMany({
+          where: {
+            userSubscribedTo: {
+              some: {
+                authorId: args.userId,
+              },
+            },
+          },
+        });
+
+        return users;
+      },
+    },
+    userSubscribedTo: {
+      type: new GraphQLList(UserType),
+      args: {
+        subscriberId: { type: UUIDType },
+      },
+      resolve: async (_, args: { subscriberId: string }, context: Context) => {
+        const users = await context.prisma.user.findMany({
+          where: {
+            subscribedToUser: {
+              some: {
+                subscriberId: args.subscriberId,
+              },
+            },
+          },
+        });
+
+        return users;
       },
     },
     memberTypes: {
