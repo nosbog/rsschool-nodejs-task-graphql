@@ -1,14 +1,5 @@
-import {
-    GraphQLBoolean,
-    GraphQLEnumType,
-    GraphQLFloat, GraphQLInputObjectType,
-    GraphQLInt,
-    GraphQLList,
-    GraphQLObjectType,
-    GraphQLString
-} from 'graphql';
+import { GraphQLBoolean, GraphQLEnumType, GraphQLFloat, GraphQLInputObjectType, GraphQLInt, GraphQLList, GraphQLObjectType, GraphQLString } from 'graphql';
 import {UUIDType} from './uuid.js';
-
 
 export const MemberTypeIdType = new GraphQLEnumType({
     name: 'MemberTypeId',
@@ -45,7 +36,6 @@ export const ProfileType = new GraphQLObjectType({
                 return context.prisma.user.findFirst({ where: { id: userId } });
             },
         },
-
         memberType: {
             type: MemberType,
             resolve: async (source, args, context) => {

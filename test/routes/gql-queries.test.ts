@@ -60,50 +60,50 @@ await test('gql-queries', async (t) => {
     t.ok(data.profiles.length === profiles.length);
   });
 
-  // await t.test('Get all resources by their id.', async (t) => {
-  //   const { body: user1 } = await createUser(app);
-  //   const { body: post1 } = await createPost(app, user1.id);
-  //   const { body: profile1 } = await createProfile(app, user1.id, MemberTypeId.BASIC);
-  //
-  //   const {
-  //     body: { data },
-  //   } = await gqlQuery(app, {
-  //     query: `query ($userId: UUID!, $profileId: UUID!, $memberTypeId: MemberTypeId!, $postId: UUID!) {
-  //       memberType(id: $memberTypeId) {
-  //           id
-  //           discount
-  //           postsLimitPerMonth
-  //       }
-  //       post(id: $postId) {
-  //           id
-  //           title
-  //           content
-  //       }
-  //       user(id: $userId) {
-  //           id
-  //           name
-  //           balance
-  //       }
-  //       profile(id: $profileId) {
-  //           id
-  //           isMale
-  //           yearOfBirth
-  //       }
-  //   }`,
-  //     variables: {
-  //       userId: user1.id,
-  //       profileId: profile1.id,
-  //       memberTypeId: MemberTypeId.BASIC,
-  //       postId: post1.id,
-  //     },
-  //   });
-  //
-  //   t.ok(data.memberType.id === MemberTypeId.BASIC);
-  //   t.ok(data.post.id === post1.id);
-  //   t.ok(data.user.id === user1.id);
-  //   t.ok(data.profile.id === profile1.id);
-  // });
-  //
+  await t.test('Get all resources by their id.', async (t) => {
+    const { body: user1 } = await createUser(app);
+    const { body: post1 } = await createPost(app, user1.id);
+    const { body: profile1 } = await createProfile(app, user1.id, MemberTypeId.BASIC);
+
+    const {
+      body: { data },
+    } = await gqlQuery(app, {
+      query: `query ($userId: UUID!, $profileId: UUID!, $memberTypeId: MemberTypeId!, $postId: UUID!) {
+        memberType(id: $memberTypeId) {
+            id
+            discount
+            postsLimitPerMonth
+        }
+        post(id: $postId) {
+            id
+            title
+            content
+        }
+        user(id: $userId) {
+            id
+            name
+            balance
+        }
+        profile(id: $profileId) {
+            id
+            isMale
+            yearOfBirth
+        }
+    }`,
+      variables: {
+        userId: user1.id,
+        profileId: profile1.id,
+        memberTypeId: MemberTypeId.BASIC,
+        postId: post1.id,
+      },
+    });
+
+    t.ok(data.memberType.id === MemberTypeId.BASIC);
+    t.ok(data.post.id === post1.id);
+    t.ok(data.user.id === user1.id);
+    t.ok(data.profile.id === profile1.id);
+  });
+
   // await t.test('Get non-existent resources by their id.', async (t) => {
   //   const { body: user1 } = await createUser(app);
   //

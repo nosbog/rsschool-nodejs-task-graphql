@@ -5,6 +5,7 @@ import { ResolveTree, parseResolveInfo, simplifyParsedResolveInfoFragmentWithTyp
 import {MemberTypeIdType} from './types/types.js';
 import {MemberType, ProfileType, PostType, UserType, CreateUserInput} from './types/types.js';
 import { memberLoader } from './loader.js';
+import {UUIDType} from './types/uuid.js';
 
 const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
   const { prisma } = fastify;
@@ -55,10 +56,7 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
           users: {
             type: new GraphQLList(UserType),
             resolve: async (source, args, context, resolveInfo) => {
-              const fragment = simplifyParsedResolveInfoFragmentWithType(
-                  parseResolveInfo(resolveInfo) as ResolveTree,
-                  UserType,
-              );
+              const fragment = simplifyParsedResolveInfoFragmentWithType( parseResolveInfo(resolveInfo) as ResolveTree, UserType );
 
               const users = await context.prisma.user.findMany({
                 include: {
@@ -67,7 +65,7 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
                 },
               });
 
-              if (!!fragment.fields.hasOwnProperty('subscribedToUser')) {
+              if (fragment.fields.hasOwnProperty('subscribedToUser')) {
                 const map = new Map();
                 users.map((user: { id: any; subscribedToUser: any[]; }) =>
                     map.set(
@@ -83,7 +81,7 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
                 context.data.subscribers = null;
               }
 
-              if (!!fragment.fields.hasOwnProperty('userSubscribedTo')) {
+              if (fragment.fields.hasOwnProperty('userSubscribedTo')) {
                 const subscriptions = new Map();
                 users.map((user: { id: any; userSubscribedTo: any[]; }) =>
                     subscriptions.set(
@@ -102,6 +100,32 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
               return users;
             },
           },
+
+          user: {
+            type: UserType,
+            args: { id: { type: UUIDType } },
+            resolve: async (parent, { id }) => {
+              return await prisma.user.findFirst({
+                where: { id: id } });
+            },
+          },
+
+          post: {
+            type: PostType,
+            args: { id: { type: UUIDType } },
+            resolve: async (parent, { id }) => {
+              return await prisma.post.findFirst({ where: { id: id },
+              });
+            },
+          },
+
+          profile: {
+            type: ProfileType,
+            args: { id: { type: UUIDType } },
+            resolve: async (parent, { id }) => {
+              return await prisma.profile.findFirst({ where: { id: id } });
+            },
+          },
         },
       });
 
@@ -110,9 +134,7 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
         fields: {
           createUser: {
             type: UserType,
-            args: {
-              dto: { type: CreateUserInput },
-            },
+            args: { dto: { type: CreateUserInput } },
             resolve: async (parent, { dto }) => {
               return prisma.user.create({ data: dto });
             },
