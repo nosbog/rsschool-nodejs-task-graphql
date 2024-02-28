@@ -1,37 +1,75 @@
-import { GraphQLFloat, GraphQLObjectType, GraphQLSchema, GraphQLString } from 'graphql';
+import {
+  GraphQLFloat,
+  GraphQLID,
+  GraphQLInt,
+  GraphQLObjectType,
+  GraphQLSchema,
+  GraphQLString,
+} from 'graphql';
 import { Context } from './types/context.js';
 
-const User = new GraphQLObjectType({
+const UserType = new GraphQLObjectType({
   name: 'User',
   fields: {
-    id: { type: GraphQLString },
+    id: { type: GraphQLID },
     name: { type: GraphQLString },
     balance: { type: GraphQLFloat },
   },
 });
 
-const Query = new GraphQLObjectType({
+const MemberTypesType = new GraphQLObjectType({
+  name: 'MemberTypes',
+  fields: {
+    id: { type: GraphQLString },
+    balance: { type: GraphQLFloat },
+    discount: { type: GraphQLFloat },
+    postsLimitPerMonth: { type: GraphQLInt },
+  },
+});
+
+const rootQuery = new GraphQLObjectType({
   name: 'Query',
   fields: {
     users: {
-      type: User,
-      resolve: async (source, args, context: Context) => {
+      type: UserType,
+      resolve: async (_, args, context: Context) => {
         const users = await context.prisma.user.findMany();
 
         return users;
       },
     },
     user: {
-      type: User,
+      type: UserType,
       args: {
-        id: { type: GraphQLString },
+        id: { type: GraphQLID },
       },
-      resolve: async (source, args: { id: string }, context: Context) => {
+      resolve: async (_, args: { id: string }, context: Context) => {
         const user = await context.prisma.user.findUnique({
           where: { id: args.id },
         });
 
         return user;
+      },
+    },
+    memberTypes: {
+      type: MemberTypesType,
+      resolve: async (_, args, context: Context) => {
+        const memberTypes = await context.prisma.memberType.findMany();
+
+        return memberTypes;
+      },
+    },
+    memberType: {
+      type: MemberTypesType,
+      args: {
+        id: { type: GraphQLString },
+      },
+      resolve: async (_, args: { id: string }, context: Context) => {
+        const memberType = await context.prisma.memberType.findUnique({
+          where: { id: args.id },
+        });
+
+        return memberType;
       },
     },
   },
@@ -41,7 +79,7 @@ const Mutation = new GraphQLObjectType({
   name: 'Mutation',
   fields: {
     createUser: {
-      type: User,
+      type: UserType,
       args: {
         name: { type: GraphQLString },
         balance: { type: GraphQLFloat },
@@ -59,7 +97,7 @@ const Mutation = new GraphQLObjectType({
       },
     },
     deleteUser: {
-      type: User,
+      type: UserType,
       args: {
         id: { type: GraphQLString },
       },
@@ -72,7 +110,7 @@ const Mutation = new GraphQLObjectType({
       },
     },
     updateUser: {
-      type: User,
+      type: UserType,
       args: {
         id: { type: GraphQLString },
         name: { type: GraphQLString },
@@ -95,7 +133,7 @@ const Mutation = new GraphQLObjectType({
 });
 
 export const schema = new GraphQLSchema({
-  types: [User],
-  query: Query,
+  types: [UserType, MemberTypesType],
+  query: rootQuery,
   mutation: Mutation,
 });
