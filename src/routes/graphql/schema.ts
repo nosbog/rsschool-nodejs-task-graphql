@@ -27,6 +27,16 @@ const MemberTypesType = new GraphQLObjectType({
   },
 });
 
+const Posts = new GraphQLObjectType({
+  name: 'Posts',
+  fields: {
+    id: { type: GraphQLID },
+    title: { type: GraphQLString },
+    content: { type: GraphQLString },
+    authorId: { type: GraphQLID },
+  },
+});
+
 const rootQuery = new GraphQLObjectType({
   name: 'Query',
   fields: {
@@ -62,6 +72,7 @@ const rootQuery = new GraphQLObjectType({
     memberType: {
       type: MemberTypesType,
       args: {
+        // TODO use MemberTypeId enum
         id: { type: GraphQLString },
       },
       resolve: async (_, args: { id: string }, context: Context) => {
@@ -70,6 +81,27 @@ const rootQuery = new GraphQLObjectType({
         });
 
         return memberType;
+      },
+    },
+    posts: {
+      type: Posts,
+      resolve: async (_, args, context: Context) => {
+        const posts = await context.prisma.post.findMany();
+
+        return posts;
+      },
+    },
+    post: {
+      type: Posts,
+      args: {
+        id: { type: GraphQLID },
+      },
+      resolve: async (_, args: { id: string }, context: Context) => {
+        const post = await context.prisma.post.findUnique({
+          where: { id: args.id },
+        });
+
+        return post;
       },
     },
   },
@@ -84,11 +116,7 @@ const Mutation = new GraphQLObjectType({
         name: { type: GraphQLString },
         balance: { type: GraphQLFloat },
       },
-      resolve: async (
-        source,
-        args: { name: string; balance: number },
-        context: Context,
-      ) => {
+      resolve: async (_, args: { name: string; balance: number }, context: Context) => {
         const user = await context.prisma.user.create({
           data: args,
         });
@@ -101,7 +129,7 @@ const Mutation = new GraphQLObjectType({
       args: {
         id: { type: GraphQLString },
       },
-      resolve: async (source, args: { id: string }, context: Context) => {
+      resolve: async (_, args: { id: string }, context: Context) => {
         const user = await context.prisma.user.delete({
           where: { id: args.id },
         });
@@ -117,7 +145,7 @@ const Mutation = new GraphQLObjectType({
         balance: { type: GraphQLFloat },
       },
       resolve: async (
-        source,
+        _,
         args: { id: string; name: string; balance: number },
         context: Context,
       ) => {
@@ -127,6 +155,58 @@ const Mutation = new GraphQLObjectType({
         });
 
         return user;
+      },
+    },
+    createPost: {
+      type: Posts,
+      args: {
+        title: { type: GraphQLString },
+        content: { type: GraphQLString },
+        authorId: { type: GraphQLID },
+      },
+      resolve: async (
+        _,
+        args: { title: string; content: string; authorId: string },
+        context: Context,
+      ) => {
+        const post = await context.prisma.post.create({
+          data: args,
+        });
+
+        return post;
+      },
+    },
+    updatePost: {
+      type: Posts,
+      args: {
+        id: { type: GraphQLID },
+        title: { type: GraphQLString },
+        content: { type: GraphQLString },
+      },
+      resolve: async (
+        _,
+        args: { id: string; title: string; content: string },
+        context: Context,
+      ) => {
+        const post = await context.prisma.post.update({
+          where: { id: args.id },
+          data: args,
+        });
+
+        return post;
+      },
+    },
+    deletePost: {
+      type: Posts,
+      args: {
+        id: { type: GraphQLID },
+      },
+      resolve: async (_, args: { id: string }, context: Context) => {
+        const post = await context.prisma.post.delete({
+          where: { id: args.id },
+        });
+
+        return post;
       },
     },
   },
