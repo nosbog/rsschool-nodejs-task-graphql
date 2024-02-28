@@ -1,4 +1,5 @@
 import {
+  GraphQLBoolean,
   GraphQLFloat,
   GraphQLID,
   GraphQLInt,
@@ -17,8 +18,8 @@ const UserType = new GraphQLObjectType({
   },
 });
 
-const MemberTypesType = new GraphQLObjectType({
-  name: 'MemberTypes',
+const MemberTypeType = new GraphQLObjectType({
+  name: 'MemberType',
   fields: {
     id: { type: GraphQLString },
     balance: { type: GraphQLFloat },
@@ -27,13 +28,24 @@ const MemberTypesType = new GraphQLObjectType({
   },
 });
 
-const Posts = new GraphQLObjectType({
-  name: 'Posts',
+const PostType = new GraphQLObjectType({
+  name: 'Post',
   fields: {
     id: { type: GraphQLID },
     title: { type: GraphQLString },
     content: { type: GraphQLString },
     authorId: { type: GraphQLID },
+  },
+});
+
+const ProfileType = new GraphQLObjectType({
+  name: 'Profile',
+  fields: {
+    id: { type: GraphQLID },
+    isMale: { type: GraphQLBoolean },
+    yearOfBirth: { type: GraphQLInt },
+    userId: { type: GraphQLID },
+    memberTypeId: { type: GraphQLString },
   },
 });
 
@@ -62,7 +74,7 @@ const rootQuery = new GraphQLObjectType({
       },
     },
     memberTypes: {
-      type: MemberTypesType,
+      type: MemberTypeType,
       resolve: async (_, args, context: Context) => {
         const memberTypes = await context.prisma.memberType.findMany();
 
@@ -70,7 +82,7 @@ const rootQuery = new GraphQLObjectType({
       },
     },
     memberType: {
-      type: MemberTypesType,
+      type: MemberTypeType,
       args: {
         // TODO use MemberTypeId enum
         id: { type: GraphQLString },
@@ -84,7 +96,7 @@ const rootQuery = new GraphQLObjectType({
       },
     },
     posts: {
-      type: Posts,
+      type: PostType,
       resolve: async (_, args, context: Context) => {
         const posts = await context.prisma.post.findMany();
 
@@ -92,7 +104,7 @@ const rootQuery = new GraphQLObjectType({
       },
     },
     post: {
-      type: Posts,
+      type: PostType,
       args: {
         id: { type: GraphQLID },
       },
@@ -102,6 +114,27 @@ const rootQuery = new GraphQLObjectType({
         });
 
         return post;
+      },
+    },
+    profiles: {
+      type: ProfileType,
+      resolve: async (_, args, context: Context) => {
+        const profiles = await context.prisma.profile.findMany();
+
+        return profiles;
+      },
+    },
+    profile: {
+      type: ProfileType,
+      args: {
+        id: { type: GraphQLID },
+      },
+      resolve: async (_, args: { id: string }, context: Context) => {
+        const profile = await context.prisma.profile.findUnique({
+          where: { id: args.id },
+        });
+
+        return profile;
       },
     },
   },
@@ -158,7 +191,7 @@ const Mutation = new GraphQLObjectType({
       },
     },
     createPost: {
-      type: Posts,
+      type: PostType,
       args: {
         title: { type: GraphQLString },
         content: { type: GraphQLString },
@@ -177,7 +210,7 @@ const Mutation = new GraphQLObjectType({
       },
     },
     updatePost: {
-      type: Posts,
+      type: PostType,
       args: {
         id: { type: GraphQLID },
         title: { type: GraphQLString },
@@ -197,7 +230,7 @@ const Mutation = new GraphQLObjectType({
       },
     },
     deletePost: {
-      type: Posts,
+      type: PostType,
       args: {
         id: { type: GraphQLID },
       },
@@ -209,11 +242,75 @@ const Mutation = new GraphQLObjectType({
         return post;
       },
     },
+    createProfile: {
+      type: ProfileType,
+      args: {
+        isMale: { type: GraphQLBoolean },
+        yearOfBirth: { type: GraphQLInt },
+        userId: { type: GraphQLID },
+        memberTypeId: { type: GraphQLString },
+      },
+      resolve: async (
+        _,
+        args: {
+          isMale: boolean;
+          yearOfBirth: number;
+          userId: string;
+          memberTypeId: string;
+        },
+        context: Context,
+      ) => {
+        const profile = await context.prisma.profile.create({
+          data: args,
+        });
+
+        return profile;
+      },
+    },
+    updateProfile: {
+      type: ProfileType,
+      args: {
+        id: { type: GraphQLID },
+        isMale: { type: GraphQLBoolean },
+        yearOfBirth: { type: GraphQLInt },
+        memberTypeId: { type: GraphQLString },
+      },
+      resolve: async (
+        _,
+        args: {
+          id: string;
+          isMale: boolean;
+          yearOfBirth: number;
+          memberTypeId: string;
+        },
+        context: Context,
+      ) => {
+        const profile = await context.prisma.profile.update({
+          where: { id: args.id },
+          data: args,
+        });
+
+        return profile;
+      },
+    },
+    deleteProfile: {
+      type: ProfileType,
+      args: {
+        id: { type: GraphQLID },
+      },
+      resolve: async (_, args: { id: string }, context: Context) => {
+        const profile = await context.prisma.profile.delete({
+          where: { id: args.id },
+        });
+
+        return profile;
+      },
+    },
   },
 });
 
 export const schema = new GraphQLSchema({
-  types: [UserType, MemberTypesType],
+  types: [UserType, MemberTypeType, PostType, ProfileType],
   query: rootQuery,
   mutation: Mutation,
 });
