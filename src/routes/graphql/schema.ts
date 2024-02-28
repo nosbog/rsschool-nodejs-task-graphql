@@ -3,6 +3,7 @@ import {
   GraphQLFloat,
   GraphQLID,
   GraphQLInt,
+  GraphQLList,
   GraphQLObjectType,
   GraphQLSchema,
   GraphQLString,
@@ -21,8 +22,8 @@ const UserType = new GraphQLObjectType({
 const MemberTypeType = new GraphQLObjectType({
   name: 'MemberType',
   fields: {
+    // TODO use MemberTypeId enum
     id: { type: GraphQLString },
-    balance: { type: GraphQLFloat },
     discount: { type: GraphQLFloat },
     postsLimitPerMonth: { type: GraphQLInt },
   },
@@ -53,7 +54,7 @@ const rootQuery = new GraphQLObjectType({
   name: 'Query',
   fields: {
     users: {
-      type: UserType,
+      type: new GraphQLList(UserType),
       resolve: async (_, args, context: Context) => {
         const users = await context.prisma.user.findMany();
 
@@ -74,9 +75,10 @@ const rootQuery = new GraphQLObjectType({
       },
     },
     memberTypes: {
-      type: MemberTypeType,
+      type: new GraphQLList(MemberTypeType),
       resolve: async (_, args, context: Context) => {
         const memberTypes = await context.prisma.memberType.findMany();
+        console.log('MEMBER TYPES', memberTypes);
 
         return memberTypes;
       },
@@ -96,7 +98,7 @@ const rootQuery = new GraphQLObjectType({
       },
     },
     posts: {
-      type: PostType,
+      type: new GraphQLList(PostType),
       resolve: async (_, args, context: Context) => {
         const posts = await context.prisma.post.findMany();
 
@@ -117,7 +119,7 @@ const rootQuery = new GraphQLObjectType({
       },
     },
     profiles: {
-      type: ProfileType,
+      type: new GraphQLList(ProfileType),
       resolve: async (_, args, context: Context) => {
         const profiles = await context.prisma.profile.findMany();
 
