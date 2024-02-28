@@ -87,7 +87,6 @@ const rootQuery = new GraphQLObjectType({
       type: new GraphQLList(MemberTypeType),
       resolve: async (_, args, context: Context) => {
         const memberTypes = await context.prisma.memberType.findMany();
-        console.log('MEMBER TYPES', memberTypes);
 
         return memberTypes;
       },
