@@ -36,7 +36,19 @@ const ProfileType = new GraphQLObjectType({
     isMale: { type: GraphQLBoolean },
     yearOfBirth: { type: GraphQLInt },
     userId: { type: UUIDType },
-    memberType: { type: MemberTypeType },
+    memberType: {
+      type: MemberTypeType,
+      resolve: async (parent, args, context: Context) => {
+        const profile = await context.prisma.profile.findUnique({
+          where: { id: parent.id },
+          include: {
+            memberType: true,
+          },
+        });
+
+        return profile?.memberType;
+      },
+    },
     memberTypeId: { type: MemberTypeIdEnum },
   },
 });
@@ -154,7 +166,7 @@ const rootQuery = new GraphQLObjectType({
       args: {
         id: { type: MemberTypeIdEnum },
       },
-      resolve: async (_, args: { id: string }, context: Context) => {
+      resolve: async (_, args: { id: MemberTypeId }, context: Context) => {
         const memberType = await context.prisma.memberType.findUnique({
           where: { id: args.id },
         });
