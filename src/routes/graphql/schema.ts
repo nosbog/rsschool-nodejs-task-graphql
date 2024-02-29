@@ -12,38 +12,6 @@ import { MemberTypeId } from '../member-types/schemas.js';
 import { Context } from './types/context.js';
 import { UUIDType } from './types/uuid.js';
 
-const ProfileType = new GraphQLObjectType({
-  name: 'Profile',
-  fields: {
-    id: { type: UUIDType },
-    isMale: { type: GraphQLBoolean },
-    yearOfBirth: { type: GraphQLInt },
-    userId: { type: UUIDType },
-    memberTypeId: { type: GraphQLString },
-  },
-});
-
-const PostType = new GraphQLObjectType({
-  name: 'Post',
-  fields: {
-    id: { type: UUIDType },
-    title: { type: GraphQLString },
-    content: { type: GraphQLString },
-    authorId: { type: UUIDType },
-  },
-});
-
-const UserType = new GraphQLObjectType({
-  name: 'User',
-  fields: {
-    id: { type: UUIDType },
-    name: { type: GraphQLString },
-    balance: { type: GraphQLFloat },
-    profile: { type: ProfileType },
-    posts: { type: new GraphQLList(PostType) },
-  },
-});
-
 const MemberTypeIdEnum = new GraphQLEnumType({
   name: 'MemberTypeId',
   values: {
@@ -61,13 +29,95 @@ const MemberTypeType = new GraphQLObjectType({
   },
 });
 
+const ProfileType = new GraphQLObjectType({
+  name: 'Profile',
+  fields: {
+    id: { type: UUIDType },
+    isMale: { type: GraphQLBoolean },
+    yearOfBirth: { type: GraphQLInt },
+    userId: { type: UUIDType },
+    memberType: { type: MemberTypeType },
+    memberTypeId: { type: MemberTypeIdEnum },
+  },
+});
+
+const PostType = new GraphQLObjectType({
+  name: 'Post',
+  fields: {
+    id: { type: UUIDType },
+    title: { type: GraphQLString },
+    content: { type: GraphQLString },
+    authorId: { type: UUIDType },
+  },
+});
+
+const UserType = new GraphQLObjectType({
+  name: 'User',
+  fields: () => ({
+    id: { type: UUIDType },
+    name: { type: GraphQLString },
+    balance: { type: GraphQLFloat },
+    profile: { type: ProfileType },
+    posts: { type: new GraphQLList(PostType) },
+    userSubscribedTo: {
+      type: new GraphQLList(UserType),
+      resolve: async (parent, args, context: Context) => {
+        const subscriptions = await context.prisma.user.findMany({
+          where: {
+            subscribedToUser: {
+              some: {
+                subscriberId: parent.id,
+              },
+            },
+          },
+        });
+
+        return subscriptions;
+      },
+    },
+    subscribedToUser: {
+      type: new GraphQLList(UserType),
+      resolve: async (parent, args, context: Context) => {
+        const subscriptions = await context.prisma.user.findMany({
+          where: {
+            userSubscribedTo: {
+              some: {
+                authorId: parent.id,
+              },
+            },
+          },
+        });
+
+        return subscriptions;
+      },
+    },
+  }),
+});
+
+const SubscribersOnAuthorsType = new GraphQLObjectType({
+  name: 'SubscribersOnAuthors',
+  fields: {
+    subscriber: { type: UserType },
+    subscriberId: { type: UUIDType },
+    author: { type: UserType },
+    authorId: { type: UUIDType },
+  },
+});
+
 const rootQuery = new GraphQLObjectType({
   name: 'Query',
   fields: {
     users: {
       type: new GraphQLList(UserType),
       resolve: async (_, args, context: Context) => {
-        const users = await context.prisma.user.findMany();
+        const users = await context.prisma.user.findMany({
+          include: {
+            profile: true,
+            posts: true,
+            subscribedToUser: true,
+            userSubscribedTo: true,
+          },
+        });
 
         return users;
       },
@@ -80,47 +130,15 @@ const rootQuery = new GraphQLObjectType({
       resolve: async (_, args: { id: string }, context: Context) => {
         const user = await context.prisma.user.findUnique({
           where: { id: args.id },
+          include: {
+            profile: true,
+            posts: true,
+            subscribedToUser: true,
+            userSubscribedTo: true,
+          },
         });
 
         return user;
-      },
-    },
-    subscribedToUser: {
-      type: new GraphQLList(UserType),
-      args: {
-        userId: { type: UUIDType },
-      },
-      resolve: async (_, args: { userId: string }, context: Context) => {
-        const users = await context.prisma.user.findMany({
-          where: {
-            userSubscribedTo: {
-              some: {
-                authorId: args.userId,
-              },
-            },
-          },
-        });
-
-        return users;
-      },
-    },
-    userSubscribedTo: {
-      type: new GraphQLList(UserType),
-      args: {
-        subscriberId: { type: UUIDType },
-      },
-      resolve: async (_, args: { subscriberId: string }, context: Context) => {
-        const users = await context.prisma.user.findMany({
-          where: {
-            subscribedToUser: {
-              some: {
-                subscriberId: args.subscriberId,
-              },
-            },
-          },
-        });
-
-        return users;
       },
     },
     memberTypes: {
@@ -359,7 +377,7 @@ const Mutation = new GraphQLObjectType({
 });
 
 export const schema = new GraphQLSchema({
-  types: [UserType, MemberTypeType, PostType, ProfileType],
+  types: [UserType, MemberTypeType, PostType, ProfileType, SubscribersOnAuthorsType],
   query: rootQuery,
   mutation: Mutation,
 });
