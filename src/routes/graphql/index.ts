@@ -3,7 +3,7 @@ import { createGqlResponseSchema, gqlResponseSchema } from './schemas.js';
 import { GraphQLList, GraphQLObjectType, GraphQLSchema, graphql } from 'graphql';
 import { ResolveTree, parseResolveInfo, simplifyParsedResolveInfoFragmentWithType } from 'graphql-parse-resolve-info';
 import {MemberTypeIdType} from './types/types.js';
-import {MemberType, ProfileType, PostType, UserType, CreateUserInput} from './types/types.js';
+import {MemberType, ProfileType, PostType, UserType, CreateUserInput, CreateProfileInput, CreatePostInput} from './types/types.js';
 import {memberLoader, postLoader, profileLoader, subscribedToUserLoader, userSubscribedToLoader} from './loader.js';
 import {UUIDType} from './types/uuid.js';
 
@@ -137,8 +137,33 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
             args: { dto: { type: CreateUserInput } },
             resolve: async (parent, { dto }) => {
               return prisma.user.create({ data: dto });
-            }
-          }
+            },
+          },
+
+          createProfile: {
+            type: ProfileType,
+            args: {
+              dto: { type: CreateProfileInput },
+            },
+
+            resolve: async (parents, { dto }) => {
+              try {
+                return prisma.profile.create({ data: dto });
+              } catch (error) {
+                console.log(error);
+              }
+            },
+          },
+
+          createPost: {
+            type: PostType,
+            args: {
+              dto: { type: CreatePostInput },
+            },
+            resolve: async (parent, { dto }) => {
+              return prisma.post.create({ data: dto });
+            },
+          },
         },
       });
 

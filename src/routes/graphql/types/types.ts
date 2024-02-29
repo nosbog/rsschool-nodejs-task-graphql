@@ -1,6 +1,7 @@
 import { GraphQLBoolean, GraphQLEnumType, GraphQLFloat, GraphQLInputObjectType, GraphQLInt, GraphQLList, GraphQLObjectType, GraphQLString } from 'graphql';
 import {UUIDType} from './uuid.js';
 
+// Member
 export const MemberTypeIdType = new GraphQLEnumType({
     name: 'MemberTypeId',
     values: {
@@ -23,7 +24,7 @@ export const MemberType = new GraphQLObjectType({
     }),
 });
 
-
+// Profile
 export const ProfileType = new GraphQLObjectType({
     name: 'ProfileType',
     fields: () => ({
@@ -45,7 +46,17 @@ export const ProfileType = new GraphQLObjectType({
         memberTypeId: { type: MemberTypeIdType } }),
 });
 
+export const CreateProfileInput = new GraphQLInputObjectType({
+    name: 'CreateProfileInput',
+    fields: () => ({
+        userId: { type: UUIDType },
+        memberTypeId: { type: MemberTypeIdType },
+        isMale: { type: GraphQLBoolean },
+        yearOfBirth: { type: GraphQLInt },
+    }),
+});
 
+// Post
 export const PostType = new GraphQLObjectType({
     name: 'PostType',
     fields: () => ({
@@ -62,7 +73,16 @@ export const PostType = new GraphQLObjectType({
     }),
 });
 
+export const CreatePostInput = new GraphQLInputObjectType({
+    name: 'CreatePostInput',
+    fields: () => ({
+        authorId: { type: UUIDType },
+        content: { type: GraphQLString },
+        title: { type: GraphQLString },
+    }),
+});
 
+// User
 export const UserType = new GraphQLObjectType({
     name: 'UserType',
     fields: () => ({
@@ -78,7 +98,6 @@ export const UserType = new GraphQLObjectType({
         posts: {
             type: new GraphQLList(PostType),
             resolve: async (source, args, context) => {
-                // console.log('calling post loader from user with source.id:' + source.id);
                 return await context.loaders.postLoader.load(source.id);
             },
         },
@@ -96,7 +115,6 @@ export const UserType = new GraphQLObjectType({
         },
     }),
 });
-
 
 export const CreateUserInput = new GraphQLInputObjectType({
     name: 'CreateUserInput',
