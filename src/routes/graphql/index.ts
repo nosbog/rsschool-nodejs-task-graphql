@@ -4,7 +4,7 @@ import { GraphQLList, GraphQLObjectType, GraphQLSchema, graphql } from 'graphql'
 import { ResolveTree, parseResolveInfo, simplifyParsedResolveInfoFragmentWithType } from 'graphql-parse-resolve-info';
 import {MemberTypeIdType} from './types/types.js';
 import {MemberType, ProfileType, PostType, UserType, CreateUserInput} from './types/types.js';
-import { memberLoader } from './loader.js';
+import {memberLoader, profileLoader} from './loader.js';
 import {UUIDType} from './types/uuid.js';
 
 const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
@@ -154,6 +154,7 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
         contextValue: {
           loaders: {
             memberLoader: memberLoader(prisma),
+            profileLoader: profileLoader(prisma)
           },
           data: {},
           prisma: prisma,
