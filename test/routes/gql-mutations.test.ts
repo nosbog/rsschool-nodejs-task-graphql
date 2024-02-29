@@ -109,75 +109,75 @@ await test('gql-mutations', async (t) => {
     t.ok(foundCreatedProfile === null);
   });
 
-  // await t.test('Change resources by id.', async (t) => {
-  //   const { body: user1 } = await createUser(app);
-  //   const { body: post1 } = await createPost(app, user1.id);
-  //   const { body: profile1 } = await createProfile(app, user1.id, MemberTypeId.BUSINESS);
-  //
-  //   const changedName = genCreateUserDto().name;
-  //   const changedTitle = genCreatePostDto('').title;
-  //   const changedIsMale = !profile1.isMale;
-  //
-  //   const {
-  //     body: { data, errors },
-  //   } = await gqlQuery(app, {
-  //     query: `
-  //     mutation ($postId: UUID!, $postDto: ChangePostInput!, $profileId: UUID!, $profileDto: ChangeProfileInput!, $userId: UUID!, $userDto: ChangeUserInput!) {
-  //       changePost(id: $postId, dto: $postDto) {
-  //           id
-  //       }
-  //       changeProfile(id: $profileId, dto: $profileDto) {
-  //           id
-  //       }
-  //       changeUser(id: $userId, dto: $userDto) {
-  //           id
-  //       }
-  //     }
-  //     `,
-  //     variables: {
-  //       postId: post1.id,
-  //       postDto: { title: changedTitle },
-  //       profileId: profile1.id,
-  //       profileDto: { isMale: changedIsMale },
-  //       userId: user1.id,
-  //       userDto: { name: changedName },
-  //     },
-  //   });
-  //
-  //   const { body: foundChangedPost } = await getPost(app, data.changePost.id);
-  //   const { body: foundChangedUser } = await getUser(app, data.changeUser.id);
-  //   const { body: foundChangedProfile } = await getProfile(app, data.changeProfile.id);
-  //
-  //   t.ok(!errors);
-  //   t.ok(foundChangedPost.title === changedTitle);
-  //   t.ok(foundChangedUser.name === changedName);
-  //   t.ok(foundChangedProfile.isMale === changedIsMale);
-  // });
-  //
-  // await t.test('Change profile => fail; invalid dto.userId.', async (t) => {
-  //   const {
-  //     body: { errors },
-  //   } = await gqlQuery(app, {
-  //     query: `mutation ($id: UUID!, $dto: ChangeProfileInput!) {
-  //       changeProfile(id: $id, dto: $dto) {
-  //           id
-  //       }
-  //   }`,
-  //     variables: {
-  //       id: randomUUID(),
-  //       dto: {
-  //         userId: randomUUID(),
-  //       },
-  //     },
-  //   });
-  //
-  //   t.ok(errors.length === 1);
-  //   const message = errors[0].message as string;
-  //   t.ok(
-  //     message.includes(`Field \"userId\" is not defined by type \"ChangeProfileInput\"`),
-  //   );
-  // });
-  //
+  await t.test('Change resources by id.', async (t) => {
+    const { body: user1 } = await createUser(app);
+    const { body: post1 } = await createPost(app, user1.id);
+    const { body: profile1 } = await createProfile(app, user1.id, MemberTypeId.BUSINESS);
+
+    const changedName = genCreateUserDto().name;
+    const changedTitle = genCreatePostDto('').title;
+    const changedIsMale = !profile1.isMale;
+
+    const {
+      body: { data, errors },
+    } = await gqlQuery(app, {
+      query: `
+      mutation ($postId: UUID!, $postDto: ChangePostInput!, $profileId: UUID!, $profileDto: ChangeProfileInput!, $userId: UUID!, $userDto: ChangeUserInput!) {
+        changePost(id: $postId, dto: $postDto) {
+            id
+        }
+        changeProfile(id: $profileId, dto: $profileDto) {
+            id
+        }
+        changeUser(id: $userId, dto: $userDto) {
+            id
+        }
+      }
+      `,
+      variables: {
+        postId: post1.id,
+        postDto: { title: changedTitle },
+        profileId: profile1.id,
+        profileDto: { isMale: changedIsMale },
+        userId: user1.id,
+        userDto: { name: changedName },
+      },
+    });
+
+    const { body: foundChangedPost } = await getPost(app, data.changePost.id);
+    const { body: foundChangedUser } = await getUser(app, data.changeUser.id);
+    const { body: foundChangedProfile } = await getProfile(app, data.changeProfile.id);
+
+    t.ok(!errors);
+    t.ok(foundChangedPost.title === changedTitle);
+    t.ok(foundChangedUser.name === changedName);
+    t.ok(foundChangedProfile.isMale === changedIsMale);
+  });
+
+  await t.test('Change profile => fail; invalid dto.userId.', async (t) => {
+    const {
+      body: { errors },
+    } = await gqlQuery(app, {
+      query: `mutation ($id: UUID!, $dto: ChangeProfileInput!) {
+        changeProfile(id: $id, dto: $dto) {
+            id
+        }
+    }`,
+      variables: {
+        id: randomUUID(),
+        dto: {
+          userId: randomUUID(),
+        },
+      },
+    });
+
+    t.ok(errors.length === 1);
+    const message = errors[0].message as string;
+    t.ok(
+      message.includes(`Field \"userId\" is not defined by type \"ChangeProfileInput\"`),
+    );
+  });
+
   // await t.test('Subs mutations.', async (t) => {
   //   const { body: user1 } = await createUser(app);
   //   const { body: user2 } = await createUser(app);
