@@ -48,3 +48,40 @@ export const postLoader = (prisma: PrismaClient) => {
             return array;
         });
 };
+
+
+export const userSubscribedToLoader = (prisma: PrismaClient) => {
+    return new DataLoader(async (keys: Readonly<string[]>) => {
+        let userSubscribedToArr = await prisma.subscribersOnAuthors.findMany({
+            where: { subscriberId: { in: keys as string[] | undefined } },
+            select: { author: true, subscriberId: true },
+        });
+        const userSubscribedToMap = new Map();
+        userSubscribedToArr.forEach(u => {
+            let subscriptionsArray = userSubscribedToMap.get(u) ? userSubscribedToMap.get(u) : [];
+            subscriptionsArray.push(u.author);
+            userSubscribedToMap.set(u.subscriberId, subscriptionsArray);
+        });
+        const array = new Array<any>();
+        keys.forEach(k => array.push(userSubscribedToMap.get(k)));
+        return array;
+    });
+};
+
+
+export const subscribedToUserLoader = (prisma: PrismaClient) => {
+    return new DataLoader(async (keys: Readonly<string[]>) => {
+        const subscribedToUserArr = await prisma.subscribersOnAuthors.findMany({
+            where: { authorId: { in: keys as string[] | undefined }},
+            select: { subscriber: true, authorId: true } });
+        const subscribedToUserMap = new Map();
+        subscribedToUserArr.forEach(u => {
+            let subscriptionsArr = subscribedToUserMap.get(u.authorId) ? subscribedToUserMap.get(u) : [];
+            subscriptionsArr.push(u.subscriber);
+            subscribedToUserMap.set(u.authorId, subscriptionsArr);
+        });
+        const array = new Array<any>();
+        keys.forEach((key) => array.push(subscribedToUserMap.get(key)));
+        return array;
+    });
+};
