@@ -4,7 +4,7 @@ import { GraphQLList, GraphQLObjectType, GraphQLSchema, graphql } from 'graphql'
 import { ResolveTree, parseResolveInfo, simplifyParsedResolveInfoFragmentWithType } from 'graphql-parse-resolve-info';
 import {MemberTypeIdType} from './types/types.js';
 import {MemberType, ProfileType, PostType, UserType, CreateUserInput} from './types/types.js';
-import {memberLoader, profileLoader} from './loader.js';
+import {memberLoader, postLoader, profileLoader} from './loader.js';
 import {UUIDType} from './types/uuid.js';
 
 const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
@@ -138,8 +138,8 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
             resolve: async (parent, { dto }) => {
               return prisma.user.create({ data: dto });
             },
-          },
-        },
+          }
+        }
       });
 
       const schema = new GraphQLSchema({
@@ -154,7 +154,8 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
         contextValue: {
           loaders: {
             memberLoader: memberLoader(prisma),
-            profileLoader: profileLoader(prisma)
+            profileLoader: profileLoader(prisma),
+            postLoader: postLoader(prisma)
           },
           data: {},
           prisma: prisma,

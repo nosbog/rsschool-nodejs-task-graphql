@@ -1,4 +1,4 @@
-import { MemberType, PrismaClient, Profile } from '@prisma/client';
+import { MemberType, PrismaClient, Profile, Post } from '@prisma/client';
 import DataLoader from 'dataloader';
 
 export const memberLoader = (prisma: PrismaClient) => {
@@ -28,4 +28,23 @@ export const profileLoader = (prisma: PrismaClient) => {
         keys.forEach(k => array.push(profilesMap.get(k) as Profile));
         return array;
     });
+};
+
+
+export const postLoader = (prisma: PrismaClient) => {
+    return new DataLoader(async (keys: Readonly<string[]>): Promise<Array<Post[]>> => {
+            const posts: Array<Post> = await prisma.post.findMany({ where: {
+                    authorId: { in: keys as string[] | undefined } }});
+            const authorMap = new Map();
+            posts.forEach(p => {
+                const authorArray = authorMap.get(p.authorId) ? authorMap.get(p.authorId) : [];
+                authorArray.push(p);
+                authorMap.set(p.authorId, authorArray);
+            });
+            const array = new Array<Post[]>();
+            keys.forEach(k => {
+                array.push(authorMap.get(k) as Post[]);
+            });
+            return array;
+        });
 };
