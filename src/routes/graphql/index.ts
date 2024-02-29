@@ -1,6 +1,6 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { createGqlResponseSchema, gqlResponseSchema } from './schemas.js';
-import { GraphQLList, GraphQLObjectType, GraphQLSchema, graphql } from 'graphql';
+import { GraphQLList, GraphQLObjectType, GraphQLSchema, GraphQLBoolean, graphql } from 'graphql';
 import { ResolveTree, parseResolveInfo, simplifyParsedResolveInfoFragmentWithType } from 'graphql-parse-resolve-info';
 import {MemberTypeIdType} from './types/types.js';
 import {MemberType, ProfileType, PostType, UserType, CreateUserInput, CreateProfileInput, CreatePostInput} from './types/types.js';
@@ -140,6 +140,23 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
             },
           },
 
+          deleteUser: {
+            type: GraphQLBoolean,
+            args: {
+              id: { type: UUIDType },
+            },
+            resolve: async (parent, { id }) => {
+              try {
+                await prisma.user.delete({
+                  where: { id: id } });
+                return true;
+              } catch (error) {
+                console.log(error);
+                return false;
+              }
+            },
+          },
+
           createProfile: {
             type: ProfileType,
             args: {
@@ -155,6 +172,21 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
             },
           },
 
+          deleteProfile: {
+            type: GraphQLBoolean,
+            args: { id: { type: UUIDType } },
+            resolve: async (parent, { id }) => {
+              try {
+                await prisma.profile.delete({
+                  where: { id: id } });
+                return true;
+              } catch (error) {
+                console.log(error);
+                return false;
+              }
+            },
+          },
+
           createPost: {
             type: PostType,
             args: {
@@ -162,6 +194,20 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
             },
             resolve: async (parent, { dto }) => {
               return prisma.post.create({ data: dto });
+            },
+          },
+
+          deletePost: {
+            type: GraphQLBoolean,
+            args: { id: { type: UUIDType } },
+            resolve: async (parent, { id }) => {
+              try {
+                await prisma.post.delete({ where: { id: id } });
+                return true;
+              } catch (error) {
+                console.log(error);
+                return false;
+              }
             },
           },
         },
