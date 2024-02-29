@@ -1,7 +1,9 @@
+import { Static } from '@fastify/type-provider-typebox';
 import {
   GraphQLBoolean,
   GraphQLEnumType,
   GraphQLFloat,
+  GraphQLInputObjectType,
   GraphQLInt,
   GraphQLList,
   GraphQLObjectType,
@@ -9,8 +11,11 @@ import {
   GraphQLString,
 } from 'graphql';
 import { MemberTypeId } from '../member-types/schemas.js';
+import { createPostSchema } from '../posts/schemas.js';
+import { createUserSchema } from '../users/schemas.js';
 import { Context } from './types/context.js';
 import { UUIDType } from './types/uuid.js';
+import { createProfileSchema } from '../profiles/schemas.js';
 
 const MemberTypeIdEnum = new GraphQLEnumType({
   name: 'MemberTypeId',
@@ -219,18 +224,52 @@ const rootQuery = new GraphQLObjectType({
   },
 });
 
+const CreatePostInput = new GraphQLInputObjectType({
+  name: 'CreatePostInput',
+  fields: {
+    title: { type: GraphQLString },
+    content: { type: GraphQLString },
+    authorId: { type: UUIDType },
+  },
+});
+
+type CreatePostDto = Static<(typeof createPostSchema)['body']>;
+
+const CreateUserInput = new GraphQLInputObjectType({
+  name: 'CreateUserInput',
+  fields: {
+    name: { type: GraphQLString },
+    balance: { type: GraphQLFloat },
+  },
+});
+
+type CreateUserDto = Static<(typeof createUserSchema)['body']>;
+
+const CreateProfileInput = new GraphQLInputObjectType({
+  name: 'CreateProfileInput',
+  fields: {
+    isMale: { type: GraphQLBoolean },
+    yearOfBirth: { type: GraphQLInt },
+    userId: { type: UUIDType },
+    memberTypeId: { type: MemberTypeIdEnum },
+  },
+});
+
+type CreateProfileDto = Static<(typeof createProfileSchema)['body']>;
+
 const Mutation = new GraphQLObjectType({
   name: 'Mutation',
   fields: {
     createUser: {
       type: UserType,
       args: {
-        name: { type: GraphQLString },
-        balance: { type: GraphQLFloat },
+        dto: {
+          type: CreateUserInput,
+        },
       },
-      resolve: async (_, args: { name: string; balance: number }, context: Context) => {
+      resolve: async (_, args: { dto: CreateUserDto }, context: Context) => {
         const user = await context.prisma.user.create({
-          data: args,
+          data: args.dto,
         });
 
         return user;
@@ -272,17 +311,13 @@ const Mutation = new GraphQLObjectType({
     createPost: {
       type: PostType,
       args: {
-        title: { type: GraphQLString },
-        content: { type: GraphQLString },
-        authorId: { type: UUIDType },
+        dto: {
+          type: CreatePostInput,
+        },
       },
-      resolve: async (
-        _,
-        args: { title: string; content: string; authorId: string },
-        context: Context,
-      ) => {
+      resolve: async (_, args: { dto: CreatePostDto }, context: Context) => {
         const post = await context.prisma.post.create({
-          data: args,
+          data: args.dto,
         });
 
         return post;
@@ -323,24 +358,16 @@ const Mutation = new GraphQLObjectType({
     },
     createProfile: {
       type: ProfileType,
-      args: {
-        isMale: { type: GraphQLBoolean },
-        yearOfBirth: { type: GraphQLInt },
-        userId: { type: UUIDType },
-        memberTypeId: { type: GraphQLString },
-      },
+      args: { dto: { type: CreateProfileInput } },
       resolve: async (
         _,
         args: {
-          isMale: boolean;
-          yearOfBirth: number;
-          userId: string;
-          memberTypeId: string;
+          dto: CreateProfileDto;
         },
         context: Context,
       ) => {
         const profile = await context.prisma.profile.create({
-          data: args,
+          data: args.dto,
         });
 
         return profile;
