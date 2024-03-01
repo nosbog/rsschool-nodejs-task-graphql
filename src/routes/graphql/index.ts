@@ -22,13 +22,12 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
         ...getLoaders(prisma)
       };
 
-      const args: GraphQLArgs = {
+      return graphql({
         source,
         variableValues,
         contextValue,
         schema,
-      };
-      return graphql(args);
+      });
     },
   });
 };

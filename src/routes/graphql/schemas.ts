@@ -39,9 +39,19 @@ const userFields = {
   balance: Type.Number()
 }
 
+const postFields = {
+  id: Type.String({format: 'uuid'}),
+  title: Type.String(),
+  content: Type.String(),
+  authorId: Type.String({format: 'uuid'}), // ?? ,
+}
+
 export const ProfileSchema = Type.Object({...profileFields});
 
 export const UserSchema = Type.Object({...userFields});
 
+export const PostSchema = Type.Object({...postFields});
+
 export type ProfileBody = Static<typeof ProfileSchema>
 export type UserBody = Static<typeof UserSchema>
+export type PostBody = Static<typeof PostSchema>
