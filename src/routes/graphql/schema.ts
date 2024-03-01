@@ -12,10 +12,10 @@ import {
 } from 'graphql';
 import { MemberTypeId } from '../member-types/schemas.js';
 import { createPostSchema } from '../posts/schemas.js';
+import { changeProfileByIdSchema, createProfileSchema } from '../profiles/schemas.js';
 import { createUserSchema } from '../users/schemas.js';
 import { Context } from './types/context.js';
 import { UUIDType } from './types/uuid.js';
-import { createProfileSchema } from '../profiles/schemas.js';
 
 const MemberTypeIdEnum = new GraphQLEnumType({
   name: 'MemberTypeId',
@@ -257,6 +257,37 @@ const CreateProfileInput = new GraphQLInputObjectType({
 
 type CreateProfileDto = Static<(typeof createProfileSchema)['body']>;
 
+const ChangeProfileInput = new GraphQLInputObjectType({
+  name: 'ChangeProfileInput',
+  fields: {
+    isMale: { type: GraphQLBoolean },
+    yearOfBirth: { type: GraphQLInt },
+    memberTypeId: { type: MemberTypeIdEnum },
+  },
+});
+
+type ChangeProfileDto = Static<(typeof changeProfileByIdSchema)['body']>;
+
+const ChangePostInput = new GraphQLInputObjectType({
+  name: 'ChangePostInput',
+  fields: {
+    title: { type: GraphQLString },
+    content: { type: GraphQLString },
+  },
+});
+
+type ChangePostDto = Static<(typeof createPostSchema)['body']>;
+
+const ChangeUserInput = new GraphQLInputObjectType({
+  name: 'ChangeUserInput',
+  fields: {
+    name: { type: GraphQLString },
+    balance: { type: GraphQLFloat },
+  },
+});
+
+type ChangeUserDto = Static<(typeof createUserSchema)['body']>;
+
 const Mutation = new GraphQLObjectType({
   name: 'Mutation',
   fields: {
@@ -286,21 +317,18 @@ const Mutation = new GraphQLObjectType({
         });
       },
     },
-    updateUser: {
+    changeUser: {
       type: UserType,
       args: {
-        id: { type: GraphQLString },
-        name: { type: GraphQLString },
-        balance: { type: GraphQLFloat },
+        id: { type: UUIDType },
+        dto: {
+          type: ChangeUserInput,
+        },
       },
-      resolve: async (
-        _,
-        args: { id: string; name: string; balance: number },
-        context: Context,
-      ) => {
+      resolve: async (_, args: { id: string; dto: ChangeUserDto }, context: Context) => {
         const user = await context.prisma.user.update({
           where: { id: args.id },
-          data: args,
+          data: args.dto,
         });
 
         return user;
@@ -321,21 +349,18 @@ const Mutation = new GraphQLObjectType({
         return post;
       },
     },
-    updatePost: {
+    changePost: {
       type: PostType,
       args: {
         id: { type: UUIDType },
-        title: { type: GraphQLString },
-        content: { type: GraphQLString },
+        dto: {
+          type: ChangePostInput,
+        },
       },
-      resolve: async (
-        _,
-        args: { id: string; title: string; content: string },
-        context: Context,
-      ) => {
+      resolve: async (_, args: { id: string; dto: ChangePostDto }, context: Context) => {
         const post = await context.prisma.post.update({
           where: { id: args.id },
-          data: args,
+          data: args.dto,
         });
 
         return post;
@@ -369,27 +394,23 @@ const Mutation = new GraphQLObjectType({
         return profile;
       },
     },
-    updateProfile: {
+    changeProfile: {
       type: ProfileType,
       args: {
         id: { type: UUIDType },
-        isMale: { type: GraphQLBoolean },
-        yearOfBirth: { type: GraphQLInt },
-        memberTypeId: { type: GraphQLString },
+        dto: { type: ChangeProfileInput },
       },
       resolve: async (
         _,
         args: {
           id: string;
-          isMale: boolean;
-          yearOfBirth: number;
-          memberTypeId: string;
+          dto: ChangeProfileDto;
         },
         context: Context,
       ) => {
         const profile = await context.prisma.profile.update({
           where: { id: args.id },
-          data: args,
+          data: args.dto,
         });
 
         return profile;
