@@ -276,16 +276,14 @@ const Mutation = new GraphQLObjectType({
       },
     },
     deleteUser: {
-      type: UserType,
+      type: GraphQLBoolean,
       args: {
-        id: { type: GraphQLString },
+        id: { type: UUIDType },
       },
       resolve: async (_, args: { id: string }, context: Context) => {
-        const user = await context.prisma.user.delete({
+        await context.prisma.user.delete({
           where: { id: args.id },
         });
-
-        return user;
       },
     },
     updateUser: {
@@ -344,16 +342,14 @@ const Mutation = new GraphQLObjectType({
       },
     },
     deletePost: {
-      type: PostType,
+      type: GraphQLBoolean,
       args: {
         id: { type: UUIDType },
       },
       resolve: async (_, args: { id: string }, context: Context) => {
-        const post = await context.prisma.post.delete({
+        await context.prisma.post.delete({
           where: { id: args.id },
         });
-
-        return post;
       },
     },
     createProfile: {
@@ -400,16 +396,14 @@ const Mutation = new GraphQLObjectType({
       },
     },
     deleteProfile: {
-      type: ProfileType,
+      type: GraphQLBoolean,
       args: {
         id: { type: UUIDType },
       },
       resolve: async (_, args: { id: string }, context: Context) => {
-        const profile = await context.prisma.profile.delete({
+        await context.prisma.profile.delete({
           where: { id: args.id },
         });
-
-        return profile;
       },
     },
   },
