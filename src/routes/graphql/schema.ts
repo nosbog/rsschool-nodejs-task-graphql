@@ -427,6 +427,54 @@ const Mutation = new GraphQLObjectType({
         });
       },
     },
+    subscribeTo: {
+      type: UserType,
+      args: {
+        userId: { type: UUIDType },
+        authorId: { type: UUIDType },
+      },
+      resolve: async (
+        _,
+        args: {
+          userId: string;
+          authorId: string;
+        },
+        context: Context,
+      ) => {
+        const subscription = await context.prisma.subscribersOnAuthors.create({
+          data: {
+            subscriberId: args.userId,
+            authorId: args.authorId,
+          },
+        });
+
+        return subscription;
+      },
+    },
+    unsubscribeFrom: {
+      type: GraphQLBoolean,
+      args: {
+        userId: { type: UUIDType },
+        authorId: { type: UUIDType },
+      },
+      resolve: async (
+        _,
+        args: {
+          userId: string;
+          authorId: string;
+        },
+        context: Context,
+      ) => {
+        await context.prisma.subscribersOnAuthors.deleteMany({
+          where: {
+            subscriberId: args.userId,
+            authorId: args.authorId,
+          },
+        });
+
+        return true;
+      },
+    },
   },
 });
 
