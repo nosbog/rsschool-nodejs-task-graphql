@@ -1,7 +1,6 @@
-import { GraphQLList, GraphQLNonNull, GraphQLObjectType, GraphQLScalarType } from 'graphql';
+import { GraphQLList, GraphQLNonNull, GraphQLObjectType } from 'graphql';
 import { Context, MTIdType, MemberType, PostType, ProfileType, UserType } from './types/types.js';
 import { UUIDType } from './types/uuid.js';
-import { httpErrors } from '@fastify/sensible';
 
 export const RootQuery = new GraphQLObjectType<unknown, Context>({
   name: 'RootQueryType',
@@ -47,50 +46,44 @@ export const RootQuery = new GraphQLObjectType<unknown, Context>({
         args: {
             id: { type: new GraphQLNonNull(UUIDType) },
         },
-        resolve: async (_obj, args: { id: string }, ctx: Context) => {
-            console.log('running post API' );
-            let post: unknown;
-            try {
-                post = await ctx.prisma.post.findUnique({
-                    where: {
-                        id: args.id,
-                    }
-                }); 
-             console.log(' FOUND' );
-            } 
-            catch (err)  {
-                console.log('NOT FOUND' );
-                throw httpErrors.notFound();
-            }
-            return post || {post: null};
+        resolve: async (_, args: { id: string }, ctx: Context) => {
+          const post = await ctx.prisma.post.findUnique({
+            where: { id: args.id, }
+          });
+          if (!post) {
+            return null; 
+          }
+          return post;            
         },
       },    
       user: {
-        type: new GraphQLNonNull(UserType),
+        type: UserType,
         args: {
             id: { type: new GraphQLNonNull(UUIDType) },
         },
         resolve: async (_obj, args: { id: string }, ctx: Context) => {
-            const user = await ctx.prisma.user.findUnique({
-                where: {
-                  id: args.id,
-                }
-              });
-              return user || null; 
+          const user = await ctx.prisma.user.findUnique({
+            where: { id: args.id, }
+          });
+          if (!user) {
+            return null; 
+          }
+          return user; 
         },
       },  
       profile: {
-        type: new GraphQLNonNull(ProfileType),
+        type: ProfileType,
         args: {
             id: { type: new GraphQLNonNull(UUIDType) },
         },
         resolve: async (_obj, args: { id: string }, ctx: Context) => {
-            const profile = await ctx.prisma.profile.findUnique({
-                where: {
-                  id: args.id,
-                }
-              });
-              return profile || null; 
+          const profile = await ctx.prisma.profile.findUnique({
+            where: { id: args.id, }
+          });
+          if (!profile) {
+            return null; 
+          }
+          return profile; 
         },
       },  
   },

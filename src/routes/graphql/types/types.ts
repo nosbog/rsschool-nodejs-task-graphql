@@ -1,6 +1,9 @@
 import { PrismaClient } from "@prisma/client";
-import { GraphQLObjectType, GraphQLString, GraphQLFloat, GraphQLInt, GraphQLBoolean, GraphQLEnumType, GraphQLNonNull } from "graphql";
+import { GraphQLObjectType, GraphQLString, GraphQLFloat, GraphQLInt, GraphQLBoolean, GraphQLEnumType } from "graphql";
 import { MemberTypeId } from '../../member-types/schemas.js';
+import { UUIDType } from "./uuid.js";
+import { getLoaders } from "./loaders.js";
+import { UserBody } from "../schemas.js";
 
 const memberTypeFields = {
     id: { type: GraphQLString },
@@ -13,31 +16,8 @@ const memberTypeFields = {
     fields: memberTypeFields,
   });
 
-  const postTypeFields = {
-    id: { type:  new GraphQLNonNull(GraphQLString) },
-    title: { type: new GraphQLNonNull(GraphQLString) },
-    content: { type: new GraphQLNonNull(GraphQLString) },
-    authorId: { type: new GraphQLNonNull(GraphQLString) },
-  };
-  
-  export const PostType = new GraphQLObjectType({
-    name: 'PostType', 
-    fields: postTypeFields,
-  });
-
-  const userTypeFields = {
-    id: { type: GraphQLString },
-    name: { type: GraphQLString },
-    balance: { type: GraphQLInt },
-  };
-  
-  export const UserType = new GraphQLObjectType({
-    name: 'UserType', 
-    fields: userTypeFields,
-  });
-
   const profileTypeFields = {
-    id: { type: GraphQLString },
+    id: { type: UUIDType},
     isMale: { type: GraphQLBoolean },
     yearOfBirth: { type: GraphQLInt },
     userId: { type: GraphQLString },
@@ -47,6 +27,35 @@ const memberTypeFields = {
   export const ProfileType = new GraphQLObjectType({
     name: 'ProfileType', 
     fields: profileTypeFields,
+  });
+
+  const postTypeFields = {
+    id: { type:  UUIDType },
+    title: { type: GraphQLString },
+    content: { type: GraphQLString },
+    authorId: { type: GraphQLString },
+  };
+  
+  export const PostType = new GraphQLObjectType({
+    name: 'PostType', 
+    fields: postTypeFields,
+  });
+
+const userTypeFields = {
+    id: { type: UUIDType },
+    name: { type: GraphQLString },
+    balance: { type: GraphQLFloat },
+    profile: {
+        type: ProfileType,
+        resolve: async (user: UserBody, _, ctx: Context) => {
+            return await ctx.profileLoader.load(user.id);
+        }
+    }
+};
+  
+  export const UserType = new GraphQLObjectType<UserBody, Context>({
+    name: 'UserType', 
+    fields: userTypeFields,
   });
 
   const TypeIdValues = {
@@ -64,6 +73,6 @@ const memberTypeFields = {
   });
   
 
-  export type Context = {
+  export type Context = ReturnType<typeof getLoaders> & {
     prisma: PrismaClient;
   };
