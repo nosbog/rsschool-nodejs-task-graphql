@@ -1,6 +1,7 @@
 import { Static, Type } from '@fastify/type-provider-typebox';
 import { RootQuery } from './rootQuery.js';
 import { GraphQLSchema } from 'graphql';
+import {  rootMutation } from './rootMutaions.js';
 
 export const gqlResponseSchema = Type.Partial(
   Type.Object({
@@ -23,7 +24,7 @@ export const createGqlResponseSchema = {
 
 export const schema = new GraphQLSchema({
   query: RootQuery, 
- // mutation: RootMutations,
+  mutation: rootMutation,
 });
 const profileFields = {
   id: Type.String({format: 'uuid'}),
@@ -35,11 +36,11 @@ const profileFields = {
 
 const userFields = {
   id: Type.String({format: 'uuid'}),
-  name: Type.Boolean(),
+  name: Type.String(),
   balance: Type.Number()
 }
 
-const postFields = {
+export const postFields = {
   id: Type.String({format: 'uuid'}),
   title: Type.String(),
   content: Type.String(),

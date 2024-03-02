@@ -1,5 +1,5 @@
 import { GraphQLList, GraphQLNonNull, GraphQLObjectType } from 'graphql';
-import { Context, MTIdType, MemberType, PostType, ProfileType, UserType } from './types/types.js';
+import { Context, MemberType, MemberTypeIdType, PostType, ProfileType, UserType } from './types/types.js';
 import { UUIDType } from './types/uuid.js';
 
 export const RootQuery = new GraphQLObjectType<unknown, Context>({
@@ -32,7 +32,7 @@ export const RootQuery = new GraphQLObjectType<unknown, Context>({
     memberType: {
         type: new GraphQLNonNull(MemberType),
         args: {
-            id: { type: new GraphQLNonNull(MTIdType) },
+            id: { type: new GraphQLNonNull(MemberTypeIdType) },
         },
         resolve: async (_obj, args: { id: string }, ctx: Context) => {
           return ctx.prisma.memberType.findUnique({

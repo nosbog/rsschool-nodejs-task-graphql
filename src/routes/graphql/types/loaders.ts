@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import DataLoader from "dataloader";
-import { PostBody, ProfileBody } from "../schemas.js";
+import { PostBody, ProfileBody, UserBody } from "../schemas.js";
 import { Record } from "@prisma/client/runtime/library.js";
 
 export function getLoaders(prisma: PrismaClient) {
@@ -24,7 +24,6 @@ export function getLoaders(prisma: PrismaClient) {
                     result[index] = null;
                 }
             });
-            console.log('result: ', result);
             return result;
 
         }),
@@ -39,6 +38,22 @@ export function getLoaders(prisma: PrismaClient) {
             const result: Record<string, PostBody[]> = {};
             userIds.forEach(userId => {
                 result[userId] = userPosts.filter(post => post.authorId === userId);
+            });
+
+            return userIds.map(userId => result[userId] ?? null);
+        }),
+        subscribersLoader: new DataLoader<string, UserBody[] | null>(async (userIds) => {
+            const userSubscribers = await prisma.subscribersOnAuthors.findMany({
+                where: {
+                    authorId: {
+                        in: [...userIds]
+                    }
+                },
+                select: { subscriber: true }
+            });
+            const result: Record<string, UserBody[]> = {};
+            userIds.forEach(userId => {
+                result[userId] = userSubscribers.filter(subscription => subscription.subscriber.id === userId).map(item => item.subscriber);
             });
 
             return userIds.map(userId => result[userId] ?? null);

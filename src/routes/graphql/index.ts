@@ -1,6 +1,6 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
-import { createGqlResponseSchema, gqlResponseSchema, schema } from './schemas.js';
-import { GraphQLArgs, graphql } from 'graphql';
+import { createGqlResponseSchema, gqlResponseSchema, schema} from './schemas.js';
+import { graphql } from 'graphql';
 import { Context } from './types/types.js';
 import { getLoaders } from './types/loaders.js';
 
@@ -26,7 +26,7 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
         source,
         variableValues,
         contextValue,
-        schema,
+        schema: schema,
       });
     },
   });
