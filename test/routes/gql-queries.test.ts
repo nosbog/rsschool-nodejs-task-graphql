@@ -31,27 +31,27 @@ await test('gql-queries', async (t) => {
       body: { data },
     } = await gqlQuery(app, {
       query: `query {
-        memberTypes {
-            id
-            discount
-            postsLimitPerMonth
-        }
-        posts {
-            id
-            title
-            content
-        }
-        users {
-            id
-            name
-            balance
-        }
-        profiles {
-            id
-            isMale
-            yearOfBirth
-        }
-    }`,
+          memberTypes {
+              id
+              discount
+              postsLimitPerMonth
+          }
+          posts {
+              id
+              title
+              content
+          }
+          users {
+              id
+              name
+              balance
+          }
+          profiles {
+              id
+              isMale
+              yearOfBirth
+          }
+      }`,
     });
 
     t.ok(data.memberTypes.length === memberTypes.length);
@@ -69,27 +69,27 @@ await test('gql-queries', async (t) => {
       body: { data },
     } = await gqlQuery(app, {
       query: `query ($userId: UUID!, $profileId: UUID!, $memberTypeId: MemberTypeId!, $postId: UUID!) {
-        memberType(id: $memberTypeId) {
-            id
-            discount
-            postsLimitPerMonth
-        }
-        post(id: $postId) {
-            id
-            title
-            content
-        }
-        user(id: $userId) {
-            id
-            name
-            balance
-        }
-        profile(id: $profileId) {
-            id
-            isMale
-            yearOfBirth
-        }
-    }`,
+          memberType(id: $memberTypeId) {
+              id
+              discount
+              postsLimitPerMonth
+          }
+          post(id: $postId) {
+              id
+              title
+              content
+          }
+          user(id: $userId) {
+              id
+              name
+              balance
+          }
+          profile(id: $profileId) {
+              id
+              isMale
+              yearOfBirth
+          }
+      }`,
       variables: {
         userId: user1.id,
         profileId: profile1.id,
