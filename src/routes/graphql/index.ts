@@ -1,6 +1,8 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { createGqlResponseSchema, gqlResponseSchema } from './schemas.js';
-import { GraphQLList, GraphQLObjectType, GraphQLSchema, GraphQLBoolean, graphql } from 'graphql';
+import { GraphQLList, GraphQLObjectType, GraphQLSchema, GraphQLBoolean, graphql, parse,
+  validate } from 'graphql';
+import depthLimit from 'graphql-depth-limit';
 import { ResolveTree, parseResolveInfo, simplifyParsedResolveInfoFragmentWithType } from 'graphql-parse-resolve-info';
 import {MemberTypeIdType} from './types/types.js';
 import {MemberType, ProfileType, PostType, UserType, CreateUserInput, CreateProfileInput, CreatePostInput, ChangeProfileInput, ChangeUserInput, ChangePostInput} from './types/types.js';
@@ -297,6 +299,12 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
           prisma: prisma,
         },
       });
+
+      const errorsValidation = validate(schema, parse(req.body.query), [depthLimit(5)]);
+      if (errorsValidation && errorsValidation.length !== 0) {
+        return { data: '', errors: errorsValidation };
+      }
+
       return { data: result.data, errors: result.errors };
     },
   });
