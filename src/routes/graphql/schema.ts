@@ -1,7 +1,6 @@
 import { Static } from '@fastify/type-provider-typebox';
 import {
   GraphQLBoolean,
-  GraphQLEnumType,
   GraphQLFloat,
   GraphQLInputObjectType,
   GraphQLInt,
@@ -19,95 +18,13 @@ import { MemberTypeId } from '../member-types/schemas.js';
 import { createPostSchema } from '../posts/schemas.js';
 import { changeProfileByIdSchema, createProfileSchema } from '../profiles/schemas.js';
 import { createUserSchema } from '../users/schemas.js';
+import { MemberTypeIdEnum, MemberTypeType } from './models/memberType.js';
+import { PostType } from './models/post.js';
+import { ProfileType } from './models/profile.js';
+import { SubscribersOnAuthorsType } from './models/subscribersOnAuthors.js';
+import { UserType } from './models/user.js';
 import { Context } from './types/context.js';
 import { UUIDType } from './types/uuid.js';
-
-const MemberTypeIdEnum = new GraphQLEnumType({
-  name: 'MemberTypeId',
-  values: {
-    basic: { value: MemberTypeId.BASIC },
-    business: { value: MemberTypeId.BUSINESS },
-  },
-});
-
-const MemberTypeType = new GraphQLObjectType({
-  name: 'MemberType',
-  fields: {
-    id: { type: MemberTypeIdEnum },
-    discount: { type: GraphQLFloat },
-    postsLimitPerMonth: { type: GraphQLInt },
-  },
-});
-
-const ProfileType = new GraphQLObjectType({
-  name: 'Profile',
-  fields: {
-    id: { type: UUIDType },
-    isMale: { type: GraphQLBoolean },
-    yearOfBirth: { type: GraphQLInt },
-    userId: { type: UUIDType },
-    memberType: {
-      type: MemberTypeType,
-      resolve: async (parent, _args, { dataLoaders }: Context) => {
-        return dataLoaders.membersLoader.load(parent.memberTypeId);
-      },
-    },
-    memberTypeId: { type: MemberTypeIdEnum },
-  },
-});
-
-const PostType = new GraphQLObjectType({
-  name: 'Post',
-  fields: {
-    id: { type: UUIDType },
-    title: { type: GraphQLString },
-    content: { type: GraphQLString },
-    authorId: { type: UUIDType },
-  },
-});
-
-const UserType = new GraphQLObjectType({
-  name: 'User',
-  fields: () => ({
-    id: { type: UUIDType },
-    name: { type: GraphQLString },
-    balance: { type: GraphQLFloat },
-    profile: {
-      type: ProfileType,
-      resolve: (parent, _args, { dataLoaders }: Context) => {
-        return dataLoaders.profilesLoader.load(parent.id);
-      },
-    },
-    posts: {
-      type: new GraphQLList(PostType),
-      resolve: (parent, _args, { dataLoaders }: Context) => {
-        return dataLoaders.postsLoader.load(parent.id);
-      },
-    },
-    userSubscribedTo: {
-      type: new GraphQLList(UserType),
-      resolve: async (parent, _args, { dataLoaders }: Context) => {
-        return dataLoaders.userSubscribedToLoader.load(parent.id);
-      },
-    },
-    subscribedToUser: {
-      type: new GraphQLList(UserType),
-      resolve: async (parent, _args, { dataLoaders }: Context) => {
-        return dataLoaders.subscribedToUserLoader.load(parent.id);
-      },
-    },
-  }),
-});
-
-const SubscribersOnAuthorsType = new GraphQLObjectType({
-  name: 'SubscribersOnAuthors',
-  fields: {
-    subscriber: { type: UserType },
-    subscriberId: { type: UUIDType },
-    author: { type: UserType },
-    authorId: { type: UUIDType },
-  },
-});
 
 const rootQuery = new GraphQLObjectType({
   name: 'Query',
