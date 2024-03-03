@@ -2,9 +2,11 @@ import {
   GraphQLEnumType,
   GraphQLFloat,
   GraphQLInt,
+  GraphQLList,
   GraphQLNonNull,
   GraphQLObjectType,
 } from 'graphql';
+import { ProfileType } from '../schemas.js';
 
 enum MemberTypeIdValue {
   BASIC = 'basic',

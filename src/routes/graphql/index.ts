@@ -27,17 +27,17 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
       // } catch (error) {
       //   return {};
       // }
-      console.log(req.body.variables);
-      const res = graphql({
+      // console.log(req.body.variables);
+      return graphql({
         schema,
         source: req.body.query,
         variableValues: req.body.variables,
         contextValue: fastify,
       });
-      const err = (await res).errors || [];
+      // const err = (await res).errors || [];
       // if (err.length > 0) console.log((await res).data);
-      if (err.length > 0) console.log(err);
-      return res;
+      // if (err.length > 0) console.log(err);
+      // return res;
     },
   });
 };

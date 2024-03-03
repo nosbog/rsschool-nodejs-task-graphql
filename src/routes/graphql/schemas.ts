@@ -12,6 +12,7 @@ import {
 } from 'graphql';
 import { UUIDType } from './types/uuid.js';
 import { MemberType, MemberTypeId } from './types/memberTypes.js';
+import { PostType } from './types/postTypes.js';
 
 export const gqlResponseSchema = Type.Partial(
   Type.Object({
@@ -32,26 +33,28 @@ export const createGqlResponseSchema = {
   ),
 };
 
-const PostType = new GraphQLObjectType({
-  name: 'PostType',
-  fields: {
-    id: { type: new GraphQLNonNull(UUIDType) },
-    title: { type: GraphQLString },
-    content: { type: GraphQLString },
-  },
-});
-
-const ProfileType = new GraphQLObjectType({
+export const ProfileType = new GraphQLObjectType({
   name: 'ProfileType',
   fields: {
     id: { type: new GraphQLNonNull(UUIDType) },
     isMale: { type: GraphQLBoolean },
     yearOfBirth: { type: GraphQLInt },
     userId: { type: GraphQLString },
+    memberTypeId: { type: GraphQLString },
+    memberType: {
+      type: new GraphQLNonNull(MemberType),
+      resolve: (profile, args, ctx) => {
+        return ctx.prisma.memberType.findUnique({
+          where: {
+            id: profile.memberTypeId,
+          },
+        });
+      },
+    },
   },
 });
 
-const UserType = new GraphQLObjectType({
+export const UserType = new GraphQLObjectType({
   name: 'UserType',
   fields: {
     id: { type: new GraphQLNonNull(UUIDType) },
@@ -69,6 +72,16 @@ const UserType = new GraphQLObjectType({
         } catch {
           return null;
         }
+      },
+    },
+    posts: {
+      type: new GraphQLList(PostType),
+      resolve: (user, args, ctx) => {
+        return ctx.prisma.post.findMany({
+          where: {
+            authorId: user.id,
+          },
+        });
       },
     },
   },
