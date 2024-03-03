@@ -111,22 +111,22 @@ await test('gql-queries', async (t) => {
       body: { data, errors },
     } = await gqlQuery(app, {
       query: `query ($nullUserId: UUID!, $userWithNullProfileId: UUID!, $profileId: UUID!, $postId: UUID!) {
-        user(id: $nullUserId) {
-            id
-        }
-        post(id: $postId) {
-            id
-        }
-        profile(id: $profileId) {
-            id
-        }
-        userWithNullProfile: user(id: $userWithNullProfileId) {
-            id
-            profile {
+          user(id: $nullUserId) {
               id
-            }
-        }
-    }`,
+          }
+          post(id: $postId) {
+              id
+          }
+          profile(id: $profileId) {
+              id
+          }
+          userWithNullProfile: user(id: $userWithNullProfileId) {
+              id
+              profile {
+                id
+              }
+          }
+      }`,
       variables: {
         userWithNullProfileId: user1.id,
         nullUserId: randomUUID(),

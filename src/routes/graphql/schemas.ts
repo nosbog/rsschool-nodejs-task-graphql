@@ -41,21 +41,36 @@ const PostType = new GraphQLObjectType({
   },
 });
 
-const UserType = new GraphQLObjectType({
-  name: 'UserType',
-  fields: {
-    id: { type: new GraphQLNonNull(UUIDType) },
-    name: { type: GraphQLString },
-    balance: { type: GraphQLFloat },
-  },
-});
-
 const ProfileType = new GraphQLObjectType({
   name: 'ProfileType',
   fields: {
     id: { type: new GraphQLNonNull(UUIDType) },
     isMale: { type: GraphQLBoolean },
     yearOfBirth: { type: GraphQLInt },
+    userId: { type: GraphQLString },
+  },
+});
+
+const UserType = new GraphQLObjectType({
+  name: 'UserType',
+  fields: {
+    id: { type: new GraphQLNonNull(UUIDType) },
+    name: { type: GraphQLString },
+    balance: { type: GraphQLFloat },
+    profile: {
+      type: ProfileType,
+      resolve: (user, args, ctx) => {
+        try {
+          return ctx.prisma.profile.findUnique({
+            where: {
+              userId: user.id,
+            },
+          });
+        } catch {
+          return null;
+        }
+      },
+    },
   },
 });
 
@@ -93,11 +108,15 @@ const RootQuery = new GraphQLObjectType({
         id: { type: new GraphQLNonNull(UUIDType) },
       },
       resolve: (_, args, ctx) => {
-        return ctx.prisma.post.findUnique({
-          where: {
-            id: args.id,
-          },
-        });
+        try {
+          return ctx.prisma.post.findUnique({
+            where: {
+              id: args.id,
+            },
+          });
+        } catch {
+          return null;
+        }
       },
     },
     users: {
@@ -112,11 +131,15 @@ const RootQuery = new GraphQLObjectType({
         id: { type: new GraphQLNonNull(UUIDType) },
       },
       resolve: (_, args, ctx) => {
-        return ctx.prisma.user.findUnique({
-          where: {
-            id: args.id,
-          },
-        });
+        try {
+          return ctx.prisma.user.findUnique({
+            where: {
+              id: args.id,
+            },
+          });
+        } catch {
+          return null;
+        }
       },
     },
     profiles: {
@@ -131,11 +154,15 @@ const RootQuery = new GraphQLObjectType({
         id: { type: new GraphQLNonNull(UUIDType) },
       },
       resolve: (_, args, ctx) => {
-        return ctx.prisma.profile.findUnique({
-          where: {
-            id: args.id,
-          },
-        });
+        try {
+          return ctx.prisma.profile.findUnique({
+            where: {
+              id: args.id,
+            },
+          });
+        } catch {
+          return null;
+        }
       },
     },
   },
