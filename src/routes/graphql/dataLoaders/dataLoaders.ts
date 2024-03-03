@@ -2,24 +2,6 @@ import { PrismaClient } from '@prisma/client';
 import DataLoader from 'dataloader';
 
 export const getDataLoaders = (prisma: PrismaClient) => ({
-  // usersLoader: new DataLoader(async (ids: readonly string[]) => {
-  //   const users = await prisma.user.findMany({
-  //     where: {
-  //       id: {
-  //         in: Array.from(ids),
-  //       },
-  //     },
-  //   });
-
-  //   const usersMap = new Map<string, { id: string; name: string }>();
-
-  //   users.forEach((user) => {
-  //     usersMap.set(user.id, user);
-  //   });
-
-  //   return ids.map((id) => usersMap.get(id));
-  // }),
-
   profilesLoader: new DataLoader(async (ids: readonly string[]) => {
     const profiles = await prisma.profile.findMany({
       where: {

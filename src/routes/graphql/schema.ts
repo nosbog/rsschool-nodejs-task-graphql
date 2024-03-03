@@ -10,6 +10,11 @@ import {
   GraphQLSchema,
   GraphQLString,
 } from 'graphql';
+import {
+  ResolveTree,
+  parseResolveInfo,
+  simplifyParsedResolveInfoFragmentWithType,
+} from 'graphql-parse-resolve-info';
 import { MemberTypeId } from '../member-types/schemas.js';
 import { createPostSchema } from '../posts/schemas.js';
 import { changeProfileByIdSchema, createProfileSchema } from '../profiles/schemas.js';
@@ -109,14 +114,49 @@ const rootQuery = new GraphQLObjectType({
   fields: {
     users: {
       type: new GraphQLList(UserType),
-      resolve: async (_, _args, { prisma, dataLoaders }: Context) => {
-        const users = await prisma.user.findMany();
+      resolve: async (_, _args, { prisma, dataLoaders }: Context, info) => {
+        const parsedResolveInfo = parseResolveInfo(info) as ResolveTree;
+
+        const { fields } = simplifyParsedResolveInfoFragmentWithType(
+          parsedResolveInfo,
+          new GraphQLList(UserType),
+        );
+
+        const shouldIncludeUserSubscribedTo = 'userSubscribedTo' in fields;
+        const shouldIncludeSubscribedToUser = 'subscribedToUser' in fields;
+
+        const users = await prisma.user.findMany({
+          include: {
+            userSubscribedTo: shouldIncludeUserSubscribedTo,
+            subscribedToUser: shouldIncludeSubscribedToUser,
+          },
+        });
+
+        if (shouldIncludeUserSubscribedTo || shouldIncludeSubscribedToUser) {
+          const usersMap = new Map<string, any>();
+
+          users.forEach((user) => {
+            usersMap.set(user.id, user);
+          });
+
+          users.forEach((user) => {
+            if (shouldIncludeUserSubscribedTo) {
+              dataLoaders.userSubscribedToLoader.prime(
+                user.id,
+                user.userSubscribedTo.map((sub) => usersMap.get(sub.authorId)),
+              );
+            }
+
+            if (shouldIncludeSubscribedToUser) {
+              dataLoaders.subscribedToUserLoader.prime(
+                user.id,
+                user.subscribedToUser.map((sub) => usersMap.get(sub.subscriberId)),
+              );
+            }
+          });
+        }
 
         return users;
-
-        // const ids = users.map((user) => user.id);
-
-        // return dataLoaders.usersLoader.loadMany(ids);
       },
     },
     user: {
