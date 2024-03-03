@@ -7,7 +7,7 @@ import { MemberTypeIdEnum, MemberTypeType } from './memberType.js';
 
 const profile = Type.Object(profileFields);
 
-type ProfileType = Static<typeof profile>;
+type Profile= Static<typeof profile>;
 
 export const ProfileType = new GraphQLObjectType({
   name: 'Profile',
@@ -18,7 +18,7 @@ export const ProfileType = new GraphQLObjectType({
     userId: { type: UUIDType },
     memberType: {
       type: MemberTypeType,
-      resolve: async (parent: ProfileType, _args, { dataLoaders }: Context) => {
+      resolve: async (parent: Profile, _args, { dataLoaders }: Context) => {
         return dataLoaders.membersLoader.load(parent.memberTypeId);
       },
     },

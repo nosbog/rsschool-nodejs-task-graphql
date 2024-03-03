@@ -22,7 +22,7 @@ import { MemberTypeIdEnum, MemberTypeType } from './models/memberType.js';
 import { PostType } from './models/post.js';
 import { ProfileType } from './models/profile.js';
 import { SubscribersOnAuthorsType } from './models/subscribersOnAuthors.js';
-import { UserType } from './models/user.js';
+import { User, UserType } from './models/user.js';
 import { Context } from './types/context.js';
 import { UUIDType } from './types/uuid.js';
 
@@ -50,7 +50,7 @@ const rootQuery = new GraphQLObjectType({
         });
 
         if (shouldIncludeUserSubscribedTo || shouldIncludeSubscribedToUser) {
-          const usersMap = new Map<string, any>();
+          const usersMap = new Map<string, User>();
 
           users.forEach((user) => {
             usersMap.set(user.id, user);
@@ -60,14 +60,16 @@ const rootQuery = new GraphQLObjectType({
             if (shouldIncludeUserSubscribedTo) {
               dataLoaders.userSubscribedToLoader.prime(
                 user.id,
-                user.userSubscribedTo.map((sub) => usersMap.get(sub.authorId)),
+                user.userSubscribedTo.map((sub) => usersMap.get(sub.authorId) as User),
               );
             }
 
             if (shouldIncludeSubscribedToUser) {
               dataLoaders.subscribedToUserLoader.prime(
                 user.id,
-                user.subscribedToUser.map((sub) => usersMap.get(sub.subscriberId)),
+                user.subscribedToUser.map(
+                  (sub) => usersMap.get(sub.subscriberId) as User,
+                ),
               );
             }
           });
