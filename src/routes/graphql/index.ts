@@ -13,7 +13,23 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
       },
     },
     async handler(req) {
-      return {};
+      const { query, variables } = req.body;
+
+      const queryDoc = parse(query)
+
+      const validationErrors = validate(gqlSchema, queryDoc, [depthLimit(5)])
+
+      if (validationErrors?.length) {
+        return { data: '', errors: validationErrors }
+      }
+
+      const { data, errors } = await graphql({
+        variableValues: variables,
+        source: query,
+        schema: gqlSchema,
+      });
+
+      return { data, errors }
     },
   });
 };
