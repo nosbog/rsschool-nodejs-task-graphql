@@ -3,6 +3,8 @@ import { GraphQLObjectType, GraphQLSchema } from 'graphql';
 import { PostQueries } from './posts/query.js';
 import { PostMutations } from './posts/mutation.js';
 import { MemberTypeQueries } from './memberTypes/query.js';
+import { ProfileQueries } from './profiles/query.js';
+import { UserQueries } from './users/query.js';
 
 export const gqlResponseSchema = Type.Partial(
   Type.Object({
@@ -28,6 +30,8 @@ const query = new GraphQLObjectType({
   fields: () => ({
     ...PostQueries,
     ...MemberTypeQueries,
+    ...ProfileQueries,
+    ...UserQueries,
   }),
 });
 

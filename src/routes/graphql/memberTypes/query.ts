@@ -1,5 +1,5 @@
-import { GraphQLFieldConfig } from "graphql";
-import { MemberTypeType } from "./type.js";
+import { GraphQLFieldConfig, GraphQLList, GraphQLNonNull } from "graphql";
+import { MemberTypeIdType, MemberTypeType } from "./type.js";
 import { Context } from "../types/context.js";
 
 type Args = {
@@ -7,7 +7,7 @@ type Args = {
 };
 
 const memberTypes: GraphQLFieldConfig<void, Context, void> = {
-  type: MemberTypeType,
+  type: new GraphQLList(MemberTypeType),
   resolve: async (_source, _args, { prisma }) => {
     return await prisma.memberType.findMany();
   },
@@ -15,6 +15,7 @@ const memberTypes: GraphQLFieldConfig<void, Context, void> = {
 
 const memberType: GraphQLFieldConfig<void, Context, Args> = {
   type: MemberTypeType,
+  args: { id: { type: new GraphQLNonNull(MemberTypeIdType) } },
   resolve: async (_source, { id }, { prisma }) => {
     return await prisma.memberType.findUnique({ where: { id: id } });
   },
