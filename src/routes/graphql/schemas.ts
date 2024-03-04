@@ -18,4 +18,7 @@ export const createGqlResponseSchema = {
       additionalProperties: false,
     },
   ),
+  response: {
+    200: gqlResponseSchema,
+  },
 };

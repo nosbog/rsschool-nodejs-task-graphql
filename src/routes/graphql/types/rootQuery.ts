@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   GraphQLObjectType,
   GraphQLList,
@@ -9,7 +10,11 @@ import { UserType } from './userType.ts';
 import { PrismaClient } from '@prisma/client';
 import { parseResolveInfo } from 'graphql-parse-resolve-info';
 
-interface Context {
+export interface Context {
+  profileLoader: any;
+  postLoader: any;
+  userSubscribedTo: any;
+  subscribedToUser: any;
   prisma: PrismaClient;
 }
 
