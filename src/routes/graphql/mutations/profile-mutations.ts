@@ -1,4 +1,4 @@
-import { GraphQLBoolean, GraphQLInputObjectType, GraphQLInt } from 'graphql';
+import { GraphQLBoolean, GraphQLInputObjectType, GraphQLInt, GraphQLString } from 'graphql';
 import { UUIDType } from '../types/uuid.js';
 import { MemberTypes } from '../types/member-type.js';
 
@@ -15,6 +15,8 @@ export const createProfileInput: GraphQLInputObjectType = new GraphQLInputObject
 export const changeProfileInput: GraphQLInputObjectType = new GraphQLInputObjectType({
     name: 'ChangeProfileInput',
     fields: () => ({
+        name: { type: GraphQLString },
         isMale: { type: GraphQLBoolean },
+        yearOfBirth: { type: GraphQLInt },
     }),
 });
