@@ -1,14 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-  GraphQLObjectType,
-  GraphQLList,
-  GraphQLNonNull,
-  GraphQLString,
-  GraphQLID,
-} from 'graphql';
+import { GraphQLObjectType, GraphQLList, GraphQLNonNull } from 'graphql';
 import { UserType } from './userType.ts';
 import { PrismaClient } from '@prisma/client';
 import { parseResolveInfo } from 'graphql-parse-resolve-info';
+import { MemberType, MemberTypeIdType } from './memberType.ts';
 
 export interface Context {
   profileLoader: any;
@@ -18,31 +13,13 @@ export interface Context {
   prisma: PrismaClient;
 }
 
-interface MemberType {
-  id: string;
-  name: string;
-  description: string;
-}
-
-const MemberType = new GraphQLObjectType<MemberType, Context>({
-  name: 'MemberType',
-  description: 'MemberType object type',
-  fields: () => ({
-    id: { type: GraphQLString },
-    name: { type: GraphQLString },
-    description: { type: GraphQLString },
-  }),
-});
-
-const MemberTypeIdType = new GraphQLNonNull(GraphQLID);
-
 export const RootQuery = new GraphQLObjectType<unknown, Context>({
   name: 'Query',
   description: 'Root Query',
   fields: {
     memberTypes: {
       type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(MemberType))),
-      resolve: async (_obj, args, ctx) => {
+      resolve: async (_obj, _args, ctx) => {
         return ctx.prisma.memberType.findMany();
       },
     },
