@@ -10,7 +10,7 @@ import {
 } from 'graphql';
 import { MemberTypeId } from '../../member-types/schemas.js';
 import { UUIDType } from './uuid.js';
-import { createLoaders } from '../dataLoaders.js';
+
 import { Context } from '../context.js';
 
 export const MemberTypeIdEnum = new GraphQLEnumType({
@@ -24,7 +24,7 @@ export const MemberTypeIdEnum = new GraphQLEnumType({
 export const MemberType = new GraphQLObjectType({
   name: 'MemberType',
   fields: () => ({
-    id: { type: new GraphQLNonNull(MemberTypeIdEnum) },
+    id: { type: MemberTypeIdEnum },
     discount: { type: GraphQLFloat },
     postsLimitPerMonth: { type: GraphQLInt },
   }),
@@ -43,7 +43,7 @@ export const PostType = new GraphQLObjectType({
 export const ProfileType = new GraphQLObjectType({
   name: 'Profile',
   fields: () => ({
-    id: { type: new GraphQLNonNull(UUIDType) },
+    id: { type: UUIDType },
     isMale: { type: GraphQLBoolean },
     yearOfBirth: { type: GraphQLInt },
     userId: { type: UUIDType },
@@ -60,13 +60,12 @@ export const ProfileType = new GraphQLObjectType({
 export const UserType = new GraphQLObjectType({
   name: 'User',
   fields: () => ({
-    id: { type: new GraphQLNonNull(UUIDType) },
+    id: { type: UUIDType },
     name: { type: GraphQLString },
     balance: { type: GraphQLFloat },
     profile: {
       type: ProfileType,
       resolve: async (parent, _args, { dataLoaders }: Context) => {
-        console.log(parent, 'pareeeeeeeeent in userType');
         return dataLoaders.profilesLoader.load(parent.id);
       },
     },
@@ -85,8 +84,18 @@ export const UserType = new GraphQLObjectType({
     subscribedToUser: {
       type: new GraphQLList(UserType),
       resolve: async (parent, _args, { dataLoaders }: Context) => {
-        return dataLoaders.subToUserLoader.load(parent.id);
+        return dataLoaders.userSubscribedTo.load(parent.id);
       },
     },
   }),
+});
+
+export const SubscribersOnAuthorsType = new GraphQLObjectType({
+  name: 'SubscribersOnAuthors',
+  fields: {
+    subscriber: { type: UserType },
+    subscriberId: { type: UUIDType },
+    author: { type: UserType },
+    authorId: { type: UUIDType },
+  },
 });

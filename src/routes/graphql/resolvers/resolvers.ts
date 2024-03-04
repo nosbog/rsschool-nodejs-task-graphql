@@ -85,14 +85,14 @@ export const resolvers = {
 
         users.forEach((user) => {
           if (subscribedTo) {
-            dataLoaders.userSubLoader.prime(
+            dataLoaders.userSubscribedTo.prime(
               user.id,
               user.userSubscribedTo.map((sub) => usersMap.get(sub.authorId) as User),
             );
           }
 
           if (subscribedToUser) {
-            dataLoaders.subToUserLoader.prime(
+            dataLoaders.userSubLoader.prime(
               user.id,
               user.subscribedToUser.map((sub) => usersMap.get(sub.subscriberId) as User),
             );
@@ -118,7 +118,7 @@ export const resolvers = {
   },
   memberTypes: {
     type: new GraphQLList(MemberType),
-    resolve: async (_, _args, context: Context) => {
+    resolve: async (parent, _args, context: Context) => {
       const memberTypes = await context.prisma.memberType.findMany();
 
       return memberTypes;
@@ -129,7 +129,7 @@ export const resolvers = {
     args: {
       id: { type: UUIDType },
     },
-    resolve: async (_, args: { id: string }, context: Context) => {
+    resolve: async (parent, args: { id: string }, context: Context) => {
       const post = await context.prisma.post.findUnique({
         where: { id: args.id },
       });
@@ -139,7 +139,7 @@ export const resolvers = {
   },
   posts: {
     type: new GraphQLList(PostType),
-    resolve: async (_, _args, context: Context) => {
+    resolve: async (parent, _args, context: Context) => {
       const posts = await context.prisma.post.findMany();
 
       return posts;

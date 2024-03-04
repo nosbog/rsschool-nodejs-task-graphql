@@ -57,10 +57,10 @@ export function createLoaders(prisma: PrismaClient) {
         );
         subsObj[user.id] = subscribed;
       });
-
-      return userId.map((id) => subsObj[id]);
+      const user = userId.map((id) => subsObj[id]);
+      return user;
     }),
-    subToUserLoader: new DataLoader(async (userId: readonly string[]) => {
+    userSubscribedTo: new DataLoader(async (userId: readonly string[]) => {
       const subs = await prisma.user.findMany({
         where: { id: { in: Array.from(userId) } },
         include: { subscribedToUser: { select: { subscriber: true } } },
@@ -72,11 +72,11 @@ export function createLoaders(prisma: PrismaClient) {
         if (!subsObj[user.id]) {
           subsObj[user.id] = [];
         }
-
-        subsObj[user.id].push(...user.subscribedToUser.map((sub) => sub.subscriber));
+        let subscribers = user.subscribedToUser.map((sub) => sub.subscriber);
+        subsObj[user.id] = subsObj[user.id].concat(subscribers);
       });
-
-      return userId.map((id) => subsObj[id]);
+      const user = userId.map((id) => subsObj[id]);
+      return user;
     }),
   };
 }
