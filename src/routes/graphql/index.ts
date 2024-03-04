@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-redundant-type-constituents */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { createGqlResponseSchema, gqlResponseSchema } from './schemas.js';
 import { GraphQLSchema, graphql, parse, validate } from 'graphql';
@@ -6,69 +8,33 @@ import { PrismaClient } from '@prisma/client';
 import DataLoader from 'dataloader';
 import { RootQuery } from './types/rootQuery.ts';
 import { Mutations } from './types/mutations.ts';
-
+import { MemberTypeBody, PostBody, ProfileBody, getLoader } from './getLoader.ts';
 
 interface GqlRequestBody {
   query?: string;
-  variables?: Record<string, any>;
+  variables?: Record<string, unknown>;
 }
 
 interface Context {
   prisma: PrismaClient;
   loaders: {
-    postLoader: any;
-    profileLoader: any;
-    memberTypeLoader: any;
+    postLoader: DataLoader<string, PostBody[] | null>;
+    profileLoader: DataLoader<string, ProfileBody>;
+    memberTypeLoader: DataLoader<string, MemberTypeBody>;
   };
 }
 
-
 const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
-
   const { prisma } = fastify;
-  
-  const dataLoaderOptions = {};
+  const loaders = getLoader(prisma);
 
-  function batchLoadPosts(keys: string[]) {
-    return prisma.post.findMany({
-      where: {
-        userId: { in: keys },
-      },
-    });
-  }
-
-  function batchLoadProfiles(keys: string[]) {
-    return prisma.profile.findMany({
-      where: {
-        userId: { in: keys },
-      },
-    });
-  }
-
-  function batchLoadMemberTypes(keys: string[]) {
-    return prisma.profile.findMany({
-      where: {
-        userId: { in: keys },
-      },
-      select: {
-        userId: true,
-        memberTypeId: true,
-      },
-    });
-  }
-
-  // Create DataLoader instances
-  const postLoader = new DataLoader(batchLoadPosts, dataLoaderOptions);
-  const profileLoader = new DataLoader(batchLoadProfiles, dataLoaderOptions);
-  const memberTypeLoader = new DataLoader(batchLoadMemberTypes, dataLoaderOptions);
-
-  // Create context with DataLoader instances
   const context: Context = {
     prisma,
+    ...getLoader(prisma),
     loaders: {
-      postLoader,
-      profileLoader,
-      memberTypeLoader,
+      postLoader: loaders.postLoader,
+      profileLoader: loaders.profileLoader,
+      memberTypeLoader: loaders.memberTypeLoader,
     },
   };
 
@@ -83,7 +49,8 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
       },
     },
     async handler(request, _) {
-      const { query, variables }: GqlRequestBody = request.body;
+      const requestBody: GqlRequestBody = request.body || {};
+      const { query = '', variables = {} }: GqlRequestBody = requestBody;
 
       try {
         const queryDocument = parse(query);
@@ -93,15 +60,13 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
         }
 
         const result = await graphql({
-          schema: schema, 
-          source: query, 
-          variableValues: variables, 
-          contextValue: { prisma }, 
-           
+          schema: schema,
+          source: query,
+          variableValues: variables,
+          contextValue: context,
         });
 
         return result;
-
       } catch (error) {
         console.error('GraphQL error:', error);
         throw new Error('Internal server error');
@@ -112,7 +77,7 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
 
 export const schema = new GraphQLSchema({
   query: RootQuery,
-  mutation: Mutations
-})
+  mutation: Mutations,
+});
 
 export default plugin;
