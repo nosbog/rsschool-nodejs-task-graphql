@@ -9,6 +9,8 @@ import {
 } from 'graphql';
 import { MemberTypeId } from '../../member-types/schemas.js';
 import { UUIDType } from './uuid.js';
+import { createLoaders } from '../dataLoaders.js';
+import { Context } from '../context.js';
 
 export const MemberTypeIdEnum = new GraphQLEnumType({
   name: 'MemberTypeId',
@@ -44,6 +46,11 @@ export const profileType = new GraphQLObjectType({
     isMale: { type: GraphQLBoolean },
     yearOfBirth: { type: GraphQLInt },
     userId: { type: UUIDType },
-    memberType: { type: MemberType },
+    memberType: {
+      type: MemberType,
+      resolve: async (parent, args, { dataLoaders }: Context) => {
+        return dataLoaders.membersLoader.load(parent.MemberTypeId);
+      },
+    },
   },
 });
