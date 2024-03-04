@@ -54,9 +54,17 @@ export const ProfileType = new GraphQLObjectType({
   },
 });
 
+const SubscribersOnAuthors = new GraphQLObjectType({
+  name: 'SubscribersOnAuthors',
+  fields: {
+    subscriberId: { type: GraphQLString },
+    authorId: { type: GraphQLString },
+  },
+});
+
 export const UserType = new GraphQLObjectType({
   name: 'UserType',
-  fields: {
+  fields: () => ({
     id: { type: new GraphQLNonNull(UUIDType) },
     name: { type: GraphQLString },
     balance: { type: GraphQLFloat },
@@ -84,7 +92,37 @@ export const UserType = new GraphQLObjectType({
         });
       },
     },
-  },
+    userSubscribedTo: {
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(UserType))),
+      resolve: (user, args, ctx) => {
+        return ctx.prisma.user.findMany({
+          where: {
+            subscribedToUser: {
+              some: {
+                subscriberId: user.id,
+              },
+            },
+          },
+          include: { subscribedToUser: true },
+        });
+      },
+    },
+    subscribedToUser: {
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(UserType))),
+      resolve: (user, args, ctx) => {
+        return ctx.prisma.user.findMany({
+          where: {
+            userSubscribedTo: {
+              some: {
+                authorId: user.id,
+              },
+            },
+          },
+          include: { userSubscribedTo: true },
+        });
+      },
+    },
+  }),
 });
 
 const RootQuery = new GraphQLObjectType({
