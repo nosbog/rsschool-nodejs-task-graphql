@@ -3,32 +3,80 @@ import { PrismaClient } from '@prisma/client';
 
 export function createLoaders(prisma: PrismaClient) {
   return {
-    membersLoader: new DataLoader(async (memberId: any) => {
+    membersLoader: new DataLoader(async (memberId: readonly string[]) => {
       const memberTypes = await prisma.memberType.findMany({
         where: {
           id: { in: Array.from(memberId) },
         },
       });
-      const foundIds = memberId.map((id) =>
+      const foundId = memberId.map((id) =>
         memberTypes.find((memberTypes) => memberTypes.id === id),
       );
-      return foundIds;
+      return foundId;
+    }),
+    profilesLoader: new DataLoader(async (userId: readonly string[]) => {
+      const profiles = await prisma.profile.findMany({
+        where: {
+          userId: { in: Array.from(userId) },
+        },
+      });
+      const foundId = userId.map((id) =>
+        profiles.find((profile) => profile.userId === id),
+      );
+      return foundId;
+    }),
+    postsLoader: new DataLoader(async (postIds: readonly string[]) => {
+      const posts = await prisma.post.findMany({
+        where: {
+          authorId: { in: Array.from(postIds) },
+        },
+      });
+
+      const postsObj = {};
+
+      posts.forEach((post) => {
+        if (!postsObj[post.authorId]) {
+          postsObj[post.authorId] = [];
+        }
+        postsObj[post.authorId].push(post);
+      });
+      const post = postIds.map((id) => postsObj[id]);
+      return post;
+    }),
+    userSubLoader: new DataLoader(async (userId: readonly string[]) => {
+      const subs = await prisma.user.findMany({
+        where: { id: { in: Array.from(userId) } },
+        include: { userSubscribedTo: { select: { author: true } } },
+      });
+
+      const subsObj = {};
+
+      subs.forEach((user) => {
+        const subscribed = user.userSubscribedTo.map(
+          (subscription) => subscription.author,
+        );
+        subsObj[user.id] = subscribed;
+      });
+
+      return userId.map((id) => subsObj[id]);
+    }),
+    subToUserLoader: new DataLoader(async (userId: readonly string[]) => {
+      const subs = await prisma.user.findMany({
+        where: { id: { in: Array.from(userId) } },
+        include: { subscribedToUser: { select: { subscriber: true } } },
+      });
+
+      const subsObj = {};
+
+      subs.forEach((user) => {
+        if (!subsObj[user.id]) {
+          subsObj[user.id] = [];
+        }
+
+        subsObj[user.id].push(...user.subscribedToUser.map((sub) => sub.subscriber));
+      });
+
+      return userId.map((id) => subsObj[id]);
     }),
   };
 }
-
-/* export const membersLoader = (prisma: PrismaClient) => {
-  return new DataLoader(async (memberId: any) => {
-    const profiles = await prisma.profile.findMany({
-      where: {
-        userId: { in: Array.from(memberId) },
-      },
-    });
-    const sortedInIdsOrder = memberId.map((id) =>
-      profiles.find((profile) => profile.userId === id),
-    );
-
-    return sortedInIdsOrder;
-  });
-};
- */

@@ -3,6 +3,7 @@ import {
   GraphQLEnumType,
   GraphQLFloat,
   GraphQLInt,
+  GraphQLList,
   GraphQLNonNull,
   GraphQLObjectType,
   GraphQLString,
@@ -31,26 +32,61 @@ export const MemberType = new GraphQLObjectType({
 
 export const PostType = new GraphQLObjectType({
   name: 'Post',
-  fields: {
+  fields: () => ({
     id: { type: UUIDType },
     title: { type: GraphQLString },
     content: { type: GraphQLString },
     authorId: { type: UUIDType },
-  },
+  }),
 });
 
-export const profileType = new GraphQLObjectType({
+export const ProfileType = new GraphQLObjectType({
   name: 'Profile',
-  fields: {
+  fields: () => ({
     id: { type: new GraphQLNonNull(UUIDType) },
     isMale: { type: GraphQLBoolean },
     yearOfBirth: { type: GraphQLInt },
     userId: { type: UUIDType },
     memberType: {
       type: MemberType,
-      resolve: async (parent, args, { dataLoaders }: Context) => {
+      resolve: async (parent, _args, { dataLoaders }: Context) => {
         return dataLoaders.membersLoader.load(parent.MemberTypeId);
       },
     },
-  },
+    memberTypeId: { type: MemberTypeIdEnum },
+  }),
+});
+
+export const UserType = new GraphQLObjectType({
+  name: 'User',
+  fields: () => ({
+    id: { type: new GraphQLNonNull(UUIDType) },
+    name: { type: GraphQLString },
+    balance: { type: GraphQLFloat },
+    profile: {
+      type: ProfileType,
+      resolve: async (parent, _args, { dataLoaders }: Context) => {
+        console.log(parent, 'pareeeeeeeeent in userType');
+        return dataLoaders.profilesLoader.load(parent.id);
+      },
+    },
+    posts: {
+      type: new GraphQLList(PostType),
+      resolve: (parent, _args, { dataLoaders }: Context) => {
+        return dataLoaders.postsLoader.load(parent.id);
+      },
+    },
+    userSubscribedTo: {
+      type: new GraphQLList(UserType),
+      resolve: async (parent, _args, { dataLoaders }: Context) => {
+        return dataLoaders.userSubLoader.load(parent.id);
+      },
+    },
+    subscribedToUser: {
+      type: new GraphQLList(UserType),
+      resolve: async (parent, _args, { dataLoaders }: Context) => {
+        return dataLoaders.subToUserLoader.load(parent.id);
+      },
+    },
+  }),
 });
