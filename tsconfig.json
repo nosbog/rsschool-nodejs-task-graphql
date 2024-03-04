@@ -7,7 +7,9 @@
     "sourceMap": true,
     "moduleResolution": "nodenext",
     "module": "NodeNext",
-    "target": "ESNext"
+    "target": "ESNext",
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
   },
   "include": ["src/**/*.ts"]
 }
