@@ -6,15 +6,29 @@ import prismaClient from '../prisma-client/client.js';
 export const Profile: GraphQLObjectType = new GraphQLObjectType({
     name: 'Profile',
     fields: () => ({
-        id: { type: UUIDType},
-        isMale: { type: GraphQLBoolean },
-        yearOfBirth: { type: GraphQLInt },
-        userId: { type: UUIDType},
-        memberTypeId: { type: MemberTypes },
+        id: {
+            type: UUIDType
+        },
+        isMale: {
+            type: GraphQLBoolean
+        },
+        yearOfBirth: {
+            type: GraphQLInt
+        },
+        userId: {
+            type: UUIDType
+        },
+        memberTypeId: {
+            type: MemberTypes
+        },
         memberType: {
             type: MemberType,
             resolve: async ({ memberTypeId }: { memberTypeId: string }) => 
-                prismaClient.memberType.findUnique({ where: { id: memberTypeId }}),
+                await prismaClient.memberType.findUnique({
+                    where: {
+                        id: memberTypeId
+                    }
+                }),
         },
     }),
 });

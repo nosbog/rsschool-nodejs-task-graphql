@@ -27,8 +27,8 @@ export const Mutation: GraphQLObjectType = new GraphQLObjectType({
                 id: { type: new GraphQLNonNull(UUIDType) },
                 dto: { type: new GraphQLNonNull(changePostInput) },
             },
-            resolve: (_, { id, dto }: { id: string; dto: Static<(typeof changePostByIdSchema)['body']> } ) => 
-                prismaClient.post.update({ where: { id }, data: dto }),
+            resolve: async (_, { id, dto }: { id: string; dto: Static<(typeof changePostByIdSchema)['body']> } ) => 
+                await prismaClient.post.update({ where: { id }, data: dto }),
         },
         deletePost: {
             type: GraphQLBoolean,
@@ -45,8 +45,8 @@ export const Mutation: GraphQLObjectType = new GraphQLObjectType({
         changeUser: {
             type: User,
             args: { id: { type: new GraphQLNonNull(UUIDType) }, dto: { type: new GraphQLNonNull(changeUserInput) } },
-            resolve: (_, { id, dto }: { id: string; dto: Static<(typeof changeUserByIdSchema)['body']> }) => 
-                prismaClient.user.update({ where: { id }, data: dto }),
+            resolve: async (_, { id, dto }: { id: string; dto: Static<(typeof changeUserByIdSchema)['body']> }) => 
+                await prismaClient.user.update({ where: { id }, data: dto }),
         },
         deleteUser: {
             type: GraphQLBoolean,
@@ -63,8 +63,8 @@ export const Mutation: GraphQLObjectType = new GraphQLObjectType({
         changeProfile: {
             type: Profile,
             args: { id: { type: new GraphQLNonNull(UUIDType) }, dto: { type: new GraphQLNonNull(changeProfileInput) }},
-            resolve: (_, { id, dto }: { id: string ; dto: Static<(typeof changeProfileByIdSchema)['body']> }) =>
-                prismaClient.profile.update({ where: { id }, data: dto }),
+            resolve: async (_, { id, dto }: { id: string ; dto: Static<(typeof changeProfileByIdSchema)['body']> }) =>
+                await prismaClient.profile.update({ where: { id }, data: dto }),
         },
         deleteProfile: {
             type: GraphQLBoolean,
@@ -78,8 +78,8 @@ export const Mutation: GraphQLObjectType = new GraphQLObjectType({
                 userId: { type: new GraphQLNonNull(UUIDType) },
                 authorId: { type: new GraphQLNonNull(UUIDType) },
             },
-            resolve: (_, { userId, authorId }: { userId: string; authorId: string }) => 
-                prismaClient.user.update({
+            resolve: async (_, { userId, authorId }: { userId: string; authorId: string }) => 
+                await prismaClient.user.update({
                     where: { id: userId },
                     data: { userSubscribedTo: { create: { authorId } } },
                 }),

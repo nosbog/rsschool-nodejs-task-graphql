@@ -22,10 +22,16 @@ export const Query: GraphQLObjectType = new GraphQLObjectType({
         memberType: {
             type: MemberType,
             args: {
-                id: { type: new GraphQLNonNull(MemberTypes) },
+                id: { 
+                    type: new GraphQLNonNull(MemberTypes)
+                },
             },
             resolve: async (_, { id }: { id: MemberTypeId }) => {
-                return await prismaClient.memberType.findUnique({ where: { id } });
+                return await prismaClient.memberType.findUnique({ 
+                    where: { 
+                        id 
+                    }
+                });
             }
         },
         users: {
@@ -34,9 +40,17 @@ export const Query: GraphQLObjectType = new GraphQLObjectType({
         },
         user: {
             type: User,
-            args: { id: { type: new GraphQLNonNull(UUIDType) } },
+            args: {
+                id: {
+                    type: new GraphQLNonNull(UUIDType)
+                }
+            },
             resolve: async (_, { id }: { id: string }) =>
-                await prismaClient.user.findUnique({ where: { id } }),
+                await prismaClient.user.findUnique({
+                    where: {
+                        id
+                    }
+                }),
         },
         posts: {
             type: new GraphQLList(Post),
@@ -44,15 +58,31 @@ export const Query: GraphQLObjectType = new GraphQLObjectType({
         },
         post: {
             type: Post,
-            args: { id: { type: new GraphQLNonNull(UUIDType) } },
+            args: {
+                id: {
+                    type: new GraphQLNonNull(UUIDType)
+                }
+            },
             resolve: async (_, { id }: { id: string }) => 
-                await prismaClient.post.findUnique({ where: { id } }),
+                await prismaClient.post.findUnique({
+                    where: {
+                        id
+                    }
+                }),
         },
         profile: {
             type: Profile,
-            args: { id: { type: new GraphQLNonNull(UUIDType) } },
+            args: {
+                id: {
+                    type: new GraphQLNonNull(UUIDType)
+                }
+            },
             resolve: async (_, { id }: { id: string }) =>
-                await prismaClient.profile.findUnique({ where: { id } }),
+                await prismaClient.profile.findUnique({
+                    where: {
+                        id
+                    }
+                }),
         },
     },
 });

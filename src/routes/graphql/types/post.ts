@@ -5,10 +5,20 @@ import { User } from './user.js';
 export const Post: GraphQLObjectType = new GraphQLObjectType({
     name: 'Post',
     fields: () => ({
-        id: { type: UUIDType },
-        title: { type: GraphQLString },
-        content: { type: GraphQLString },
-        authorId: { type: UUIDType },
-        author: { type: User },
+        id: { 
+            type: UUIDType
+        },
+        title: { 
+            type: GraphQLString
+        },
+        content: { 
+            type: GraphQLString
+        },
+        authorId: { 
+            type: UUIDType
+        },
+        author: { 
+            type: User
+        },
     }),
 });
