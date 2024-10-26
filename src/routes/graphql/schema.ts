@@ -70,6 +70,16 @@ const CreateProfileInput = new GraphQLObjectType({
 });
 
 //+
+const ChangeProfileInput = new GraphQLObjectType({
+  name: 'ChangeProfileInput',
+  fields: {
+    isMale: { type: GraphQLBoolean },
+    yearOfBirth: { type: GraphQLInt },
+    memberTypeId: { type: new GraphQLNonNull(MemberTypeIdType) },
+  },
+});
+
+//+
 const Post = new GraphQLObjectType({
   name: 'Post',
   fields: {
@@ -103,7 +113,7 @@ const Profile = new GraphQLObjectType({
 });
 
 //+
-const User = new GraphQLObjectType({
+const User: GraphQLObjectType = new GraphQLObjectType({
   name: 'User',
   fields: () => ({
     id: { type: new GraphQLNonNull(UUIDType) },
@@ -116,8 +126,34 @@ const User = new GraphQLObjectType({
   }),
 });
 
+const RootQueryType = new GraphQLObjectType({
+  name: 'RootQueryType',
+  fields: {
+    memberTypes: { type: new GraphQLList(MemberType) },
+    memberType: {
+      type: MemberType,
+      args: { id: { type: new GraphQLNonNull(MemberTypeIdType) } },
+    },
+    users: { type: new GraphQLList(User) },
+    user: {
+      type: User,
+      args: { id: { type: new GraphQLNonNull(UUIDType) } },
+    },
+    posts: { type: new GraphQLList(Post) },
+    post: {
+      type: Post,
+      args: { id: { type: new GraphQLNonNull(UUIDType) } },
+    },
+    profiles: { type: new GraphQLList(Profile) },
+    profile: {
+      type: Profile,
+      args: { id: { type: new GraphQLNonNull(UUIDType) } },
+    },
+  },
+});
+
 const schema = new GraphQLSchema({
-  query: null,
+  query: RootQueryType,
   mutation: null,
 });
 
