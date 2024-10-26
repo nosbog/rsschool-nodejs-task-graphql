@@ -20,9 +20,6 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
       const variables = req.body.variables;
 
       try {
-        const users = await prisma.user.findMany();
-        console.log(users);
-
         const result = await graphql({
           schema,
           source: query,
@@ -30,12 +27,12 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
         });
 
         if (result.errors) {
-          return { errors: result.errors };
+          return { errors: result.errors, prisma };
         }
 
-        return result;
+        return { ...result, prisma };
       } catch (error) {
-        return { errors: [{ message: 'Internal server error' }] };
+        return { errors: [{ message: 'Internal server error' }], prisma };
       }
     },
   });

@@ -2,6 +2,7 @@ import {
   GraphQLBoolean,
   GraphQLEnumType,
   GraphQLFloat,
+  GraphQLInputObjectType,
   GraphQLInt,
   GraphQLList,
   GraphQLNonNull,
@@ -12,8 +13,7 @@ import {
 import { UUIDType } from './types/uuid.js';
 import { MemberTypeId } from '../member-types/schemas.js';
 
-// ++
-const CreateUserInput = new GraphQLObjectType({
+const CreateUserInput = new GraphQLInputObjectType({
   name: 'CreateUserInput',
   fields: {
     name: { type: new GraphQLNonNull(GraphQLString) },
@@ -21,8 +21,7 @@ const CreateUserInput = new GraphQLObjectType({
   },
 });
 
-//+
-const ChangeUserInput = new GraphQLObjectType({
+const ChangeUserInput = new GraphQLInputObjectType({
   name: 'ChangeUserInput',
   fields: {
     name: { type: GraphQLString },
@@ -30,8 +29,7 @@ const ChangeUserInput = new GraphQLObjectType({
   },
 });
 
-//+
-const CreatePostInput = new GraphQLObjectType({
+const CreatePostInput = new GraphQLInputObjectType({
   name: 'CreatePostInput',
   fields: {
     title: { type: new GraphQLNonNull(GraphQLString) },
@@ -40,7 +38,6 @@ const CreatePostInput = new GraphQLObjectType({
   },
 });
 
-//+
 const MemberTypeIdType = new GraphQLEnumType({
   name: 'MemberTypeId',
   values: {
@@ -49,8 +46,7 @@ const MemberTypeIdType = new GraphQLEnumType({
   },
 });
 
-//+
-const ChangePostInput = new GraphQLObjectType({
+const ChangePostInput = new GraphQLInputObjectType({
   name: 'ChangePostInput',
   fields: {
     title: { type: GraphQLString },
@@ -58,8 +54,7 @@ const ChangePostInput = new GraphQLObjectType({
   },
 });
 
-//+
-const CreateProfileInput = new GraphQLObjectType({
+const CreateProfileInput = new GraphQLInputObjectType({
   name: 'CreateProfileInput',
   fields: {
     isMale: { type: new GraphQLNonNull(GraphQLBoolean) },
@@ -69,8 +64,7 @@ const CreateProfileInput = new GraphQLObjectType({
   },
 });
 
-//+
-const ChangeProfileInput = new GraphQLObjectType({
+const ChangeProfileInput = new GraphQLInputObjectType({
   name: 'ChangeProfileInput',
   fields: {
     isMale: { type: GraphQLBoolean },
@@ -79,7 +73,6 @@ const ChangeProfileInput = new GraphQLObjectType({
   },
 });
 
-//+
 const Post = new GraphQLObjectType({
   name: 'Post',
   fields: {
@@ -90,7 +83,6 @@ const Post = new GraphQLObjectType({
   },
 });
 
-//+
 const MemberType = new GraphQLObjectType({
   name: 'MemberType',
   fields: {
@@ -100,7 +92,6 @@ const MemberType = new GraphQLObjectType({
   },
 });
 
-//+
 const Profile = new GraphQLObjectType({
   name: 'Profile',
   fields: {
@@ -112,7 +103,6 @@ const Profile = new GraphQLObjectType({
   },
 });
 
-//+
 const User: GraphQLObjectType = new GraphQLObjectType({
   name: 'User',
   fields: () => ({
@@ -152,9 +142,74 @@ const RootQueryType = new GraphQLObjectType({
   },
 });
 
+const Mutations = new GraphQLObjectType({
+  name: 'Mutations',
+  fields: {
+    createUser: {
+      type: User,
+      args: { dto: { type: new GraphQLNonNull(CreateUserInput) } },
+    },
+    createProfile: {
+      type: Profile,
+      args: { dto: { type: new GraphQLNonNull(CreateProfileInput) } },
+    },
+    createPost: {
+      type: Post,
+      args: { dto: { type: new GraphQLNonNull(CreatePostInput) } },
+    },
+    changePost: {
+      type: Post,
+      args: {
+        id: { type: new GraphQLNonNull(UUIDType) },
+        dto: { type: new GraphQLNonNull(ChangePostInput) },
+      },
+    },
+    changeProfile: {
+      type: Profile,
+      args: {
+        id: { type: new GraphQLNonNull(UUIDType) },
+        dto: { type: new GraphQLNonNull(ChangeProfileInput) },
+      },
+    },
+    changeUser: {
+      type: User,
+      args: {
+        id: { type: new GraphQLNonNull(UUIDType) },
+        dto: { type: new GraphQLNonNull(ChangeUserInput) },
+      },
+    },
+    deleteUser: {
+      type: GraphQLString,
+      args: { id: { type: new GraphQLNonNull(UUIDType) } },
+    },
+    deletePost: {
+      type: GraphQLString,
+      args: { id: { type: new GraphQLNonNull(UUIDType) } },
+    },
+    deleteProfile: {
+      type: GraphQLString,
+      args: { id: { type: new GraphQLNonNull(UUIDType) } },
+    },
+    subscribeTo: {
+      type: GraphQLString,
+      args: {
+        userId: { type: new GraphQLNonNull(UUIDType) },
+        authorId: { type: new GraphQLNonNull(UUIDType) },
+      },
+    },
+    unsubscribeFrom: {
+      type: GraphQLString,
+      args: {
+        userId: { type: new GraphQLNonNull(UUIDType) },
+        authorId: { type: new GraphQLNonNull(UUIDType) },
+      },
+    },
+  },
+});
+
 const schema = new GraphQLSchema({
   query: RootQueryType,
-  mutation: null,
+  mutation: Mutations,
 });
 
 export default schema;
