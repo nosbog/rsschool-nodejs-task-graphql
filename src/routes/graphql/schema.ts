@@ -263,14 +263,14 @@ const Mutations = new GraphQLObjectType({
   name: 'Mutations',
   fields: {
     createUser: {
-      type: User,
+      type: new GraphQLNonNull(User),
       args: { dto: { type: new GraphQLNonNull(CreateUserInput) } },
       resolve: async (
         _,
         { dto }: { dto: { name: string; balance: number } },
         { prisma }: { prisma: PrismaClient },
       ) => {
-        return await prisma.user.create({ data: { ...dto } });
+        return prisma.user.create({ data: dto });
       },
     },
     createProfile: {
@@ -290,7 +290,7 @@ const Mutations = new GraphQLObjectType({
         },
         { prisma }: { prisma: PrismaClient },
       ) => {
-        return await prisma.profile.create({ data: { ...dto } });
+        return await prisma.profile.create({ data: dto });
       },
     },
     createPost: {
