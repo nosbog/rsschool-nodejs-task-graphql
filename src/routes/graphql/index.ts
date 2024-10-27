@@ -24,13 +24,14 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
           schema,
           source: query,
           variableValues: variables,
+          contextValue: { prisma },
         });
 
         if (result.errors) {
           return { errors: result.errors, prisma };
         }
 
-        return { ...result, prisma };
+        return result;
       } catch (error) {
         return { errors: [{ message: 'Internal server error' }], prisma };
       }
