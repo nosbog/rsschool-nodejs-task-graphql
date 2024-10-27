@@ -120,10 +120,60 @@ const User: GraphQLObjectType = new GraphQLObjectType({
     id: { type: new GraphQLNonNull(UUIDType) },
     name: { type: new GraphQLNonNull(GraphQLString) },
     balance: { type: new GraphQLNonNull(GraphQLFloat) },
-    profile: { type: Profile },
-    posts: { type: new GraphQLNonNull(new GraphQLList(Post)) },
-    userSubscribedTo: { type: new GraphQLNonNull(new GraphQLList(User)) },
-    subscribedToUser: { type: new GraphQLNonNull(new GraphQLList(User)) },
+    profile: {
+      type: Profile,
+      resolve: async (user: { id: string }, args, ctx: { prisma: PrismaClient }) => {
+        return await ctx.prisma.profile.findUnique({
+          where: { userId: user.id },
+        });
+      },
+    },
+    posts: {
+      type: new GraphQLNonNull(new GraphQLList(Post)),
+      resolve: async (user: { id: string }, args, ctx: { prisma: PrismaClient }) => {
+        return await ctx.prisma.post.findMany({
+          where: { authorId: user.id },
+        });
+      },
+    },
+    userSubscribedTo: {
+      type: new GraphQLNonNull(new GraphQLList(User)),
+      resolve: async (user: { id: string }, args, ctx: { prisma: PrismaClient }) => {
+        const subscribedTo = await ctx.prisma.user.findMany({
+          where: {
+            subscribedToUser: {
+              some: {
+                subscriberId: user.id,
+              },
+            },
+          },
+          include: {
+            subscribedToUser: true,
+          },
+        });
+
+        return subscribedTo;
+      },
+    },
+    subscribedToUser: {
+      type: new GraphQLNonNull(new GraphQLList(User)),
+      resolve: async (user: { id: string }, args, ctx: { prisma: PrismaClient }) => {
+        const subscribedToUser = await ctx.prisma.user.findMany({
+          where: {
+            userSubscribedTo: {
+              some: {
+                authorId: user.id,
+              },
+            },
+          },
+          include: {
+            userSubscribedTo: true,
+          },
+        });
+
+        return subscribedToUser;
+      },
+    },
   }),
 });
 
@@ -136,85 +186,74 @@ const RootQueryType = new GraphQLObjectType({
         return prisma.memberType.findMany();
       },
     },
+
     memberType: {
       type: MemberType,
       args: { id: { type: new GraphQLNonNull(MemberTypeIdType) } },
-      resolve: (_, { id }, { prisma }: { prisma: PrismaClient }) => {
-        return prisma.memberType.findUnique({ where: { id: id as MemberTypeId } });
+      resolve: (_, { id }, ctx) => {
+        return ctx.prisma.memberType.findUnique({ where: { id: id as MemberTypeId } });
       },
     },
+
     prismaStats: {
       type: new GraphQLList(PrismaStats),
-      resolve: (_, __, { prisma }: { prisma: PrismaClient }) => {
-        return prisma.$queryRaw`SELECT * FROM PrismaStats`;
+      resolve: (_, __, ctx) => {
+        return ctx.prisma.$queryRaw`SELECT * FROM PrismaStats`;
       },
     },
+
     users: {
-      type: new GraphQLList(User),
-      resolve: (_, __, { prisma }: { prisma: PrismaClient }) => {
-        return prisma.user.findMany();
-      },
-    },
-    user: {
-      type: User,
-      args: { id: { type: new GraphQLNonNull(UUIDType) } },
-      resolve: async (_, { id }, { prisma }: { prisma: PrismaClient }) => {
-        return prisma.user.findUnique({
-          where: { id: id as string },
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(User))),
+      resolve: (_, __, ctx, info) => {
+        const includesUserSubscribedTo = info.fieldName.includes('userSubscribedTo');
+        const includesSubscribedToUser = info.fieldName.includes('subscribedToUser');
+
+        return ctx.prisma.user.findMany({
           include: {
-            userSubscribedTo: true,
-            subscribedToUser: true,
+            userSubscribedTo: includesUserSubscribedTo,
+            subscribedToUser: includesSubscribedToUser,
           },
         });
       },
     },
-    userPosts: {
-      type: new GraphQLList(Post),
+
+    user: {
+      type: User,
       args: { id: { type: new GraphQLNonNull(UUIDType) } },
-      resolve: (_, { id }, { prisma }: { prisma: PrismaClient }) => {
-        return prisma.post.findMany({ where: { authorId: id as string } });
-      },
-    },
-    userSubscribtion: {
-      type: new GraphQLList(User),
-      args: { id: { type: new GraphQLNonNull(UUIDType) } },
-      resolve: (_, { id }, { prisma }: { prisma: PrismaClient }) => {
-        return prisma.user.findMany({
-          where: { subscribedToUser: { some: { authorId: id as string } } },
+      resolve: async (_, { id }, ctx) => {
+        return ctx.prisma.user.findUnique({
+          where: { id: id as string },
         });
       },
     },
-    userProfile: {
-      type: Profile,
-      args: { id: { type: new GraphQLNonNull(UUIDType) } },
-      resolve: (_, { id }, { prisma }: { prisma: PrismaClient }) => {
-        return prisma.profile.findUnique({ where: { userId: id as string } });
-      },
-    },
+
     posts: {
       type: new GraphQLList(Post),
-      resolve: (_, __, { prisma }: { prisma: PrismaClient }) => {
-        return prisma.post.findMany();
+      resolve: (_, __, ctx) => {
+        return ctx.prisma.post.findMany();
       },
     },
+
     post: {
       type: Post,
       args: { id: { type: new GraphQLNonNull(UUIDType) } },
-      resolve: (_, { id }, { prisma }: { prisma: PrismaClient }) => {
-        return prisma.post.findUnique({ where: { id: id as string } });
+      resolve: (_, { id }, ctx) => {
+        return ctx.prisma.post.findUnique({ where: { id: id as string } });
       },
     },
+
     profiles: {
       type: new GraphQLList(Profile),
-      resolve: (_, __, { prisma }: { prisma: PrismaClient }) => {
-        return prisma.profile.findMany();
+      resolve: (_, __, ctx) => {
+        return ctx.prisma.profile.findMany();
       },
     },
+
     profile: {
       type: Profile,
       args: { id: { type: new GraphQLNonNull(UUIDType) } },
-      resolve: (_, { id }, { prisma }: { prisma: PrismaClient }) => {
-        return prisma.profile.findUnique({ where: { id: id as string } });
+      resolve: (_, { id }, ctx) => {
+        return ctx.prisma.profile.findUnique({ where: { id: id as string } });
       },
     },
   }),
