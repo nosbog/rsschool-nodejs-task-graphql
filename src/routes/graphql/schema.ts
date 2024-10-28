@@ -257,7 +257,7 @@ const RootQueryType = new GraphQLObjectType({
       args: { id: { type: new GraphQLNonNull(UUIDType) } },
       resolve: async (_, { id }, ctx) => {
         return ctx.prisma.user.findUnique({
-          where: { id: id as string },
+          where: { id },
         });
       },
     },
@@ -311,20 +311,7 @@ const Mutations = new GraphQLObjectType({
     createProfile: {
       type: Profile,
       args: { dto: { type: new GraphQLNonNull(CreateProfileInput) } },
-      resolve: async (
-        _,
-        {
-          dto,
-        }: {
-          dto: {
-            isMale: boolean;
-            yearOfBirth: number;
-            memberTypeId: MemberTypeId;
-            userId: string;
-          };
-        },
-        { prisma }: { prisma: PrismaClient },
-      ) => {
+      resolve: async (_, dto, { prisma }: { prisma: PrismaClient }) => {
         return await prisma.profile.create({ data: dto });
       },
     },
