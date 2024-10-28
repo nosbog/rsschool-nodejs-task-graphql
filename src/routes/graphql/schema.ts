@@ -125,8 +125,8 @@ const Profile = new GraphQLObjectType({
       },
     },
     userId: { type: new GraphQLNonNull(UUIDType) },
-    memberType: { type: new GraphQLNonNull(MemberType) },
-    memberTypeId: { type: new GraphQLNonNull(MemberTypeIdType) },
+    memberType: { type: MemberType },
+    memberTypeId: { type: MemberTypeIdType },
   }),
 });
 
@@ -172,7 +172,7 @@ const User: GraphQLObjectType = new GraphQLObjectType({
       },
     },
     userSubscribedTo: {
-      type: new GraphQLList(SubscribersOnAuthors),
+      type: new GraphQLList(User),
       resolve: async (user: { id: string }, args, ctx: { prisma: PrismaClient }) => {
         const subscribedTo = await ctx.prisma.user.findMany({
           where: {
@@ -191,7 +191,7 @@ const User: GraphQLObjectType = new GraphQLObjectType({
       },
     },
     subscribedToUser: {
-      type: new GraphQLList(SubscribersOnAuthors),
+      type: new GraphQLList(User),
       resolve: async (user: { id: string }, args, ctx: { prisma: PrismaClient }) => {
         const subscribedToUser = await ctx.prisma.user.findMany({
           where: {
