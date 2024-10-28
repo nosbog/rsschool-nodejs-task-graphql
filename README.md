@@ -35,9 +35,11 @@ Steps to get started:
 1. Install dependencies: npm ci  
 2. Create .env file (based on .env.example): ./.env  
 3. Create db file: ./prisma/database.db  
-4. Apply pending migrations: npx prisma migrate deploy  
-5. Seed db: npx prisma db seed  
+4. Apply pending migrations: npx prisma migrate deploy (if you have a problem like 'request to https://binaries.prisma.sh/all_commits/78caf6feeaed953168c64e15a249c3e9a033ebe2/windows/query_engine.dll.node.gz.sha256 failed, reason: self-signed certificate in certificate chain', then in a terminal first write the command 'set NODE_TLS_REJECT_UNAUTHORIZED=0', then write the command 'npx prisma migrate deploy')
+5. Seed db: npx prisma db seed (if you have an error executing this command, then try first 'npx prisma generate')
 6. Start server: npm run start  
+
+
 
 Useful things:  
 
