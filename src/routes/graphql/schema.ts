@@ -70,7 +70,7 @@ const ChangeProfileInput = new GraphQLInputObjectType({
   fields: {
     isMale: { type: GraphQLBoolean },
     yearOfBirth: { type: GraphQLInt },
-    memberTypeId: { type: new GraphQLNonNull(MemberTypeIdType) },
+    memberTypeId: { type: MemberTypeIdType },
   },
 });
 
