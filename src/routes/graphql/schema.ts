@@ -76,12 +76,24 @@ const ChangeProfileInput = new GraphQLInputObjectType({
 
 const Post = new GraphQLObjectType({
   name: 'Post',
-  fields: {
+  fields: () => ({
     id: { type: new GraphQLNonNull(UUIDType) },
     title: { type: new GraphQLNonNull(GraphQLString) },
     content: { type: new GraphQLNonNull(GraphQLString) },
+    author: {
+      type: User,
+      resolve: async (
+        post: { authorId: string },
+        args,
+        ctx: { prisma: PrismaClient },
+      ) => {
+        return await ctx.prisma.user.findUnique({
+          where: { id: post.authorId },
+        });
+      },
+    },
     authorId: { type: new GraphQLNonNull(UUIDType) },
-  },
+  }),
 });
 
 const MemberType = new GraphQLObjectType({
@@ -96,13 +108,26 @@ const MemberType = new GraphQLObjectType({
 
 const Profile = new GraphQLObjectType({
   name: 'Profile',
-  fields: {
+  fields: () => ({
     id: { type: new GraphQLNonNull(UUIDType) },
     isMale: { type: new GraphQLNonNull(GraphQLBoolean) },
     yearOfBirth: { type: new GraphQLNonNull(GraphQLInt) },
+    user: {
+      type: User,
+      resolve: async (
+        profile: { userId: string },
+        args,
+        ctx: { prisma: PrismaClient },
+      ) => {
+        return await ctx.prisma.user.findUnique({
+          where: { id: profile.userId },
+        });
+      },
+    },
     userId: { type: new GraphQLNonNull(UUIDType) },
+    memberType: { type: new GraphQLNonNull(MemberType) },
     memberTypeId: { type: new GraphQLNonNull(MemberTypeIdType) },
-  },
+  }),
 });
 
 const PrismaStats = new GraphQLObjectType({
@@ -112,6 +137,16 @@ const PrismaStats = new GraphQLObjectType({
     operation: { type: new GraphQLNonNull(GraphQLString) },
     args: { type: GraphQLString },
   },
+});
+
+const SubscribersOnAuthors = new GraphQLObjectType({
+  name: 'SubscribersOnAuthors',
+  fields: () => ({
+    subscriber: { type: new GraphQLNonNull(User) },
+    subscriberId: { type: new GraphQLNonNull(UUIDType) },
+    author: { type: new GraphQLNonNull(User) },
+    authorId: { type: new GraphQLNonNull(UUIDType) },
+  }),
 });
 
 const User: GraphQLObjectType = new GraphQLObjectType({
@@ -137,7 +172,7 @@ const User: GraphQLObjectType = new GraphQLObjectType({
       },
     },
     userSubscribedTo: {
-      type: new GraphQLNonNull(new GraphQLList(User)),
+      type: new GraphQLNonNull(new GraphQLList(SubscribersOnAuthors)),
       resolve: async (user: { id: string }, args, ctx: { prisma: PrismaClient }) => {
         const subscribedTo = await ctx.prisma.user.findMany({
           where: {
@@ -156,7 +191,7 @@ const User: GraphQLObjectType = new GraphQLObjectType({
       },
     },
     subscribedToUser: {
-      type: new GraphQLNonNull(new GraphQLList(User)),
+      type: new GraphQLNonNull(new GraphQLList(SubscribersOnAuthors)),
       resolve: async (user: { id: string }, args, ctx: { prisma: PrismaClient }) => {
         const subscribedToUser = await ctx.prisma.user.findMany({
           where: {
