@@ -142,10 +142,10 @@ const PrismaStats = new GraphQLObjectType({
 const SubscribersOnAuthors = new GraphQLObjectType({
   name: 'SubscribersOnAuthors',
   fields: () => ({
-    subscriber: { type: new GraphQLNonNull(User) },
-    subscriberId: { type: new GraphQLNonNull(UUIDType) },
-    author: { type: new GraphQLNonNull(User) },
-    authorId: { type: new GraphQLNonNull(UUIDType) },
+    subscriber: { type: User },
+    subscriberId: { type: UUIDType },
+    author: { type: User },
+    authorId: { type: UUIDType },
   }),
 });
 
@@ -172,7 +172,7 @@ const User: GraphQLObjectType = new GraphQLObjectType({
       },
     },
     userSubscribedTo: {
-      type: new GraphQLNonNull(new GraphQLList(SubscribersOnAuthors)),
+      type: new GraphQLList(SubscribersOnAuthors),
       resolve: async (user: { id: string }, args, ctx: { prisma: PrismaClient }) => {
         const subscribedTo = await ctx.prisma.user.findMany({
           where: {
@@ -191,7 +191,7 @@ const User: GraphQLObjectType = new GraphQLObjectType({
       },
     },
     subscribedToUser: {
-      type: new GraphQLNonNull(new GraphQLList(SubscribersOnAuthors)),
+      type: new GraphQLList(SubscribersOnAuthors),
       resolve: async (user: { id: string }, args, ctx: { prisma: PrismaClient }) => {
         const subscribedToUser = await ctx.prisma.user.findMany({
           where: {
