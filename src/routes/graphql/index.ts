@@ -3,16 +3,17 @@ import { buildSchema, graphql } from 'graphql';
 import typeDefs from './gql-types/schema.graphql.js';
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { createGqlResponseSchema, gqlResponseSchema } from './schemas.js';
+import { UUIDType } from './types/uuid.js';
 
 const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
   const { prisma, httpErrors } = fastify;
 
   const schema = buildSchema(
     typeDefs,
-    {}
   );
 
   const root = {
+    UUID: UUIDType,
     //Query: {
       memberTypes: async () => {
         return await prisma.memberType.findMany();
@@ -26,7 +27,7 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
       profiles: async () => {
         return await prisma.profile.findMany();
       },
-      memberType: async (id) => {
+      memberType: async ({ id }) => {
         const memberType = await prisma.memberType.findUnique({
           where: { id },
         });
@@ -35,7 +36,7 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
         }
         return memberType;
       },
-      post: async (id) => {
+      post: async ({ id }) => {
         const post = await prisma.post.findUnique({
           where: { id },
         });
@@ -44,7 +45,7 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
         }
         return post;
       },
-      user: async (id) => {
+      user: async ({ id }) => {
         const user = await prisma.user.findUnique({
           where: { id },
         });
@@ -53,7 +54,7 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
         }
         return user;
       },
-      profile: async (id) => {
+      profile: async ({ id }) => {
         const profile = await prisma.profile.findUnique({
           where: { id },
         });
@@ -124,11 +125,12 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
       },
     },
     async handler(request: FastifyRequest, reply: FastifyReply) {
-      const source = (request.query as any)?.query as string;
+      const source = (request.body as any).query as string;
       const response = await graphql({
           schema,
           source,
           rootValue: root,
+          variableValues: (request.body as any).variables,
       });
       reply.send(response);
     },
