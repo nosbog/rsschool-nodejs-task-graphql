@@ -17,10 +17,10 @@ const User = new GraphQLObjectType({
     balance: { type: new GraphQLNonNull(GraphQLFloat) },
     profile: {
       type: Profile,
-      resolve: (obj, _args, { prisma }) => {
-        return prisma.user.findUnique({
+      resolve: async (obj, _args, { prisma }) => {
+        return await prisma.profile.findUnique({
           where: {
-            id: obj.id,
+            userId: obj.id,
           },
         });
       },
@@ -30,7 +30,7 @@ const User = new GraphQLObjectType({
       resolve: (obj, _args, { prisma }) => {
         return prisma.post.findMany({
           where: {
-            id: obj.id,
+            authorId: obj.id,
           },
         });
       },

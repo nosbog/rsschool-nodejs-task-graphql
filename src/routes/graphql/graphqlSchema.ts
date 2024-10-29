@@ -24,8 +24,8 @@ const RootQueryType: GraphQLObjectType = new GraphQLObjectType({
     memberType: {
       type: MemberType,
       args: { id: { type: new GraphQLNonNull(MemberIdType) } },
-      resolve: async (_, args, { prisma }: { prisma: PrismaClient }) => {
-        return await prisma.user.findUnique({
+      resolve: (_, args, { prisma }: { prisma: PrismaClient }) => {
+        return prisma.memberType.findUnique({
           where: {
             id: args.id,
           },
@@ -35,7 +35,7 @@ const RootQueryType: GraphQLObjectType = new GraphQLObjectType({
 
     users: {
       type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(User))),
-      resolve: async (_obj, _args, { prisma }, info) => {
+      resolve: (_obj, _args, { prisma }, info) => {
         const parsedResolveInfo = parseResolveInfo(info);
         const fields = parsedResolveInfo?.fieldsByTypeName.User;
         const include: IncludeFieldsPrisma = {};
@@ -46,7 +46,7 @@ const RootQueryType: GraphQLObjectType = new GraphQLObjectType({
           include.subscribedToUser = true;
         }
 
-        return await prisma.user.findMany({
+        return prisma.user.findMany({
           include,
         });
       },
