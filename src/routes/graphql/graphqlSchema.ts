@@ -4,6 +4,7 @@ import { MemberIdType, MemberType } from './types/memberTypes.js';
 import { User } from './types/users.js';
 import { parseResolveInfo } from 'graphql-parse-resolve-info';
 import { UUIDType } from './types/uuid.js';
+import { Post } from './types/posts.js';
 
 interface IncludeFieldsPrisma {
   userSubscribedTo?: boolean;
@@ -55,6 +56,25 @@ const RootQueryType: GraphQLObjectType = new GraphQLObjectType({
       args: { id: { type: new GraphQLNonNull(UUIDType) } },
       resolve: async (_, args, { prisma }) => {
         return await prisma.user.findUnique({
+          where: {
+            id: args.id,
+          },
+        });
+      },
+    },
+
+    posts: {
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(Post))),
+      resolve: (_obj, _args, { prisma }) => {
+        return prisma.post.findMany();
+      },
+    },
+
+    post: {
+      type: Post,
+      args: { id: { type: new GraphQLNonNull(UUIDType) } },
+      resolve: async (_, args, { prisma }) => {
+        return await prisma.post.findUnique({
           where: {
             id: args.id,
           },
