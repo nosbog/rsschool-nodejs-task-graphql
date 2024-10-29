@@ -436,10 +436,11 @@ const Mutations = new GraphQLObjectType({
         { userId, authorId }: { userId: string; authorId: string },
         { prisma }: { prisma: PrismaClient },
       ) => {
-        return await prisma.user.update({
+        await prisma.user.update({
           where: { id: userId },
           data: { userSubscribedTo: { create: { authorId } } },
         });
+        return authorId;
       },
     },
     unsubscribeFrom: {
@@ -457,7 +458,7 @@ const Mutations = new GraphQLObjectType({
           where: { id: userId },
           data: { subscribedToUser: { deleteMany: { authorId } } },
         });
-        return 'Unsubscribed';
+        return authorId;
       },
     },
   },
