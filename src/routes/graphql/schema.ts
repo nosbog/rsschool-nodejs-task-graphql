@@ -137,16 +137,6 @@ const PrismaStats = new GraphQLObjectType({
   },
 });
 
-const SubscribersOnAuthors = new GraphQLObjectType({
-  name: 'SubscribersOnAuthors',
-  fields: () => ({
-    subscriber: { type: User },
-    subscriberId: { type: UUIDType },
-    author: { type: User },
-    authorId: { type: UUIDType },
-  }),
-});
-
 const User: GraphQLObjectType = new GraphQLObjectType({
   name: 'User',
   fields: () => ({
