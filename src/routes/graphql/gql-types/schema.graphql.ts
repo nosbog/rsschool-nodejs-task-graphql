@@ -1,5 +1,5 @@
-const schema =
-`schema {
+const schema = `
+schema {
     query: RootQueryType
     mutation: Mutations
 }
