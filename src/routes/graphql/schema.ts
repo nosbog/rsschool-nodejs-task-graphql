@@ -102,7 +102,6 @@ const MemberType = new GraphQLObjectType({
     id: { type: new GraphQLNonNull(MemberTypeIdType) },
     discount: { type: new GraphQLNonNull(GraphQLFloat) },
     postsLimitPerMonth: { type: new GraphQLNonNull(GraphQLInt) },
-    profiles: { type: new GraphQLList(Profile) },
   }),
 });
 
@@ -112,20 +111,19 @@ const Profile = new GraphQLObjectType({
     id: { type: new GraphQLNonNull(UUIDType) },
     isMale: { type: new GraphQLNonNull(GraphQLBoolean) },
     yearOfBirth: { type: new GraphQLNonNull(GraphQLInt) },
-    user: {
-      type: User,
+    userId: { type: new GraphQLNonNull(UUIDType) },
+    memberType: {
+      type: MemberType,
       resolve: async (
-        profile: { userId: string },
+        profile: { memberTypeId: MemberTypeId; userId: string },
         args,
         ctx: { prisma: PrismaClient },
       ) => {
-        return await ctx.prisma.user.findUnique({
-          where: { id: profile.userId },
+        return await ctx.prisma.memberType.findUnique({
+          where: { id: profile.memberTypeId },
         });
       },
     },
-    userId: { type: new GraphQLNonNull(UUIDType) },
-    memberType: { type: MemberType },
     memberTypeId: { type: MemberTypeIdType },
   }),
 });
@@ -308,13 +306,6 @@ const Mutations = new GraphQLObjectType({
         return prisma.user.create({ data: dto });
       },
     },
-    createProfile: {
-      type: Profile,
-      args: { dto: { type: new GraphQLNonNull(CreateProfileInput) } },
-      resolve: async (_, dto, { prisma }: { prisma: PrismaClient }) => {
-        return await prisma.profile.create({ data: dto });
-      },
-    },
     createPost: {
       type: Post,
       args: { dto: { type: new GraphQLNonNull(CreatePostInput) } },
@@ -342,6 +333,26 @@ const Mutations = new GraphQLObjectType({
         { prisma }: { prisma: PrismaClient },
       ) => {
         return await prisma.post.update({ where: { id }, data: { ...dto } });
+      },
+    },
+    createProfile: {
+      type: Profile,
+      args: { dto: { type: new GraphQLNonNull(CreateProfileInput) } },
+      resolve: async (
+        _,
+        {
+          dto,
+        }: {
+          dto: {
+            isMale: boolean;
+            yearOfBirth: number;
+            memberTypeId: MemberTypeId;
+            userId: string;
+          };
+        },
+        { prisma }: { prisma: PrismaClient },
+      ) => {
+        return await prisma.profile.create({ data: dto });
       },
     },
     changeProfile: {
