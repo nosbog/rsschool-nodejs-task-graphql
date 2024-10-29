@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { GraphQLList, GraphQLNonNull, GraphQLObjectType, GraphQLSchema } from 'graphql';
 import { MemberIdType, MemberType } from './types/memberTypes.js';
-import { User } from './types/users.js';
+import { CreateUserInput, User } from './types/users.js';
 import { parseResolveInfo } from 'graphql-parse-resolve-info';
 import { UUIDType } from './types/uuid.js';
 import { Post } from './types/posts.js';
@@ -104,9 +104,25 @@ const RootQueryType: GraphQLObjectType = new GraphQLObjectType({
   }),
 });
 
+const Mutations = new GraphQLObjectType({
+  name: 'Mutations',
+  fields: () => ({
+    createUser: {
+      type: new GraphQLNonNull(User),
+      args: { dto: { type: new GraphQLNonNull(CreateUserInput) } },
+      resolve: (_, args, { prisma }) => {
+        const { name, balance } = args.dto;
+        return prisma.user.create({
+          data: { name, balance },
+        });
+      },
+    },
+  }),
+});
+
 const schema = new GraphQLSchema({
   query: RootQueryType,
-  // mutation: Mutations
+  mutation: Mutations,
 });
 
 export { schema };
