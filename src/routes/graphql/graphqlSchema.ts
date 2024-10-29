@@ -1,23 +1,62 @@
 import { PrismaClient } from '@prisma/client';
 import { GraphQLList, GraphQLNonNull, GraphQLObjectType, GraphQLSchema } from 'graphql';
 import { MemberIdType, MemberType } from './types/memberTypes.js';
+import { User } from './types/users.js';
+import { parseResolveInfo } from 'graphql-parse-resolve-info';
+import { UUIDType } from './types/uuid.js';
+
+interface IncludeFieldsPrisma {
+  userSubscribedTo?: boolean;
+  subscribedToUser?: boolean;
+}
 
 const RootQueryType: GraphQLObjectType = new GraphQLObjectType({
   name: 'RootQueryType',
   fields: () => ({
     memberTypes: {
       type: new GraphQLList(MemberType),
-      resolve: (_obj, _args, { prisma }: { prisma: PrismaClient }) => {
-        return prisma.memberType.findMany();
+      resolve: async (_obj, _args, { prisma }: { prisma: PrismaClient }) => {
+        return await prisma.memberType.findMany();
       },
     },
     memberType: {
-      type: new GraphQLList(MemberType),
-      args: { userId: { type: new GraphQLNonNull(MemberIdType) } },
-      resolve: (_obj, args, { prisma }: { prisma: PrismaClient }) => {
-        return prisma.user.findUnique({
+      type: MemberType,
+      args: { id: { type: new GraphQLNonNull(MemberIdType) } },
+      resolve: async (_, args, { prisma }: { prisma: PrismaClient }) => {
+        return await prisma.user.findUnique({
           where: {
-            id: args.userId,
+            id: args.id,
+          },
+        });
+      },
+    },
+
+    users: {
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(User))),
+      resolve: async (_obj, _args, { prisma }, info) => {
+        const parsedResolveInfo = parseResolveInfo(info);
+        const fields = parsedResolveInfo?.fieldsByTypeName.User;
+        const include: IncludeFieldsPrisma = {};
+        if (fields && 'userSubscribedTo' in fields) {
+          include.userSubscribedTo = true;
+        }
+        if (fields && 'subscribedToUser' in fields) {
+          include.subscribedToUser = true;
+        }
+
+        return await prisma.user.findMany({
+          include,
+        });
+      },
+    },
+
+    user: {
+      type: User,
+      args: { id: { type: new GraphQLNonNull(UUIDType) } },
+      resolve: async (_, args, { prisma }) => {
+        return await prisma.user.findUnique({
+          where: {
+            id: args.id,
           },
         });
       },
