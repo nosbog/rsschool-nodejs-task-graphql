@@ -456,7 +456,7 @@ const Mutations = new GraphQLObjectType({
       ): Promise<string> => {
         await prisma.user.update({
           where: { id: userId },
-          data: { subscribedToUser: { deleteMany: { authorId } } },
+          data: { userSubscribedTo: { deleteMany: { authorId } } },
         });
         return authorId;
       },
