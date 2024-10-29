@@ -5,6 +5,7 @@ import { User } from './types/users.js';
 import { parseResolveInfo } from 'graphql-parse-resolve-info';
 import { UUIDType } from './types/uuid.js';
 import { Post } from './types/posts.js';
+import { Profile } from './types/profiles.js';
 
 interface IncludeFieldsPrisma {
   userSubscribedTo?: boolean;
@@ -75,6 +76,25 @@ const RootQueryType: GraphQLObjectType = new GraphQLObjectType({
       args: { id: { type: new GraphQLNonNull(UUIDType) } },
       resolve: async (_, args, { prisma }) => {
         return await prisma.post.findUnique({
+          where: {
+            id: args.id,
+          },
+        });
+      },
+    },
+
+    profiles: {
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(Profile))),
+      resolve: (_obj, _args, { prisma }) => {
+        return prisma.profile.findMany();
+      },
+    },
+
+    profile: {
+      type: Profile,
+      args: { id: { type: new GraphQLNonNull(UUIDType) } },
+      resolve: async (_, args, { prisma }) => {
+        return await prisma.profile.findUnique({
           where: {
             id: args.id,
           },
