@@ -8,11 +8,12 @@ import { UUIDType } from './uuid.js';
 
 const Post = new GraphQLObjectType({
   name: 'Post',
-  fields: {
+  fields: () => ({
     id: { type: new GraphQLNonNull(UUIDType) },
     title: { type: new GraphQLNonNull(GraphQLString) },
     content: { type: new GraphQLNonNull(GraphQLString) },
-  },
+    authorId: { type: new GraphQLNonNull(UUIDType) },
+  }),
 });
 
 const CreatePostInput = new GraphQLInputObjectType({
@@ -24,4 +25,12 @@ const CreatePostInput = new GraphQLInputObjectType({
   },
 });
 
-export { Post, CreatePostInput };
+const ChangePostInput = new GraphQLInputObjectType({
+  name: 'ChangePostInput',
+  fields: {
+    title: { type: GraphQLString },
+    content: { type: GraphQLString },
+  },
+});
+
+export { Post, CreatePostInput, ChangePostInput };

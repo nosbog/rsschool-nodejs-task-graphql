@@ -1,11 +1,11 @@
 import { PrismaClient } from '@prisma/client';
 import { GraphQLList, GraphQLNonNull, GraphQLObjectType, GraphQLSchema } from 'graphql';
 import { MemberIdType, MemberType } from './types/memberTypes.js';
-import { CreateUserInput, User } from './types/users.js';
+import { ChangeUserInput, CreateUserInput, User } from './types/users.js';
 import { parseResolveInfo } from 'graphql-parse-resolve-info';
 import { UUIDType } from './types/uuid.js';
-import { CreatePostInput, Post } from './types/posts.js';
-import { CreateProfileInput, Profile } from './types/profiles.js';
+import { ChangePostInput, CreatePostInput, Post } from './types/posts.js';
+import { ChangeProfileInput, CreateProfileInput, Profile } from './types/profiles.js';
 
 interface IncludeFieldsPrisma {
   userSubscribedTo?: boolean;
@@ -131,6 +131,45 @@ const Mutations = new GraphQLObjectType({
       args: { dto: { type: new GraphQLNonNull(CreatePostInput) } },
       resolve: (_, args, { prisma }) => {
         return prisma.post.create({
+          data: args.dto,
+        });
+      },
+    },
+    changePost: {
+      type: new GraphQLNonNull(Post),
+      args: {
+        id: { type: new GraphQLNonNull(UUIDType) },
+        dto: { type: new GraphQLNonNull(ChangePostInput) },
+      },
+      resolve: (_, args, { prisma }) => {
+        return prisma.post.update({
+          where: { id: args.id },
+          data: args.dto,
+        });
+      },
+    },
+    changeProfile: {
+      type: new GraphQLNonNull(Profile),
+      args: {
+        id: { type: new GraphQLNonNull(UUIDType) },
+        dto: { type: new GraphQLNonNull(ChangeProfileInput) },
+      },
+      resolve: (_, args, { prisma }) => {
+        return prisma.profile.update({
+          where: { id: args.id },
+          data: args.dto,
+        });
+      },
+    },
+    changeUser: {
+      type: new GraphQLNonNull(User),
+      args: {
+        id: { type: new GraphQLNonNull(UUIDType) },
+        dto: { type: new GraphQLNonNull(ChangeUserInput) },
+      },
+      resolve: (_, args, { prisma }) => {
+        return prisma.user.update({
+          where: { id: args.id },
           data: args.dto,
         });
       },

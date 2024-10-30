@@ -75,4 +75,12 @@ const CreateUserInput = new GraphQLInputObjectType({
   },
 });
 
-export { User, CreateUserInput };
+const ChangeUserInput = new GraphQLInputObjectType({
+  name: 'ChangeUserInput',
+  fields: {
+    name: { type: GraphQLString },
+    balance: { type: GraphQLFloat },
+  },
+});
+
+export { User, CreateUserInput, ChangeUserInput };
