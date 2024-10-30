@@ -245,7 +245,7 @@ const RootQueryType = new GraphQLObjectType({
       args: { id: { type: new GraphQLNonNull(UUIDType) } },
       resolve: async (_, { id }, ctx) => {
         return ctx.prisma.user.findUnique({
-          where: { id },
+          where: { id: id as string },
         });
       },
     },
