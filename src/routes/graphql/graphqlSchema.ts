@@ -4,8 +4,8 @@ import { MemberIdType, MemberType } from './types/memberTypes.js';
 import { CreateUserInput, User } from './types/users.js';
 import { parseResolveInfo } from 'graphql-parse-resolve-info';
 import { UUIDType } from './types/uuid.js';
-import { Post } from './types/posts.js';
-import { Profile } from './types/profiles.js';
+import { CreatePostInput, Post } from './types/posts.js';
+import { CreateProfileInput, Profile } from './types/profiles.js';
 
 interface IncludeFieldsPrisma {
   userSubscribedTo?: boolean;
@@ -114,6 +114,24 @@ const Mutations = new GraphQLObjectType({
         const { name, balance } = args.dto;
         return prisma.user.create({
           data: { name, balance },
+        });
+      },
+    },
+    createProfile: {
+      type: new GraphQLNonNull(Profile),
+      args: { dto: { type: new GraphQLNonNull(CreateProfileInput) } },
+      resolve: (_, args, { prisma }) => {
+        return prisma.profile.create({
+          data: args.dto,
+        });
+      },
+    },
+    createPost: {
+      type: new GraphQLNonNull(Post),
+      args: { dto: { type: new GraphQLNonNull(CreatePostInput) } },
+      resolve: (_, args, { prisma }) => {
+        return prisma.post.create({
+          data: args.dto,
         });
       },
     },
