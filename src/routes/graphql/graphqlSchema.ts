@@ -1,5 +1,11 @@
 import { PrismaClient } from '@prisma/client';
-import { GraphQLList, GraphQLNonNull, GraphQLObjectType, GraphQLSchema } from 'graphql';
+import {
+  GraphQLList,
+  GraphQLNonNull,
+  GraphQLObjectType,
+  GraphQLSchema,
+  GraphQLString,
+} from 'graphql';
 import { MemberIdType, MemberType } from './types/memberTypes.js';
 import { ChangeUserInput, CreateUserInput, User } from './types/users.js';
 import { parseResolveInfo } from 'graphql-parse-resolve-info';
@@ -172,6 +178,48 @@ const Mutations = new GraphQLObjectType({
           where: { id: args.id },
           data: args.dto,
         });
+      },
+    },
+    deleteUser: {
+      type: new GraphQLNonNull(GraphQLString),
+      args: {
+        id: { type: new GraphQLNonNull(UUIDType) },
+      },
+      resolve: (_, args, { prisma }) => {
+        prisma.user.delete({
+          where: {
+            id: args.id,
+          },
+        });
+        return `User with id ${args.id} was deleted`;
+      },
+    },
+    deletePost: {
+      type: new GraphQLNonNull(GraphQLString),
+      args: {
+        id: { type: new GraphQLNonNull(UUIDType) },
+      },
+      resolve: (_, args, { prisma }) => {
+        prisma.post.delete({
+          where: {
+            id: args.id,
+          },
+        });
+        return `Post with id ${args.id} was deleted`;
+      },
+    },
+    deleteProfile: {
+      type: new GraphQLNonNull(GraphQLString),
+      args: {
+        id: { type: new GraphQLNonNull(UUIDType) },
+      },
+      resolve: (_, args, { prisma }) => {
+        prisma.profile.delete({
+          where: {
+            id: args.id,
+          },
+        });
+        return `Profile with id ${args.id} was deleted`;
       },
     },
   }),
