@@ -8,8 +8,8 @@ export const ProfileType = new GraphQLObjectType({
     name: 'ProfileType',
     fields: () => ({
         id: { type: UUIDType },
-        userId: { type: UserType.getFields().id.type },
-        memberTypeId: { type: PostType.getFields().id.type },
+        //userId: { type: UserType.getFields().id.type },
+        //memberTypeId: { type: PostType.getFields().id.type },
         isMale: { type: GraphQLBoolean },
         yearOfBirth: { type: GraphQLInt },
         memberType: { type: MemberType },
@@ -17,21 +17,21 @@ export const ProfileType = new GraphQLObjectType({
 });
 
 export const CreateProfileInputType = new GraphQLInputObjectType({
-    name: 'CreateProfileInputType',
+    name: 'CreateProfileInput',
     fields: () => ({
-        userId: { type: GraphQLString },
-        memberTypeId: { type: GraphQLString },
         isMale: { type: GraphQLBoolean },
         yearOfBirth: { type: GraphQLInt },
+        userId: { type: GraphQLString },
+        memberTypeId: { type: GraphQLString },
     }),
 });
 
 export const ChangeProfileInputType = new GraphQLInputObjectType({
-    name: 'ChangeProfileInputType',
+    name: 'ChangeProfileInput',
     fields: {
-        memberTypeId: { type: GraphQLString },
         isMale: { type: GraphQLBoolean },
         yearOfBirth: { type: GraphQLInt },
+        memberTypeId: { type: GraphQLString },
     },
 });
   
