@@ -18,9 +18,9 @@ import profileResolver from './resolvers/singleRecord/profile.resolver.js';
 
 const queries = (
   prisma: PrismaClient,
-  profilesLoader: DataLoader<string, Profile[], string>,
+  profileLoader: DataLoader<string, Profile | null, string>,
   postsLoader: DataLoader<string, Post[], string>,
-  memberTypesLoader: DataLoader<string, MemberType, string>,
+  memberTypeLoader: DataLoader<string, MemberType | null, string>,
 ) =>
     new GraphQLObjectType({
         name: 'queries',
@@ -33,7 +33,7 @@ const queries = (
                 resolve: async (_parent, _args, _context, resolveInfo) => {
                   const parsedResolveInfoFragment = parseResolveInfo(resolveInfo) as ResolveTree;
                   const { fields } = simplifyParsedResolveInfoFragmentWithType(parsedResolveInfoFragment, UserType);
-                  return await usersResolver(fields, profilesLoader, postsLoader, prisma);
+                  return await usersResolver(fields, profileLoader, postsLoader, memberTypeLoader, prisma);
                 },
             },
         
@@ -49,7 +49,7 @@ const queries = (
 
             profiles: {
                 type: new GraphQLList(ProfileType),
-                resolve: async () => await profilesResolver(memberTypesLoader, prisma),
+                resolve: async () => await profilesResolver(memberTypeLoader, prisma),
             },
 
             // ---> single record
@@ -59,7 +59,8 @@ const queries = (
                 args: {
                     id: { type: UUIDType },
                 },
-                resolve: async (_parent, args) => await userResolver(args, prisma),
+                resolve: async (_parent, args) =>
+                    await userResolver(args, postsLoader, profileLoader, memberTypeLoader, prisma),
             },
 
             memberType: {

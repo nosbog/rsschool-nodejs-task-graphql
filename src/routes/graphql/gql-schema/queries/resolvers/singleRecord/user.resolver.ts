@@ -1,6 +1,13 @@
-import { PrismaClient, User, Profile, Post } from '@prisma/client';
+import { PrismaClient, Profile, Post, MemberType } from '@prisma/client';
+import DataLoader from 'dataloader';
 
-async function userResolver(args: Record<string, any>, prisma: PrismaClient) {
+async function userResolver(
+  args: Record<string, any>,
+  postsLoader: DataLoader<string, Post[], string>,
+  profileLoader: DataLoader<string, Profile | null, string>,
+  memberTypeLoader: DataLoader<string, MemberType | null, string>,
+  prisma: PrismaClient
+) {
   const user = await prisma.user.findUnique({ where: { id: args.id } });
   if (!user) return null;
 
@@ -52,13 +59,18 @@ async function userResolver(args: Record<string, any>, prisma: PrismaClient) {
     })
   );
     
-  const profile: Profile | null = await prisma.profile.findUnique({ where: { userId: user.id } });
+  const profile = await profileLoader.load(user.id);
 
-  const posts: Post[] = await prisma.post.findMany({ where: { authorId: user.id } });
+  const profileWithMemberType = profile ? {
+    ...profile,
+    memberType: await memberTypeLoader.load(profile.id),
+  }: null;
+
+  const posts: Post[] = await postsLoader.load(user.id);
 
   return {
     ...user,
-    profile: profile ? { ...profile, memberType: { id: profile.memberTypeId } } : null,
+    profile: profileWithMemberType,
     posts,
     userSubscribedTo: [...userAuthors],
     subscribedToUser: [...userSubscribers],

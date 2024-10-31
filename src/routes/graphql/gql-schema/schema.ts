@@ -6,11 +6,11 @@ import queries from './queries/queries.js';
 
 const Schema = (
     prisma: PrismaClient,
-    profilesLoader: DataLoader<string, Profile[], string>,
+    profileLoader: DataLoader<string, Profile | null, string>,
     postsLoader: DataLoader<string, Post[], string>,
-    memberTypesLoader: DataLoader<string, MemberType[], string>) => {
+    memberTypeLoader: DataLoader<string, MemberType | null, string>) => {
     return new GraphQLSchema({
-      query: queries(prisma, profilesLoader, postsLoader, memberTypesLoader),
+      query: queries(prisma, profileLoader, postsLoader, memberTypeLoader),
       mutation: mutations(prisma),
     });
 }

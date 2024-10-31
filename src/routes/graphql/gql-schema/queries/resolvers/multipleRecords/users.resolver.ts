@@ -1,10 +1,11 @@
-import { PrismaClient, Post, Profile, User } from '@prisma/client';
+import { MemberType, PrismaClient, Post, Profile, User } from '@prisma/client';
 import DataLoader from 'dataloader';
 
 async function usersResolver(
     fields: Record<string, any>,
-    profilesLoader: DataLoader<string, Profile[], string>,
+    profileLoader: DataLoader<string, Profile | null, string>,
     postsLoader: DataLoader<string, Post[], string>,
+    memberTypeLoader: DataLoader<string, MemberType | null, string>,
     prisma: PrismaClient
 ): Promise<User[]> {
   const additionallyRequiredUserFieldNames =
@@ -27,13 +28,18 @@ async function usersResolver(
     }));
   }
   if (additionallyRequiredUserFieldNames.includes('profile')) {
-    const allUsersProfiles = await Promise.all(users.map(async (user) => await profilesLoader.load(user.id)));
-    users = users.map((user, index) => {
+    const allUsersProfiles = await Promise.all(users.map(async (user) => await profileLoader.load(user.id)));
+    users = await Promise.all(users.map(async (user, index) => {
+      const userProfile = allUsersProfiles[index];
+      const profileWithMemberType = userProfile ? {
+        ...userProfile,
+        memberType: await memberTypeLoader.load(userProfile.id),
+      } : null;
       return {
         ...user,
-        profile: allUsersProfiles[index],
+        profile: profileWithMemberType,
       };
-    });
+    }));
   }
   return users;
 };
