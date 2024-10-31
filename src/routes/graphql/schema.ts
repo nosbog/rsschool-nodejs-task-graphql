@@ -13,6 +13,7 @@ import {
 import { UUIDType } from './types/uuid.js';
 import { MemberTypeId } from '../member-types/schemas.js';
 import { PrismaClient } from '@prisma/client';
+import { userLoader } from './loaders/userLoader.js';
 
 const CreateUserInput = new GraphQLInputObjectType({
   name: 'CreateUserInput',
@@ -236,9 +237,7 @@ const RootQueryType = new GraphQLObjectType({
       type: User,
       args: { id: { type: new GraphQLNonNull(UUIDType) } },
       resolve: async (_, { id }, ctx) => {
-        return ctx.prisma.user.findUnique({
-          where: { id: id as string },
-        });
+        return await userLoader(ctx.prisma).load(id as string);
       },
     },
 
