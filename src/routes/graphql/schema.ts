@@ -227,16 +227,8 @@ const RootQueryType = new GraphQLObjectType({
 
     users: {
       type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(User))),
-      resolve: (_, __, ctx, info) => {
-        const includesUserSubscribedTo = info.fieldName.includes('userSubscribedTo');
-        const includesSubscribedToUser = info.fieldName.includes('subscribedToUser');
-
-        return ctx.prisma.user.findMany({
-          include: {
-            ...(includesUserSubscribedTo && { userSubscribedTo: true }),
-            ...(includesSubscribedToUser && { subscribedToUser: true }),
-          },
-        });
+      resolve: (_, __, ctx) => {
+        return ctx.prisma.user.findMany();
       },
     },
 
