@@ -18,6 +18,8 @@ module.exports = {
   ],
   overrides: [],
   rules: {
+    "@typescript-eslint/no-unsafe-assignment": "error",
+    "@typescript-eslint/no-explicit-any": "error",
     '@typescript-eslint/require-await': 0,
     '@typescript-eslint/ban-ts-comment': 0,
     '@typescript-eslint/no-misused-promises': [
