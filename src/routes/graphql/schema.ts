@@ -1,8 +1,8 @@
 import { GraphQLObjectType, GraphQLSchema } from "graphql";
 import { MemberQuery } from './types/member.js';
-import { PostQuery } from './types/post.js';
-import { ProfileQuery } from './types/profile.js';
-import { UserQuery } from './types/user.js';
+import { PostMutation, PostQuery } from './types/post.js';
+import { ProfileMutation, ProfileQuery } from './types/profile.js';
+import { UserMutation, UserQuery } from './types/user.js';
 
 
 
@@ -16,6 +16,16 @@ const RootQuery = new GraphQLObjectType({
   }
 });
 
+const RootMutation = new GraphQLObjectType({
+  name: 'RootMutation',
+  fields: {
+    ...UserMutation.toConfig().fields,
+    ...PostMutation.toConfig().fields,
+    ...ProfileMutation.toConfig().fields
+  }
+});
+
 export const schema: GraphQLSchema = new GraphQLSchema({
   query: RootQuery,
+  mutation: RootMutation,
 });
