@@ -17,7 +17,7 @@ export const memberTypeFields = {
 };
 */
 
-const MemberIdEnum = new GraphQLEnumType({
+export const MemberIdEnum = new GraphQLEnumType({
   name: 'MemberId',
   values: {
     BASIC: { value: MemberTypeId.BASIC },
