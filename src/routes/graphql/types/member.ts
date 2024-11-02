@@ -8,7 +8,7 @@ import {
 import { MemberTypeId } from '../../member-types/schemas.js';
 
 export const MemberIdEnum = new GraphQLEnumType({
-  name: 'MemberId',
+  name: 'MemberTypeId',
   values: {
     BASIC: { value: MemberTypeId.BASIC },
     BUSINESS: { value: MemberTypeId.BUSINESS },

@@ -23,6 +23,11 @@ import {
   UserType,
 } from '../types/user.js';
 
+interface SubscribeArgs {
+  subscriberId: string;
+  authorId: string;
+}
+
 export const MutationType = new GraphQLObjectType({
   name: 'Mutation',
   fields: {
@@ -158,7 +163,37 @@ export const MutationType = new GraphQLObjectType({
         userId: { type: new GraphQLNonNull(UUIDType) },
         authorId: { type: new GraphQLNonNull(UUIDType) },
       },
-      resolve: async (source, args, { prisma }: PrismaContext) => {},
+      resolve: async (
+        source,
+        { authorId, subscriberId }: SubscribeArgs,
+        { prisma }: PrismaContext,
+      ) => {
+        // const user = await prisma.user.findUnique({ where: { id: subscriberId } });
+        // const author = await prisma.user.findUnique({ where: { id: authorId } });
+
+        // if (!user || !author) {
+        //   throw new Error('User or Author not found');
+        // }
+        const existingSubscription = await prisma.subscribersOnAuthors.findUnique({
+          where: {
+            subscriberId_authorId: {
+              subscriberId,
+              authorId,
+            },
+          },
+        });
+
+        if (existingSubscription) {
+          throw new Error('User already subscribed to the Author');
+        }
+
+        return await prisma.subscribersOnAuthors.create({
+          data: {
+            subscriberId,
+            authorId,
+          },
+        });
+      },
     },
     unsubscribeFrom: {
       type: new GraphQLNonNull(GraphQLString),
@@ -166,7 +201,20 @@ export const MutationType = new GraphQLObjectType({
         userId: { type: new GraphQLNonNull(UUIDType) },
         authorId: { type: new GraphQLNonNull(UUIDType) },
       },
-      resolve: async (source, args, { prisma }: PrismaContext) => {},
+      resolve: async (
+        source,
+        { subscriberId, authorId }: SubscribeArgs,
+        { prisma }: PrismaContext,
+      ) => {
+        await prisma.subscribersOnAuthors.delete({
+          where: {
+            subscriberId_authorId: {
+              subscriberId,
+              authorId,
+            },
+          },
+        });
+      },
     },
   },
 });

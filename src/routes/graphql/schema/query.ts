@@ -89,6 +89,14 @@ export const QueryType = new GraphQLObjectType({
       async resolve(parent, { id }: { id: string }, { prisma }) {
         return await prisma.user.findUnique({
           where: { id },
+          include: {
+            profile: {
+              include: {
+                memberType: true,
+              },
+            },
+            posts: true,
+          },
         });
       },
     },
