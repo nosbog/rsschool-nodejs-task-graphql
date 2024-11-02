@@ -13,16 +13,12 @@ interface GetPostArgsType {
   id: string;
 }
 
-// interface PostsArgsType {
-//   id: string;
-// }
-
 export const QueryType = new GraphQLObjectType({
   name: 'Query',
   fields: {
     memberTypes: {
       type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(MemberType))),
-      resolve: async (obj, args, { prisma }: PrismaContext) => {
+      resolve: async (source, args, { prisma }: PrismaContext) => {
         return await prisma.memberType.findMany();
       },
     },
@@ -31,7 +27,7 @@ export const QueryType = new GraphQLObjectType({
       args: {
         id: { type: new GraphQLNonNull(MemberIdEnum) },
       },
-      resolve: async (obj, { id }: MemberTypeArgs, { prisma }: PrismaContext) => {
+      resolve: async (source, { id }: MemberTypeArgs, { prisma }: PrismaContext) => {
         return await prisma.memberType.findUnique({
           where: {
             id,
@@ -41,7 +37,7 @@ export const QueryType = new GraphQLObjectType({
     },
     posts: {
       type: new GraphQLList(PostType),
-      resolve: async (obj, args, { prisma }: PrismaContext) => {
+      resolve: async (source, args, { prisma }: PrismaContext) => {
         return await prisma.post.findMany();
       },
     },
@@ -50,7 +46,7 @@ export const QueryType = new GraphQLObjectType({
       args: {
         id: { type: new GraphQLNonNull(UUIDType) },
       },
-      resolve: async (obj, { id }: GetPostArgsType, { prisma }: PrismaContext) => {
+      resolve: async (source, { id }: GetPostArgsType, { prisma }: PrismaContext) => {
         return await prisma.post.findUnique({
           where: {
             id,
@@ -60,14 +56,14 @@ export const QueryType = new GraphQLObjectType({
     },
     profiles: {
       type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(ProfileType))),
-      resolve: async (obj, args, { prisma }: PrismaContext) => {},
+      resolve: async (source, args, { prisma }: PrismaContext) => {},
     },
     profile: {
       type: ProfileType,
       args: {
         id: { type: new GraphQLNonNull(UUIDType) },
       },
-      resolve: async (obj, args, { prisma }: PrismaContext) => {},
+      resolve: async (source, args, { prisma }: PrismaContext) => {},
     },
   },
 });

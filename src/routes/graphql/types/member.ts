@@ -7,16 +7,6 @@ import {
 } from 'graphql';
 import { MemberTypeId } from '../../member-types/schemas.js';
 
-/* 
-export const memberTypeFields = {
-  id: Type.String({
-    pattern: Object.values(MemberTypeId).join('|'),
-  }),
-  discount: Type.Number(),
-  postsLimitPerMonth: Type.Integer(),
-};
-*/
-
 export const MemberIdEnum = new GraphQLEnumType({
   name: 'MemberId',
   values: {
