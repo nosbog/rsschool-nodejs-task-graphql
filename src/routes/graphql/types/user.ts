@@ -42,3 +42,14 @@ export const UpdateUserInput = new GraphQLInputObjectType({
     balance: { type: GraphQLFloat },
   },
 });
+
+export interface UserArgs {
+  name: string;
+  balance: number;
+}
+export interface CreateUserArgs {
+  user: UserArgs;
+}
+export interface UpdateUserArgs extends CreateUserArgs {
+  id: string;
+}

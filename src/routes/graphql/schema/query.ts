@@ -4,12 +4,13 @@ import { MemberType, MemberIdEnum } from '../types/member.js';
 import { PostType } from '../types/post.js';
 import { UUIDType } from '../types/uuid.js';
 import { ProfileType } from '../types/profile.js';
+import { UserType } from '../types/user.js';
 
 interface MemberTypeArgs {
   id: string;
 }
 
-interface GetPostArgsType {
+interface GetPostArgs {
   id: string;
 }
 
@@ -46,7 +47,7 @@ export const QueryType = new GraphQLObjectType({
       args: {
         id: { type: new GraphQLNonNull(UUIDType) },
       },
-      resolve: async (source, { id }: GetPostArgsType, { prisma }: PrismaContext) => {
+      resolve: async (source, { id }: GetPostArgs, { prisma }: PrismaContext) => {
         return await prisma.post.findUnique({
           where: {
             id,
@@ -56,14 +57,40 @@ export const QueryType = new GraphQLObjectType({
     },
     profiles: {
       type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(ProfileType))),
-      resolve: async (source, args, { prisma }: PrismaContext) => {},
+      resolve: async (source, args, { prisma }: PrismaContext) => {
+        return await prisma.profile.findMany();
+      },
     },
     profile: {
       type: ProfileType,
       args: {
         id: { type: new GraphQLNonNull(UUIDType) },
       },
-      resolve: async (source, args, { prisma }: PrismaContext) => {},
+      resolve: async (source, { id }: { id: string }, { prisma }: PrismaContext) => {
+        return await prisma.profile.findUnique({
+          where: { id },
+        });
+      },
+    },
+
+    users: {
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(UserType))),
+      resolve(parent, args, { prisma }) {
+        return prisma.user.findMany();
+      },
+    },
+
+    user: {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      type: UserType,
+      args: {
+        id: { type: new GraphQLNonNull(UUIDType) },
+      },
+      async resolve(parent, { id }: { id: string }, { prisma }) {
+        return await prisma.user.findUnique({
+          where: { id },
+        });
+      },
     },
   },
 });

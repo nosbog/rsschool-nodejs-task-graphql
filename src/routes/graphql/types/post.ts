@@ -43,3 +43,17 @@ export const CreatePostInput = new GraphQLInputObjectType({
     authorId: { type: new GraphQLNonNull(UUIDType) },
   },
 });
+
+export interface PostArgs {
+  title: string;
+  content: string;
+  authorId: string;
+}
+
+export interface CreatePostArgs {
+  post: PostArgs;
+}
+
+export interface UpdatePostArgs extends CreatePostArgs {
+  id: string;
+}

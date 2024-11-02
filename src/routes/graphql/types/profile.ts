@@ -22,9 +22,9 @@ export const ProfileType = new GraphQLObjectType({
 export const CreateProfileInput = new GraphQLInputObjectType({
   name: 'CreateProfileInput',
   fields: {
+    userId: { type: new GraphQLNonNull(UUIDType) },
     isMale: { type: new GraphQLNonNull(GraphQLBoolean) },
     yearOfBirth: { type: new GraphQLNonNull(GraphQLInt) },
-    userId: { type: new GraphQLNonNull(UUIDType) },
     memberTypeId: { type: new GraphQLNonNull(MemberIdEnum) },
   },
 });
@@ -37,3 +37,17 @@ export const UpdateProfileInput = new GraphQLInputObjectType({
     memberTypeId: { type: MemberIdEnum },
   },
 });
+
+export interface ProfileArgs {
+  userId: string;
+  isMale: boolean;
+  yearOfBirth: number;
+  memberTypeId: string;
+}
+
+export interface CreateProfileArgs {
+  profile: ProfileArgs;
+}
+export interface UpdateProfileArgs extends CreateProfileArgs {
+  id: string;
+}
