@@ -40,7 +40,7 @@ export const CreateProfileInput = new GraphQLInputObjectType({
   },
 });
 
-export const UpdateProfileInput = new GraphQLInputObjectType({
+export const ChangeProfileInput = new GraphQLInputObjectType({
   name: 'ChangeProfileInput',
   fields: {
     isMale: { type: GraphQLBoolean },
@@ -57,8 +57,8 @@ export interface ProfileArgs {
 }
 
 export interface CreateProfileArgs {
-  profile: ProfileArgs;
+  dto: ProfileArgs;
 }
-export interface UpdateProfileArgs extends CreateProfileArgs {
+export interface ChangeProfileArgs extends CreateProfileArgs {
   id: string;
 }

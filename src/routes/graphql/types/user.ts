@@ -80,8 +80,8 @@ export const CreateUserInput = new GraphQLInputObjectType({
   },
 });
 
-export const UpdateUserInput = new GraphQLInputObjectType({
-  name: 'UpdateUserInput',
+export const ChangeUserInput = new GraphQLInputObjectType({
+  name: 'ChangeUserInput',
   fields: {
     name: { type: GraphQLString },
     balance: { type: GraphQLFloat },
@@ -93,8 +93,8 @@ export interface UserArgs {
   balance: number;
 }
 export interface CreateUserArgs {
-  user: UserArgs;
+  dto: UserArgs;
 }
-export interface UpdateUserArgs extends CreateUserArgs {
+export interface ChangeUserArgs extends CreateUserArgs {
   id: string;
 }

@@ -27,8 +27,8 @@ export const PostType = new GraphQLObjectType({
   },
 });
 
-export const UpdatePostInput = new GraphQLInputObjectType({
-  name: 'UpdatePostInput',
+export const ChangePostInput = new GraphQLInputObjectType({
+  name: 'ChangePostInput',
   fields: {
     title: { type: GraphQLString },
     content: { type: GraphQLString },
@@ -51,9 +51,9 @@ export interface PostArgs {
 }
 
 export interface CreatePostArgs {
-  post: PostArgs;
+  dto: PostArgs;
 }
 
-export interface UpdatePostArgs extends CreatePostArgs {
+export interface ChangePostArgs extends CreatePostArgs {
   id: string;
 }
