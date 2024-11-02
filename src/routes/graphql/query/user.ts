@@ -1,4 +1,4 @@
-import {userType} from "./types/user.js";
+import {UserType} from "./types/user.js";
 import {GraphQLNonNull, GraphQLList } from "graphql";
 import {UUIDType} from "../types/uuid.js";
 import {User} from "@prisma/client";
@@ -6,7 +6,7 @@ import { Context } from "../types/context.js"
 
 export const userQueryType = {
     user: {
-        type: userType,
+        type: UserType,
         args: {
             id: { type: new GraphQLNonNull(UUIDType) },
         },
@@ -15,7 +15,7 @@ export const userQueryType = {
         }
     },
     users: {
-        type: new GraphQLList(userType),
+        type: new GraphQLList(UserType),
         resolve: async (_obj, _args, context: Context) => {
             return await context.prisma.user.findMany()
         }

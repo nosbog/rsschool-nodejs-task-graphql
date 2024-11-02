@@ -1,11 +1,11 @@
 import {  GraphQLNonNull, GraphQLObjectType, GraphQLString, GraphQLFloat, GraphQLList } from "graphql";
 import { User } from '@prisma/client';
 import { Context } from "../../types/context.js";
-import {postType} from "./post.js";
-import {profileType} from "./profile.js";
+import {PostType} from "./post.js";
+import {ProfileType} from "./profile.js";
 import {UUIDType} from "../../types/uuid.js";
 
-export const userType = new GraphQLObjectType({
+export const UserType = new GraphQLObjectType({
     name: 'User',
     description: "This represent a User",
     fields: () => ({
@@ -13,19 +13,19 @@ export const userType = new GraphQLObjectType({
         name: { type: GraphQLString },
         balance: { type: GraphQLFloat },
         posts: {
-            type: new GraphQLList(postType),
+            type: new GraphQLList(PostType),
             resolve: async (obj: User, _args, context: Context) => {
                 return await context.prisma.post.findMany({ where: { authorId: obj.id } })
             }
         },
         profile: {
-            type: profileType as GraphQLObjectType,
+            type: ProfileType,
             resolve: async (obj: User, _args, context: Context) => {
                 return await context.prisma.profile.findUnique({ where: { userId: obj.id } })
             }
         },
         subscribedToUser: {
-            type: new GraphQLList(userType),
+            type: new GraphQLList(UserType),
             resolve: async (obj: User, _args, context: Context) => {
                 return context.prisma.user.findMany(
                     {
@@ -40,7 +40,7 @@ export const userType = new GraphQLObjectType({
             }
         },
         userSubscribedTo: {
-            type: new GraphQLList(userType),
+            type: new GraphQLList(UserType),
             resolve: async (obj: User, _args, context: Context) => {
                 return context.prisma.user.findMany(
                     {

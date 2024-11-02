@@ -1,12 +1,12 @@
 import {  GraphQLNonNull, GraphQLList } from "graphql";
-import {postType} from "./types/post.js";
+import {PostType} from "./types/post.js";
 import {UUIDType} from "../types/uuid.js";
 import {Post} from "@prisma/client";
 import { Context } from "../types/context.js";
 
 export const postQueryType = {
     post: {
-        type: postType,
+        type: PostType,
         args: {
             id: { type: new GraphQLNonNull(UUIDType) },
         },
@@ -15,7 +15,7 @@ export const postQueryType = {
         }
     },
     posts: {
-        type: new GraphQLList(postType),
+        type: new GraphQLList(PostType),
         resolve: async (_obj, _args, context: Context) => {
             return await context.prisma.post.findMany()
         }
