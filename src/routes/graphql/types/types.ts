@@ -3,12 +3,13 @@ import {
   GraphQLFloat,
   GraphQLInt,
   GraphQLObjectType,
+  GraphQLScalarType,
   GraphQLString,
 } from 'graphql';
 import { UUIDType } from './uuid.js';
 
-export const memberTypes = new GraphQLObjectType({
-  name: 'MemberTypes',
+export const memberType = new GraphQLObjectType({
+  name: 'MemberType',
   fields: () => ({
     id: {
       type: GraphQLString,
@@ -22,8 +23,8 @@ export const memberTypes = new GraphQLObjectType({
   }),
 });
 
-export const posts = new GraphQLObjectType({
-  name: 'Posts',
+export const post = new GraphQLObjectType({
+  name: 'Post',
   fields: () => ({
     id: {
       type: UUIDType,
@@ -40,8 +41,8 @@ export const posts = new GraphQLObjectType({
   }),
 });
 
-export const users = new GraphQLObjectType({
-  name: 'Users',
+export const user = new GraphQLObjectType({
+  name: 'User',
   fields: () => ({
     id: {
       type: UUIDType,
@@ -55,8 +56,8 @@ export const users = new GraphQLObjectType({
   }),
 });
 
-export const profiles = new GraphQLObjectType({
-  name: 'Profiles',
+export const profile = new GraphQLObjectType({
+  name: 'Profile',
   fields: () => ({
     id: {
       type: UUIDType,
@@ -74,4 +75,8 @@ export const profiles = new GraphQLObjectType({
       type: GraphQLString,
     },
   }),
+});
+
+export const MemberTypeId = new GraphQLScalarType({
+  name: 'MemberTypeId',
 });

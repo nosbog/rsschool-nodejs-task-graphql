@@ -1,7 +1,15 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { createGqlResponseSchema, gqlResponseSchema } from './schemas.js';
-import { graphql, GraphQLList, GraphQLObjectType, GraphQLSchema } from 'graphql';
-import { memberTypes, posts, profiles, users } from './types/types.js';
+import {
+  graphql,
+  GraphQLList,
+  GraphQLNonNull,
+  GraphQLObjectType,
+  GraphQLSchema,
+} from 'graphql';
+import { memberType, MemberTypeId, post, profile, user } from './types/types.js';
+import { FastifyRequest } from 'fastify';
+import { UUIDType } from './types/uuid.js';
 
 const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
   const { prisma } = fastify;
@@ -29,27 +37,87 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
       name: 'RootQuery',
       fields: {
         memberTypes: {
-          type: new GraphQLList(memberTypes),
+          type: new GraphQLList(memberType),
           resolve: async () => {
             return prisma.memberType.findMany();
           },
         },
         posts: {
-          type: new GraphQLList(posts),
+          type: new GraphQLList(post),
           resolve: async () => {
             return prisma.post.findMany();
           },
         },
         users: {
-          type: new GraphQLList(users),
+          type: new GraphQLList(user),
           resolve: async () => {
             return prisma.user.findMany();
           },
         },
         profiles: {
-          type: new GraphQLList(profiles),
+          type: new GraphQLList(profile),
           resolve: async () => {
             return prisma.profile.findMany();
+          },
+        },
+        memberType: {
+          type: memberType,
+          args: {
+            id: {
+              type: MemberTypeId,
+            },
+          },
+          resolve: async (req: FastifyRequest, args: { id: string }) => {
+            return await prisma.memberType.findUnique({
+              where: {
+                id: args.id,
+              },
+            });
+          },
+        },
+        post: {
+          type: post,
+          args: {
+            id: {
+              type: new GraphQLNonNull(UUIDType),
+            },
+          },
+          resolve: async (req: FastifyRequest, args: { id: string }) => {
+            return await prisma.post.findUnique({
+              where: {
+                id: args.id,
+              },
+            });
+          },
+        },
+        user: {
+          type: user,
+          args: {
+            id: {
+              type: new GraphQLNonNull(UUIDType),
+            },
+          },
+          resolve: async (req: FastifyRequest, args: { id: string }) => {
+            return await prisma.user.findUnique({
+              where: {
+                id: args.id,
+              },
+            });
+          },
+        },
+        profile: {
+          type: profile,
+          args: {
+            id: {
+              type: new GraphQLNonNull(UUIDType),
+            },
+          },
+          resolve: async (req: FastifyRequest, args: { id: string }) => {
+            return await prisma.profile.findUnique({
+              where: {
+                id: args.id,
+              },
+            });
           },
         },
       },
