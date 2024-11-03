@@ -1,10 +1,13 @@
-import { Type } from '@fastify/type-provider-typebox';
+import { Type } from "@fastify/type-provider-typebox";
+import { GraphQLSchema } from "graphql";
+import { query } from "./schema/query.js";
+import { mutation } from "./schema/mutation.js";
 
 export const gqlResponseSchema = Type.Partial(
   Type.Object({
     data: Type.Any(),
     errors: Type.Any(),
-  }),
+  })
 );
 
 export const createGqlResponseSchema = {
@@ -15,6 +18,8 @@ export const createGqlResponseSchema = {
     },
     {
       additionalProperties: false,
-    },
+    }
   ),
 };
+
+export const schema = new GraphQLSchema({ query, mutation });
