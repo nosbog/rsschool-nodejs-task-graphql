@@ -9,7 +9,6 @@ import {
   GraphQLList,
   GraphQLEnumType,
   GraphQLBoolean,
-  GraphQLNonNull,
 } from 'graphql';
 import { UUIDType } from './types/uuid.js';
 
@@ -67,7 +66,13 @@ const profileType = new GraphQLObjectType({
     id: { type: UUIDType },
     isMale: { type: GraphQLBoolean },
     yearOfBirth: { type: GraphQLInt },
-    memberType: { type: memberType },
+    memberType: {
+      type: memberType,
+      resolve: async (currentProfile: Record<string, string>) =>
+        await prisma.memberType.findUnique({
+          where: { id: currentProfile.memberTypeId },
+        }),
+    },
   },
 });
 
@@ -94,9 +99,9 @@ const userType = new GraphQLObjectType({
       resolve: async (currentUser) => {
         const subscribers = await prisma.subscribersOnAuthors.findMany({
           where: { subscriberId: currentUser.id },
-          include: { subscriber: true },
+          include: { author: true },
         });
-        return subscribers.map((sub) => sub.subscriber);
+        return subscribers.map((sub) => sub.author);
       },
     },
 
@@ -105,9 +110,9 @@ const userType = new GraphQLObjectType({
       resolve: async (currentUser) => {
         const subscriptions = await prisma.subscribersOnAuthors.findMany({
           where: { authorId: currentUser.id },
-          include: { author: true },
+          include: { subscriber: true },
         });
-        return subscriptions.map((s) => s.author);
+        return subscriptions.map((s) => s.subscriber);
       },
     },
   }),
@@ -156,11 +161,9 @@ const rootQuery = new GraphQLObjectType({
       args: { id: { type: UUIDType } },
       resolve: async (root, args: Record<string, string>) =>
         await prisma.profile.findUnique({ where: { id: args.id } }),
-    }
+    },
   },
 });
-
-
 
 export const schema = new GraphQLSchema({
   query: rootQuery,
