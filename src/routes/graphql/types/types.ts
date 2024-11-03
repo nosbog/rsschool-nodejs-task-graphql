@@ -2,6 +2,7 @@ import {
   GraphQLBoolean,
   GraphQLFloat,
   GraphQLInt,
+  GraphQLList,
   GraphQLObjectType,
   GraphQLScalarType,
   GraphQLString,
@@ -56,6 +57,9 @@ export const user = new GraphQLObjectType({
     profile: {
       type: profile,
     },
+    posts: {
+      type: new GraphQLList(post),
+    },
   }),
 });
 
@@ -76,6 +80,9 @@ export const profile = new GraphQLObjectType({
     },
     memberTypeId: {
       type: GraphQLString,
+    },
+    memberType: {
+      type: memberType,
     },
   }),
 });

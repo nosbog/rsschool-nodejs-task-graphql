@@ -10,6 +10,7 @@ import {
 import { memberType, MemberTypeId, post, profile, user } from './types/types.js';
 import { FastifyRequest } from 'fastify';
 import { UUIDType } from './types/uuid.js';
+import { MemberType } from '@prisma/client';
 
 const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
   const { prisma } = fastify;
@@ -32,6 +33,35 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
     },
   });
 
+  const resolveUser = async (args: { id: string }) => {
+    const user = await prisma.user.findUnique({
+      where: {
+        id: args.id,
+      },
+    });
+    if (!user) return null;
+    const profile = await prisma.profile.findUnique({
+      where: {
+        userId: args.id,
+      },
+    });
+    const posts = await prisma.post.findMany({
+      where: {
+        authorId: args.id,
+      },
+    });
+    let memberType: MemberType | null = null;
+    if (profile) {
+      memberType = await prisma.memberType.findUnique({
+        where: {
+          id: profile?.memberTypeId,
+        },
+      });
+    }
+    const userProfile = profile ? { ...profile, memberType } : null;
+    return { ...user, profile: userProfile, posts };
+  };
+
   const schema = new GraphQLSchema({
     query: new GraphQLObjectType({
       name: 'RootQuery',
@@ -51,7 +81,12 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
         users: {
           type: new GraphQLList(user),
           resolve: async () => {
-            return prisma.user.findMany();
+            const prismaUsers = await prisma.user.findMany();
+            const users = prismaUsers.map(async (user) => {
+              return await resolveUser({ id: user.id });
+            });
+
+            return users;
           },
         },
         profiles: {
@@ -98,18 +133,7 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
             },
           },
           resolve: async (req: FastifyRequest, args: { id: string }) => {
-            const user = await prisma.user.findUnique({
-              where: {
-                id: args.id,
-              },
-            });
-            const profile = await prisma.profile.findUnique({
-              where: {
-                id: args.id,
-              },
-            });
-            if (!user) return null;
-            return { ...user, ...profile };
+            return await resolveUser(args);
           },
         },
         profile: {
