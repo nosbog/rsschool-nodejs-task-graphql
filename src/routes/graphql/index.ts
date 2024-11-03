@@ -98,11 +98,18 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
             },
           },
           resolve: async (req: FastifyRequest, args: { id: string }) => {
-            return await prisma.user.findUnique({
+            const user = await prisma.user.findUnique({
               where: {
                 id: args.id,
               },
             });
+            const profile = await prisma.profile.findUnique({
+              where: {
+                id: args.id,
+              },
+            });
+            if (!user) return null;
+            return { ...user, ...profile };
           },
         },
         profile: {

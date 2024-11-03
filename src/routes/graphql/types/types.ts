@@ -53,6 +53,9 @@ export const user = new GraphQLObjectType({
     balance: {
       type: GraphQLFloat,
     },
+    profile: {
+      type: profile,
+    },
   }),
 });
 
