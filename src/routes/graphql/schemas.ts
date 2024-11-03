@@ -9,6 +9,7 @@ import {
   GraphQLList,
   GraphQLEnumType,
   GraphQLBoolean,
+  GraphQLInputObjectType,
 } from 'graphql';
 import { UUIDType } from './types/uuid.js';
 
@@ -165,6 +166,63 @@ const rootQuery = new GraphQLObjectType({
   },
 });
 
+const postInput = new GraphQLInputObjectType({
+  name: 'CreatePostInput',
+  fields: {
+    title: { type: GraphQLString },
+    content: { type: GraphQLString },
+    authorId: { type: GraphQLString },
+  },
+});
+
+const userInput = new GraphQLInputObjectType({
+  name: 'CreateUserInput',
+  fields: {
+    name: { type: GraphQLString },
+    balance: { type: GraphQLFloat },
+  },
+});
+
+const profileInput = new GraphQLInputObjectType({
+  name: 'CreateProfileInput',
+  fields: {
+    isMale: { type: GraphQLBoolean },
+    yearOfBirth: { type: GraphQLInt },
+    userId: { type: UUIDType },
+    memberTypeId: { type: memberTypeId },
+  },
+});
+
+const rootMutation = new GraphQLObjectType({
+  name: 'Mutation',
+  description: 'root mutation',
+  fields: {
+    createPost: {
+      type: postType,
+      args: { dto: { type: postInput } },
+      resolve: async (root, args) =>
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+        await prisma.post.create({ data: args.dto }),
+    },
+    createUser: {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      type: userType,
+      args: { dto: { type: userInput } },
+      resolve: async (root, args) =>
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+        await prisma.user.create({ data: args.dto }),
+    },
+    createProfile: {
+      type: profileType,
+      args: { dto: { type: profileInput } },
+      resolve: async (root, args) =>
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+        await prisma.profile.create({ data: args.dto }),
+    },
+  },
+});
+
 export const schema = new GraphQLSchema({
   query: rootQuery,
+  mutation: rootMutation,
 });
