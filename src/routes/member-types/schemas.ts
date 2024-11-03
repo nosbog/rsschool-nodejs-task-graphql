@@ -1,8 +1,8 @@
 import { Type } from '@fastify/type-provider-typebox';
 
 export enum MemberTypeId {
-  BASIC = 'BASIC',
-  BUSINESS = 'BUSINESS',
+  BASIC = 'basic',
+  BUSINESS = 'business',
 }
 
 export const memberTypeFields = {
