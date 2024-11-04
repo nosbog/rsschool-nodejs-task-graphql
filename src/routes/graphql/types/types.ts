@@ -60,6 +60,12 @@ export const user = new GraphQLObjectType({
     posts: {
       type: new GraphQLList(post),
     },
+    userSubscribedTo: {
+      type: new GraphQLList(userSubscribedTo),
+    },
+    subscribedToUser: {
+      type: new GraphQLList(subscribedToUser),
+    },
   }),
 });
 
@@ -90,3 +96,59 @@ export const profile = new GraphQLObjectType({
 export const MemberTypeId = new GraphQLScalarType({
   name: 'MemberTypeId',
 });
+
+export const userSubscribedTo = new GraphQLObjectType({
+  name: 'userSubscribedTo',
+  fields: () => ({
+    id: {
+      type: UUIDType,
+    },
+    name: {
+      type: UUIDType,
+    },
+    balance: {
+      type: GraphQLFloat,
+    },
+    subscribedToUser: {
+      type: new GraphQLList(subscribedToUser),
+    },
+  }),
+});
+
+export const subscribedToUser = new GraphQLObjectType({
+  name: 'subscribedToUser',
+  fields: () => ({
+    id: {
+      type: UUIDType,
+    },
+    name: {
+      type: UUIDType,
+    },
+    balance: {
+      type: GraphQLFloat,
+    },
+    userSubscribedTo: {
+      type: new GraphQLList(userSubscribedTo),
+    },
+  }),
+});
+
+export type SubscriptionType = {
+  id: string;
+  name: string;
+  balance: number;
+};
+
+export interface Subscriber {
+  id: string;
+  name: string;
+  balance: number;
+  subscribedToUser: SubscriptionType[];
+}
+
+export interface Subscription {
+  id: string;
+  name: string;
+  balance: number;
+  userSubscribedTo: SubscriptionType[];
+}

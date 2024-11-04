@@ -59,7 +59,66 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
       });
     }
     const userProfile = profile ? { ...profile, memberType } : null;
-    return { ...user, profile: userProfile, posts };
+
+    const subscriptions = await prisma.user.findMany({
+      where: {
+        subscribedToUser: {
+          some: {
+            subscriberId: args.id,
+          },
+        },
+      },
+    });
+
+    const subscribers = await prisma.user.findMany({
+      where: {
+        userSubscribedTo: {
+          some: {
+            authorId: args.id,
+          },
+        },
+      },
+    });
+
+    const subscriptionsWithSubscribers = await Promise.all(
+      subscriptions.map(async (subscription) => {
+        const subscribers2ndLevel = await prisma.user.findMany({
+          where: {
+            userSubscribedTo: {
+              some: {
+                authorId: subscription.id,
+              },
+            },
+          },
+        });
+        return { ...subscription, subscribedToUser: subscribers2ndLevel };
+      }),
+    );
+
+    const subscribersWithSubscriptions = await Promise.all(
+      subscribers.map(async (subscriber) => {
+        const subscriptions2ndLevel = await prisma.user.findMany({
+          where: {
+            subscribedToUser: {
+              some: {
+                subscriberId: subscriber.id,
+              },
+            },
+          },
+        });
+        return { ...subscriber, userSubscribedTo: subscriptions2ndLevel };
+      }),
+    );
+
+    const fullUser = {
+      ...user,
+      profile: userProfile,
+      posts,
+      userSubscribedTo: subscriptionsWithSubscribers,
+      subscribedToUser: subscribersWithSubscriptions,
+    };
+
+    return fullUser;
   };
 
   const schema = new GraphQLSchema({
