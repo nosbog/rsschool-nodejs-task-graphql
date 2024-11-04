@@ -131,5 +131,3 @@ export const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
     },
   });
 };
-
-// export { plugin, requestHook };
