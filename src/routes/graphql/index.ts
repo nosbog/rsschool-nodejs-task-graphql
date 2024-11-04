@@ -10,7 +10,7 @@ import fastify, { FastifyPluginAsync } from 'fastify';
 const typeDefs = `
 
 type User{
-  iid: ID!
+  id: ID!
   name: String!
   balance: Float!
   posts: [Post!]
