@@ -193,6 +193,31 @@ const profileInput = new GraphQLInputObjectType({
   },
 });
 
+const changePostInput = new GraphQLInputObjectType({
+  name: 'ChangePostInput',
+  fields: {
+    title: { type: GraphQLString },
+    content: { type: GraphQLString },
+  },
+});
+
+const changeProfileInput = new GraphQLInputObjectType({
+  name: 'ChangeProfileInput',
+  fields: {
+    isMale: { type: GraphQLBoolean },
+    yearOfBirth: { type: GraphQLInt },
+    memberTypeId: { type: memberTypeId },
+  },
+});
+
+const changeUserInput = new GraphQLInputObjectType({
+  name: 'ChangeUserInput',
+  fields: {
+    name: { type: GraphQLString },
+    balance: { type: GraphQLFloat },
+  },
+});
+
 const rootMutation = new GraphQLObjectType({
   name: 'Mutation',
   description: 'root mutation',
@@ -218,6 +243,103 @@ const rootMutation = new GraphQLObjectType({
       resolve: async (root, args) =>
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
         await prisma.profile.create({ data: args.dto }),
+    },
+    deletePost: {
+      type: GraphQLBoolean,
+      args: { id: { type: UUIDType } },
+      resolve: async (root, args) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+        await prisma.post.delete({ where: { id: args.id } });
+        return true;
+      },
+    },
+    deleteProfile: {
+      type: GraphQLBoolean,
+      args: { id: { type: UUIDType } },
+      resolve: async (root, args) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+        await prisma.profile.delete({ where: { id: args.id } });
+        return true;
+      },
+    },
+    deleteUser: {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      type: GraphQLBoolean,
+      args: { id: { type: UUIDType } },
+      resolve: async (root, args) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+        await prisma.user.delete({ where: { id: args.id } });
+        return true;
+      },
+    },
+    changePost: {
+      type: postType,
+      args: { id: { type: UUIDType }, dto: { type: changePostInput } },
+      resolve: async (root, args) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+        return await prisma.post.update({ where: { id: args.id }, data: args.dto });
+      },
+    },
+    changeProfile: {
+      type: profileType,
+      args: { id: { type: UUIDType }, dto: { type: changeProfileInput } },
+      resolve: async (root, args) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+        return await prisma.profile.update({ where: { id: args.id }, data: args.dto });
+      },
+    },
+    changeUser: {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      type: userType,
+      args: { id: { type: UUIDType }, dto: { type: changeUserInput } },
+      resolve: async (root, args) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+        return await prisma.user.update({ where: { id: args.id }, data: args.dto });
+      },
+    },
+    subscribeTo: {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      type: GraphQLBoolean,
+      args: {
+        userId: { type: UUIDType },
+        authorId: { type: UUIDType },
+      },
+      resolve: async (root, args) => {
+        await prisma.user.update({
+          where: {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+            id: args.userId,
+          },
+          data: {
+            userSubscribedTo: {
+              create: {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+                authorId: args.authorId,
+              },
+            },
+          },
+        });
+        return true;
+      },
+    },
+
+    unsubscribeFrom: {
+      type: GraphQLBoolean,
+      args: {
+        userId: { type: UUIDType },
+        authorId: { type: UUIDType },
+      },
+      resolve: async (root, args) => {
+        await prisma.subscribersOnAuthors.delete({
+          where: {
+            subscriberId_authorId: {
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+              subscriberId: args.userId,authorId: args.authorId,
+            },
+          },
+        });
+        return true;
+      },
     },
   },
 });
