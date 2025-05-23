@@ -26,9 +26,9 @@ export async function gqlQuery(
     body: dto,
   });
   const body = (await res.json()) as Static<typeof gqlResponseSchema>;
+  console.log('gqlQuery (test): query=', dto.query, 'variables=', dto.variables, 'status=', res.statusCode, 'result=', body);
   return { res, body };
 }
-
 export async function getUsers(app: FastifyInstance) {
   const res = await app.inject({
     url: `/users`,
@@ -108,6 +108,7 @@ export async function createUser(app: FastifyInstance) {
     payload: genCreateUserDto(),
   });
   const body = (await res.json()) as UserBody;
+  console.log('createUser (test): status=', res.statusCode, 'body=', body);
   return { res, body };
 }
 
@@ -140,14 +141,28 @@ export async function subscribeTo(
   userId: string,
   authorId: string,
 ) {
+  const payload = {
+    query: `
+      mutation ($userId: UUID!, $authorId: UUID!) {
+        subscribeTo(userId: $userId, authorId: $authorId)
+      }
+    `,
+    variables: { userId, authorId },
+  };
   const res = await app.inject({
-    url: `/users/${userId}/user-subscribed-to/`,
+    url: '/graphql',
     method: 'POST',
-    payload: {
-      authorId,
-    },
+    payload,
   });
-  return { res, body: {} };
+  const body = await res.json();
+  console.log('subscribeTo (test): userId=', userId, 'authorId=', authorId, 'status=', res.statusCode, 'result=', body);
+  if (body.errors) {
+    throw new Error(`subscribeTo failed: ${JSON.stringify(body.errors)}`);
+  }
+  if (!body.data?.subscribeTo) {
+    throw new Error(`subscribeTo returned no data: ${JSON.stringify(body)}`);
+  }
+  return { res, body };
 }
 
 export async function subscribedToUser(app: FastifyInstance, userId: string) {
