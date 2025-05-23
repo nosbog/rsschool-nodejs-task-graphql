@@ -1,4 +1,8 @@
-import { Context } from '../ts-types.js';
+import {
+  changeUserInputDto,
+  Context,
+  createUserInputDto,
+} from '../ts-types.js';
 
 export const getAllUsers = async (
   _parent: unknown,
@@ -22,4 +26,66 @@ export const getUser = async (
     throw httpErrors.notFound();
   }
   return user;
+};
+
+export const createUser = async (
+  _parent: unknown,
+  { dto }: { dto: createUserInputDto },
+  { prisma }: Context,
+) => {
+  const user = await prisma.user.create({
+    data: dto,
+  });
+  return user;
+};
+
+export const updateUser = async (
+  _parent: unknown,
+  { dto, id }: { dto: changeUserInputDto; id: string },
+  { prisma }: Context,
+) => {
+  const user = await prisma.user.update({
+    where: {
+      id,
+    },
+    data: dto,
+  });
+  return user;
+};
+
+export const deleteUser = async (
+  _parent: unknown,
+  { id }: { id: string },
+  { prisma }: Context,
+) => {
+  await prisma.user.delete({ where: { id } });
+  return 'Deleted succesfully!';
+};
+
+export const subscribeTo = async (
+  _parent: unknown,
+  { userId, authorId }: { userId: string; authorId: string },
+  { prisma }: Context,
+) => {
+  await prisma.user.update({
+    where: { id: userId },
+    data: { userSubscribedTo: { create: { authorId } } },
+  });
+  return 'Subscribed successfully';
+};
+
+export const unsubscribeFrom = async (
+  _parent: unknown,
+  { userId, authorId }: { userId: string; authorId: string },
+  { prisma }: Context,
+) => {
+  await prisma.subscribersOnAuthors.delete({
+    where: {
+      subscriberId_authorId: {
+        subscriberId: userId,
+        authorId,
+      },
+    },
+  });
+  return 'Unsubscribed successfully';
 };

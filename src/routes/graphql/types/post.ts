@@ -29,8 +29,8 @@ export const CreatePostInput = new GraphQLInputObjectType({
   name: 'CreatePostInput',
   description: 'Input type for adding a post',
   fields: () => ({
-    id: { type: UUIDType },
     title: { type: GraphQLString },
     content: { type: GraphQLString },
+    authorId: { type: UUIDType },
   }),
 });

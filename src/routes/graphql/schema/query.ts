@@ -13,7 +13,7 @@ import { getAllProfiles, getProfile } from '../resolvers/Profile.resolver.js';
 import { UserType } from '../types/user.js';
 
 export const QueryType = new GraphQLObjectType({
-  name: 'Query',
+  name: 'RootQueryType',
   description: 'Root Query',
   fields: () => ({
     memberTypes: {

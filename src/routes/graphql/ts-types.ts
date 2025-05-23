@@ -1,7 +1,7 @@
 import { HttpErrors } from '@fastify/sensible';
 import { Prisma, PrismaClient } from '@prisma/client';
 import { DefaultArgs } from '@prisma/client/runtime/library.js';
-import { GraphQLScalarType } from 'graphql';
+import { MemberTypeId } from '../member-types/schemas.js';
 
 export type Context = {
   prisma: PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>;
@@ -28,7 +28,7 @@ export interface Profile {
   id: string;
   isMale: boolean;
   yearOfBirth: number;
-  memberType: MemberType;
+  memberTypeId: MemberTypeId;
 }
 
 export interface MemberType {
@@ -36,3 +36,10 @@ export interface MemberType {
   discount: number;
   postsLimitPerMonth: number;
 }
+
+export type createUserInputDto = Pick<User, 'balance' | 'name'>;
+export type createProfileInputDto = Omit<Profile, 'id'> & { userId: string };
+export type createPostInputDto = Omit<Post, 'id'> & { authorId: string };
+export type changePostInputDto = Omit<Post, 'id'>;
+export type changeProfileInputDto = Omit<Profile, 'id'>;
+export type changeUserInputDto = Pick<User, 'balance' | 'name'>;
