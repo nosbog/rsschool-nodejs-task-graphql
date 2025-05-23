@@ -1,25 +1,25 @@
 import { Context } from '../ts-types.js';
 
-export const getAllPosts = async (
+export const getAllProfiles = async (
   _parent: unknown,
   _args: unknown,
   { prisma }: Context,
 ) => {
-  return prisma.post.findMany();
+  return prisma.profile.findMany();
 };
 
-export const getPost = async (
+export const getProfile = async (
   _parent: unknown,
   { id }: { id: string },
   { prisma, httpErrors }: Context,
 ) => {
-  const post = await prisma.post.findUnique({
+  const profile = await prisma.profile.findUnique({
     where: {
       id,
     },
   });
-  if (post === null) {
+  if (profile === null) {
     throw httpErrors.notFound();
   }
-  return post;
+  return profile;
 };
