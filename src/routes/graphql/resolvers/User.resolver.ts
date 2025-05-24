@@ -83,6 +83,7 @@ export const createUser = async (
   const user = await prisma.user.create({
     data: dto,
   });
+  console.log(user);
   return user;
 };
 

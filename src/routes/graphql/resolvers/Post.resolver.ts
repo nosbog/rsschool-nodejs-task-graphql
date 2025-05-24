@@ -26,6 +26,20 @@ export const getPost = async (
   return post;
 };
 
+export const getPostByUser = async (
+  parent: User,
+  _args: unknown,
+  { prisma }: Context,
+) => {
+  const { id } = parent;
+  const post = await prisma.post.findMany({
+    where: {
+      authorId: id,
+    },
+  });
+  return post;
+};
+
 export const createPost = async (
   _parent: unknown,
   { dto }: { dto: createPostInputDto },
@@ -58,18 +72,4 @@ export const deletePost = async (
 ) => {
   await prisma.post.delete({ where: { id } });
   return 'Deleted succesfully!';
-};
-
-export const getPostByUser = async (
-  parent: User,
-  _args: unknown,
-  { prisma }: Context,
-) => {
-  const { id } = parent;
-  const post = await prisma.post.findMany({
-    where: {
-      authorId: id,
-    },
-  });
-  return post;
 };

@@ -1,5 +1,6 @@
 import {
   GraphQLInputObjectType,
+  GraphQLNonNull,
   GraphQLObjectType,
   GraphQLString,
 } from 'graphql';
@@ -29,8 +30,8 @@ export const CreatePostInput = new GraphQLInputObjectType({
   name: 'CreatePostInput',
   description: 'Input type for adding a post',
   fields: () => ({
-    title: { type: GraphQLString },
-    content: { type: GraphQLString },
-    authorId: { type: UUIDType },
+    title: { type: new GraphQLNonNull(GraphQLString) },
+    content: { type: new GraphQLNonNull(GraphQLString) },
+    authorId: { type: new GraphQLNonNull(UUIDType) },
   }),
 });

@@ -17,11 +17,15 @@ import {
   updateProfile,
 } from '../resolvers/Profile.resolver.js';
 import { ChangePostInput, CreatePostInput, PostType } from '../types/post.js';
-import { deletePost, updatePost } from '../resolvers/Post.resolver.js';
+import {
+  createPost,
+  deletePost,
+  updatePost,
+} from '../resolvers/Post.resolver.js';
 import { UUIDType } from '../types/uuid.js';
 
 export const MutationType = new GraphQLObjectType({
-  name: 'Mutations',
+  name: 'RootMutationType',
   description: 'Root Mutation',
   fields: () => ({
     createUser: {
@@ -32,19 +36,19 @@ export const MutationType = new GraphQLObjectType({
       },
       resolve: createUser,
     },
-    createProfile: {
-      type: ProfileType,
-      description: 'Create a new profile',
-      args: {
-        dto: { type: new GraphQLNonNull(CreateProfileInput) },
-      },
-      resolve: createProfile,
-    },
     createPost: {
       type: PostType,
       description: 'Create a new post',
       args: {
         dto: { type: new GraphQLNonNull(CreatePostInput) },
+      },
+      resolve: createPost,
+    },
+    createProfile: {
+      type: ProfileType,
+      description: 'Create a new profile',
+      args: {
+        dto: { type: new GraphQLNonNull(CreateProfileInput) },
       },
       resolve: createProfile,
     },

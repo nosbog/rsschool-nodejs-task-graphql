@@ -21,7 +21,6 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
       return graphql({
         schema,
         source: query,
-        // rootValue: root,
         variableValues: variables,
         contextValue: {
           prisma,

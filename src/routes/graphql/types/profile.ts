@@ -2,7 +2,9 @@ import {
   GraphQLBoolean,
   GraphQLInputObjectType,
   GraphQLInt,
+  GraphQLNonNull,
   GraphQLObjectType,
+  GraphQLString,
 } from 'graphql';
 import { UUIDType } from './uuid.js';
 import { MemberTypeType, MemberTypeId } from './memberType.js';
@@ -27,7 +29,7 @@ export const ChangeProfileInput = new GraphQLInputObjectType({
   fields: () => ({
     isMale: { type: GraphQLBoolean },
     yearOfBirth: { type: GraphQLInt },
-    MemberTypeId: {
+    memberTypeId: {
       type: MemberTypeId,
     },
   }),
@@ -37,11 +39,11 @@ export const CreateProfileInput = new GraphQLInputObjectType({
   name: 'CreateProfileInput',
   description: 'Input type for adding a profile',
   fields: () => ({
-    isMale: { type: GraphQLBoolean },
-    yearOfBirth: { type: GraphQLInt },
-    MemberTypeId: {
-      type: MemberTypeId,
+    isMale: { type: new GraphQLNonNull(GraphQLBoolean) },
+    yearOfBirth: { type: new GraphQLNonNull(GraphQLInt) },
+    memberTypeId: {
+      type: new GraphQLNonNull(GraphQLString),
     },
-    userId: { type: UUIDType },
+    userId: { type: new GraphQLNonNull(UUIDType) },
   }),
 });
