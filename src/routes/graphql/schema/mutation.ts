@@ -56,6 +56,7 @@ export const MutationType = new GraphQLObjectType({
       type: PostType,
       description: 'Update a post',
       args: {
+        id: { type: new GraphQLNonNull(UUIDType) },
         dto: { type: new GraphQLNonNull(ChangePostInput) },
       },
       resolve: updatePost,
@@ -64,6 +65,7 @@ export const MutationType = new GraphQLObjectType({
       type: ProfileType,
       description: 'Update a profile',
       args: {
+        id: { type: new GraphQLNonNull(UUIDType) },
         dto: { type: new GraphQLNonNull(ChangeProfileInput) },
       },
       resolve: updateProfile,
@@ -72,6 +74,7 @@ export const MutationType = new GraphQLObjectType({
       type: UserType,
       description: 'Update a user',
       args: {
+        id: { type: new GraphQLNonNull(UUIDType) },
         dto: { type: new GraphQLNonNull(ChangeUserInput) },
       },
       resolve: updateUser,
