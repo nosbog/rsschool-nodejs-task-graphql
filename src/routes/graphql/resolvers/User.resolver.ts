@@ -106,10 +106,13 @@ export const subscribeTo = async (
   { userId, authorId }: { userId: string; authorId: string },
   { prisma }: Context,
 ) => {
-  await prisma.user.update({
-    where: { id: userId },
-    data: { userSubscribedTo: { create: { authorId } } },
+  await prisma.subscribersOnAuthors.create({
+    data: {
+      subscriberId: userId,
+      authorId,
+    },
   });
+
   return 'Subscribed successfully';
 };
 

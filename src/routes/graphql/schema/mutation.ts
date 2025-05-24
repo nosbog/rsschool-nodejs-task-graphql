@@ -4,6 +4,7 @@ import {
   createUser,
   deleteUser,
   subscribeTo,
+  unsubscribeFrom,
   updateUser,
 } from '../resolvers/User.resolver.js';
 import {
@@ -119,7 +120,7 @@ export const MutationType = new GraphQLObjectType({
         userId: { type: new GraphQLNonNull(UUIDType) },
         authorId: { type: new GraphQLNonNull(UUIDType) },
       },
-      resolve: subscribeTo,
+      resolve: unsubscribeFrom,
     },
   }),
 });
