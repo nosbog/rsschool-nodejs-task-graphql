@@ -8,14 +8,19 @@ export type Context = {
   httpErrors: HttpErrors;
 };
 
+export type Subscription = {
+  subscriberId: string;
+  authorId: string;
+};
+
 export interface User {
   id: string;
   name: string;
   balance: number;
   profile: Profile | null;
   posts: Post[];
-  userSubscribedTo: User[];
-  subscribedToUser: User[];
+  userSubscribedTo: Subscription[];
+  subscribedToUser: Subscription[];
 }
 
 export interface Post {

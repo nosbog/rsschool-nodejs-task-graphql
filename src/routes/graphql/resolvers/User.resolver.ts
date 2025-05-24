@@ -2,6 +2,7 @@ import {
   changeUserInputDto,
   Context,
   createUserInputDto,
+  User,
 } from '../ts-types.js';
 
 export const getAllUsers = async (
@@ -31,6 +32,49 @@ export const getUser = async (
   return user;
 };
 
+export const getSubscriptions = async (
+  { userSubscribedTo }: User,
+  _args: unknown,
+  { prisma }: Context,
+) => {
+  const subscriptions = userSubscribedTo.map(({ authorId }) => authorId);
+  return await prisma.user.findMany({
+    where: { id: { in: subscriptions } },
+    include: {
+      profile: true,
+      posts: true,
+      userSubscribedTo: true,
+      subscribedToUser: true,
+    },
+  });
+};
+
+export const getSubscribers = async (
+  { subscribedToUser }: User,
+  _args: unknown,
+  { prisma }: Context,
+) => {
+  const subscribers = subscribedToUser.map(({ subscriberId }) => subscriberId);
+  return await prisma.user.findMany({
+    where: { id: { in: subscribers } },
+    include: {
+      profile: true,
+      posts: true,
+      userSubscribedTo: true,
+      subscribedToUser: true,
+    },
+  });
+};
+
+export const deleteUser = async (
+  _parent: unknown,
+  { id }: { id: string },
+  { prisma }: Context,
+) => {
+  await prisma.user.delete({ where: { id } });
+  return 'Deleted succesfully!';
+};
+
 export const createUser = async (
   _parent: unknown,
   { dto }: { dto: createUserInputDto },
@@ -54,15 +98,6 @@ export const updateUser = async (
     data: dto,
   });
   return user;
-};
-
-export const deleteUser = async (
-  _parent: unknown,
-  { id }: { id: string },
-  { prisma }: Context,
-) => {
-  await prisma.user.delete({ where: { id } });
-  return 'Deleted succesfully!';
 };
 
 export const subscribeTo = async (

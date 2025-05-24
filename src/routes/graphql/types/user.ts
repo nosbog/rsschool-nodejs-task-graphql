@@ -11,7 +11,10 @@ import { PostType } from './post.js';
 import { Context, User } from '../ts-types.js';
 import { getProfileByUser } from '../resolvers/Profile.resolver.js';
 import { getPostByUser } from '../resolvers/Post.resolver.js';
-import { getUser } from '../resolvers/User.resolver.js';
+import {
+  getSubscribers,
+  getSubscriptions,
+} from '../resolvers/User.resolver.js';
 
 export const UserType: GraphQLObjectType<User, Context> = new GraphQLObjectType<
   User,
@@ -25,8 +28,14 @@ export const UserType: GraphQLObjectType<User, Context> = new GraphQLObjectType<
     balance: { type: GraphQLFloat },
     profile: { type: ProfileType, resolve: getProfileByUser },
     posts: { type: new GraphQLList(PostType), resolve: getPostByUser },
-    userSubscribedTo: { type: new GraphQLList(UserType), resolve: getUser },
-    subscribedToUser: { type: new GraphQLList(UserType), resolve: getUser },
+    userSubscribedTo: {
+      type: new GraphQLList(UserType),
+      resolve: getSubscriptions,
+    },
+    subscribedToUser: {
+      type: new GraphQLList(UserType),
+      resolve: getSubscribers,
+    },
   }),
 });
 
