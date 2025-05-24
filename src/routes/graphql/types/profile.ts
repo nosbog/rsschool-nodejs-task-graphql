@@ -7,6 +7,7 @@ import {
 import { UUIDType } from './uuid.js';
 import { MemberTypeType, MemberTypeId } from './memberType.js';
 import { Context, Profile } from '../ts-types.js';
+import { getMemberTypeByProfile } from '../resolvers/MemberType.resolver.js';
 
 export const ProfileType = new GraphQLObjectType<Profile, Context>({
   name: 'Profile',
@@ -15,7 +16,8 @@ export const ProfileType = new GraphQLObjectType<Profile, Context>({
     id: { type: UUIDType },
     isMale: { type: GraphQLBoolean },
     yearOfBirth: { type: GraphQLInt },
-    memberType: { type: MemberTypeType },
+    memberType: { type: MemberTypeType, resolve: getMemberTypeByProfile },
+    userId: { type: UUIDType },
   },
 });
 
@@ -25,7 +27,9 @@ export const ChangeProfileInput = new GraphQLInputObjectType({
   fields: () => ({
     isMale: { type: GraphQLBoolean },
     yearOfBirth: { type: GraphQLInt },
-    MemberTypeId: { type: MemberTypeId },
+    MemberTypeId: {
+      type: MemberTypeId,
+    },
   }),
 });
 
@@ -35,7 +39,9 @@ export const CreateProfileInput = new GraphQLInputObjectType({
   fields: () => ({
     isMale: { type: GraphQLBoolean },
     yearOfBirth: { type: GraphQLInt },
-    MemberTypeId: { type: MemberTypeId },
+    MemberTypeId: {
+      type: MemberTypeId,
+    },
     userId: { type: UUIDType },
   }),
 });

@@ -2,6 +2,7 @@ import {
   changeProfileInputDto,
   Context,
   createProfileInputDto,
+  User,
 } from '../ts-types.js';
 
 export const getAllProfiles = async (
@@ -15,16 +16,13 @@ export const getAllProfiles = async (
 export const getProfile = async (
   _parent: unknown,
   { id }: { id: string },
-  { prisma, httpErrors }: Context,
+  { prisma }: Context,
 ) => {
   const profile = await prisma.profile.findUnique({
     where: {
       id,
     },
   });
-  if (profile === null) {
-    throw httpErrors.notFound();
-  }
   return profile;
 };
 
@@ -61,3 +59,29 @@ export const deleteProfile = async (
   await prisma.profile.delete({ where: { id } });
   return 'Deleted succesfully!';
 };
+
+export const getProfileByUser = async (
+  parent: User,
+  _args: unknown,
+  { prisma }: Context,
+) => {
+  return prisma.profile.findUnique({
+    where: {
+      userId: parent.id,
+    },
+  });
+};
+
+// export const getMemberTypeByProfile = async (
+//   parent: Profile,
+//   _args: unknown,
+//   { prisma }: Context,
+// ) => {
+//   const { memberTypeId } = parent;
+//   const profile = await prisma.profile.findUnique({
+//     where: {
+//       id: memberTypeId,
+//     },
+//   });
+//   return profile;
+// };

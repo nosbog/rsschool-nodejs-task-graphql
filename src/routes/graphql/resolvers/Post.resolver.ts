@@ -2,6 +2,7 @@ import {
   changePostInputDto,
   Context,
   createPostInputDto,
+  User,
 } from '../ts-types.js';
 
 export const getAllPosts = async (
@@ -15,16 +16,13 @@ export const getAllPosts = async (
 export const getPost = async (
   _parent: unknown,
   { id }: { id: string },
-  { prisma, httpErrors }: Context,
+  { prisma }: Context,
 ) => {
   const post = await prisma.post.findUnique({
     where: {
       id,
     },
   });
-  if (post === null) {
-    throw httpErrors.notFound();
-  }
   return post;
 };
 
@@ -60,4 +58,18 @@ export const deletePost = async (
 ) => {
   await prisma.post.delete({ where: { id } });
   return 'Deleted succesfully!';
+};
+
+export const getPostByUser = async (
+  parent: User,
+  _args: unknown,
+  { prisma }: Context,
+) => {
+  const { id } = parent;
+  const post = await prisma.post.findMany({
+    where: {
+      authorId: id,
+    },
+  });
+  return post;
 };

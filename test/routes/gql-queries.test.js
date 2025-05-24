@@ -63,7 +63,11 @@ await test('gql-queries', async (t) => {
   await t.test('Get all resources by their id.', async (t) => {
     const { body: user1 } = await createUser(app);
     const { body: post1 } = await createPost(app, user1.id);
-    const { body: profile1 } = await createProfile(app, user1.id, MemberTypeId.BASIC);
+    const { body: profile1 } = await createProfile(
+      app,
+      user1.id,
+      MemberTypeId.BASIC,
+    );
 
     const {
       body: { data },
@@ -142,15 +146,21 @@ await test('gql-queries', async (t) => {
     t.ok(data.userWithNullProfile.profile === null);
   });
 
-  await t.test('Get user/users with his/their posts, profile, memberType.', async (t) => {
-    const { body: user1 } = await createUser(app);
-    const { body: post1 } = await createPost(app, user1.id);
-    const { body: profile1 } = await createProfile(app, user1.id, MemberTypeId.BASIC);
+  await t.test(
+    'Get user/users with his/their posts, profile, memberType.',
+    async (t) => {
+      const { body: user1 } = await createUser(app);
+      const { body: post1 } = await createPost(app, user1.id);
+      const { body: profile1 } = await createProfile(
+        app,
+        user1.id,
+        MemberTypeId.BASIC,
+      );
 
-    const {
-      body: { data: dataUser },
-    } = await gqlQuery(app, {
-      query: `query ($userId: UUID!) {
+      const {
+        body: { data: dataUser },
+      } = await gqlQuery(app, {
+        query: `query ($userId: UUID!) {
           user(id: $userId) {
               id
               profile {
@@ -164,14 +174,14 @@ await test('gql-queries', async (t) => {
               }
           }
       }`,
-      variables: {
-        userId: user1.id,
-      },
-    });
-    const {
-      body: { data: dataUsers },
-    } = await gqlQuery(app, {
-      query: `query {
+        variables: {
+          userId: user1.id,
+        },
+      });
+      const {
+        body: { data: dataUsers },
+      } = await gqlQuery(app, {
+        query: `query {
           users {
               id
               profile {
@@ -185,16 +195,17 @@ await test('gql-queries', async (t) => {
               }
           }
       }`,
-    });
+      });
 
-    t.ok(dataUser.user.id === user1.id);
-    t.ok(dataUser.user.profile.id === profile1.id);
-    t.ok(dataUser.user.profile.memberType?.id === MemberTypeId.BASIC);
-    t.ok(dataUser.user.posts[0].id === post1.id);
+      t.ok(dataUser.user.id === user1.id);
+      t.ok(dataUser.user.profile.id === profile1.id);
+      t.ok(dataUser.user.profile.memberType?.id === MemberTypeId.BASIC);
+      t.ok(dataUser.user.posts[0].id === post1.id);
 
-    const foundUser1 = dataUsers.users.find((user) => user.id === user1.id);
-    t.same(foundUser1, dataUser.user);
-  });
+      const foundUser1 = dataUsers.users.find((user) => user.id === user1.id);
+      t.same(foundUser1, dataUser.user);
+    },
+  );
 
   await t.test(`Get user by id with his subs.`, async (t) => {
     const { body: user1 } = await createUser(app);

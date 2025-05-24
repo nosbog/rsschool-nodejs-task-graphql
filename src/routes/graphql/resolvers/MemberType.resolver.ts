@@ -1,4 +1,4 @@
-import { Context } from '../ts-types.js';
+import { Context, Profile } from '../ts-types.js';
 
 export const getAllMemberTypes = async (
   _parent: unknown,
@@ -11,15 +11,26 @@ export const getAllMemberTypes = async (
 export const getMemberType = async (
   _parent: unknown,
   { id }: { id: string },
-  { prisma, httpErrors }: Context,
+  { prisma }: Context,
 ) => {
   const memberType = await prisma.memberType.findUnique({
     where: {
       id,
     },
   });
-  if (memberType === null) {
-    throw httpErrors.notFound();
-  }
   return memberType;
+};
+
+export const getMemberTypeByProfile = async (
+  parent: Profile,
+  _args: unknown,
+  { prisma }: Context,
+) => {
+  const { memberTypeId } = parent;
+  const profile = await prisma.memberType.findUnique({
+    where: {
+      id: memberTypeId,
+    },
+  });
+  return profile;
 };

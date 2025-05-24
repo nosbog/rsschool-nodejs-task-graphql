@@ -22,6 +22,7 @@ export interface Post {
   id: string;
   title: string;
   content: string;
+  authorId: string;
 }
 
 export interface Profile {
@@ -29,6 +30,7 @@ export interface Profile {
   isMale: boolean;
   yearOfBirth: number;
   memberTypeId: MemberTypeId;
+  userId: string;
 }
 
 export interface MemberType {

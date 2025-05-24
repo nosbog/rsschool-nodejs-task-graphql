@@ -15,16 +15,19 @@ export const getAllUsers = async (
 export const getUser = async (
   _parent: unknown,
   { id }: { id: string },
-  { prisma, httpErrors }: Context,
+  { prisma }: Context,
 ) => {
   const user = await prisma.user.findUnique({
     where: {
       id: id,
     },
+    include: {
+      profile: true,
+      posts: true,
+      userSubscribedTo: true,
+      subscribedToUser: true,
+    },
   });
-  if (user === null) {
-    throw httpErrors.notFound();
-  }
   return user;
 };
 

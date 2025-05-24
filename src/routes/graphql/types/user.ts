@@ -9,6 +9,9 @@ import { UUIDType } from './uuid.js';
 import { ProfileType } from './profile.js';
 import { PostType } from './post.js';
 import { Context, User } from '../ts-types.js';
+import { getProfileByUser } from '../resolvers/Profile.resolver.js';
+import { getPostByUser } from '../resolvers/Post.resolver.js';
+import { getUser } from '../resolvers/User.resolver.js';
 
 export const UserType: GraphQLObjectType<User, Context> = new GraphQLObjectType<
   User,
@@ -20,10 +23,10 @@ export const UserType: GraphQLObjectType<User, Context> = new GraphQLObjectType<
     id: { type: UUIDType },
     name: { type: GraphQLString },
     balance: { type: GraphQLFloat },
-    profile: { type: ProfileType },
-    posts: { type: new GraphQLList(PostType) },
-    userSubscribedTo: { type: new GraphQLList(UserType) },
-    subscribedToUser: { type: new GraphQLList(UserType) },
+    profile: { type: ProfileType, resolve: getProfileByUser },
+    posts: { type: new GraphQLList(PostType), resolve: getPostByUser },
+    userSubscribedTo: { type: new GraphQLList(UserType), resolve: getUser },
+    subscribedToUser: { type: new GraphQLList(UserType), resolve: getUser },
   }),
 });
 
