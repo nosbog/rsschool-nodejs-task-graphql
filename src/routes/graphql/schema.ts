@@ -7,6 +7,7 @@ import {
   GraphQLInt,
   GraphQLNonNull,
   GraphQLList,
+  GraphQLBoolean,
 } from 'graphql';
 import { UUIDType } from './types/uuid.js';
 
@@ -27,6 +28,24 @@ const MemberTypeType = new GraphQLObjectType({
     discount: { type: new GraphQLNonNull(GraphQLFloat) },
     postsLimitPerMonth: { type: new GraphQLNonNull(GraphQLInt) },
   },
+});
+
+// Profile Object Type
+const ProfileType = new GraphQLObjectType({
+  name: 'Profile',
+  fields: () => ({
+    id: { type: new GraphQLNonNull(UUIDType) },
+    isMale: { type: new GraphQLNonNull(GraphQLBoolean) },
+    yearOfBirth: { type: new GraphQLNonNull(GraphQLInt) },
+    memberType: {
+      type: new GraphQLNonNull(MemberTypeType),
+      resolve: async (parent, args, context) => {
+        return context.prisma.memberType.findUnique({
+          where: { id: parent.memberTypeId }
+        });
+      },
+    },
+  }),
 });
 
 // Post Object Type
@@ -103,6 +122,23 @@ const RootQueryType = new GraphQLObjectType({
       },
       resolve: async (parent, args, context) => {
         return context.prisma.post.findUnique({
+          where: { id: args.id }
+        });
+      },
+    },
+    profiles: {
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(ProfileType))),
+      resolve: async (parent, args, context) => {
+        return context.prisma.profile.findMany();
+      },
+    },
+    profile: {
+      type: ProfileType,
+      args: {
+        id: { type: new GraphQLNonNull(UUIDType) },
+      },
+      resolve: async (parent, args, context) => {
+        return context.prisma.profile.findUnique({
           where: { id: args.id }
         });
       },
