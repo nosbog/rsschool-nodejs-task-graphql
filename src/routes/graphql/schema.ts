@@ -6,6 +6,7 @@ import {
   GraphQLFloat,
   GraphQLInt,
   GraphQLNonNull,
+  GraphQLList,
 } from 'graphql';
 
 // MemberTypeId Enum
@@ -34,7 +35,23 @@ const RootQueryType = new GraphQLObjectType({
       type: GraphQLString,
       resolve: () => 'Hello GraphQL!',
     },
-    
+    memberTypes: {
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(MemberTypeType))),
+      resolve: async (parent, args, context) => {
+        return context.prisma.memberType.findMany();
+      },
+    },
+    memberType: {
+      type: MemberTypeType,
+      args: {
+        id: { type: new GraphQLNonNull(MemberTypeIdEnum) },
+      },
+      resolve: async (parent, args, context) => {
+        return context.prisma.memberType.findUnique({
+          where: { id: args.id }
+        });
+      },
+    },
   },
 });
 
