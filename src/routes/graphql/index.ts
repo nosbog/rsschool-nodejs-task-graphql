@@ -1,19 +1,25 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
 import { createGqlResponseSchema, gqlResponseSchema } from './schemas.js';
 import { graphql, GraphQLObjectType, GraphQLSchema } from 'graphql';
-import { MembersTypeSchema } from './types/member.js';
-import { PostsTypeSchema } from './types/post.js';
-import { UsersTypeSchema } from './types/user.js';
-import { ProfilesTypeSchema } from './types/profile.js';
+import { MemberTypeSchema, MemberTypesSchema } from './types/member.js';
+import { PostsSchema, PostSchema } from './types/post.js';
+import { UsersSchema, UserSchema } from './types/user.js';
+import { ProfileSchema, ProfilesSchema } from './types/profile.js';
 
 const schema: GraphQLSchema = new GraphQLSchema({
   query: new GraphQLObjectType({
     name: 'RootQuery',
     fields: {
-      memberTypes: MembersTypeSchema,
-      posts: PostsTypeSchema,
-      users: UsersTypeSchema,
-      profiles: ProfilesTypeSchema
+      // Get all resources
+      memberTypes: MemberTypesSchema,
+      posts: PostsSchema,
+      users: UsersSchema,
+      profiles: ProfilesSchema,
+      // Get resources by id
+      memberType: MemberTypeSchema,
+      post: PostSchema,
+      profile: ProfileSchema,
+      user: UserSchema,
     }
   })
 })
