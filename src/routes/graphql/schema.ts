@@ -8,6 +8,7 @@ import {
   GraphQLNonNull,
   GraphQLList,
 } from 'graphql';
+import { UUIDType } from './types/uuid.js';
 
 // MemberTypeId Enum
 const MemberTypeIdEnum = new GraphQLEnumType({
@@ -25,6 +26,15 @@ const MemberTypeType = new GraphQLObjectType({
     id: { type: new GraphQLNonNull(MemberTypeIdEnum) },
     discount: { type: new GraphQLNonNull(GraphQLFloat) },
     postsLimitPerMonth: { type: new GraphQLNonNull(GraphQLInt) },
+  },
+});
+
+const UserType = new GraphQLObjectType({
+  name: 'User',
+  fields: {
+    id: { type: new GraphQLNonNull(UUIDType) },
+    name: { type: new GraphQLNonNull(GraphQLString) },
+    balance: { type: new GraphQLNonNull(GraphQLFloat) },
   },
 });
 
@@ -48,6 +58,23 @@ const RootQueryType = new GraphQLObjectType({
       },
       resolve: async (parent, args, context) => {
         return context.prisma.memberType.findUnique({
+          where: { id: args.id }
+        });
+      },
+    },
+    users: {
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(UserType))),
+      resolve: async (parent, args, context) => {
+        return context.prisma.user.findMany();
+      },
+    },
+    user: {
+      type: UserType,
+      args: {
+        id: { type: new GraphQLNonNull(UUIDType) },
+      },
+      resolve: async (parent, args, context) => {
+        return context.prisma.user.findUnique({
           where: { id: args.id }
         });
       },
