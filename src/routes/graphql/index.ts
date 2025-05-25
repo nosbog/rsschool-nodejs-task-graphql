@@ -159,16 +159,38 @@ const UserType: UserGraphQLType = new GraphQLObjectType<
       resolve: async (
         user: UserWithRelations,
         _: unknown,
-        { loaders }: GraphQLContext,
+        { prisma, loaders }: GraphQLContext,
       ) => {
         if (!user) return [];
         const authorIds = (user.userSubscribedTo || [])
-          .map((sub) => sub.author?.id)
+          .filter((sub) => sub.author !== null && sub.author !== undefined)
+          .map((sub) => sub.author.id)
           .filter((id): id is string => id !== null && id !== undefined);
         const authors = await loaders.user.loadMany(authorIds);
         const result = authors.filter(
           (author): author is UserWithRelations => author !== null,
         );
+
+        for (const author of result) {
+          const authorSubscriptions = await prisma.subscribersOnAuthors.findMany({
+            where: { authorId: author.id },
+            include: { subscriber: true },
+          });
+          const subscriberIds = authorSubscriptions
+            .map((sub) => sub.subscriber?.id)
+            .filter((id): id is string => id !== null && id !== undefined);
+          const subscribers = await loaders.user.loadMany(subscriberIds);
+          author.subscribedToUser = authorSubscriptions.map((sub) => ({
+            subscriberId: sub.subscriberId,
+            authorId: sub.authorId,
+            subscriber: sub.subscriber,
+          }));
+          subscriberIds.forEach((id, index) => {
+            if (subscribers[index]) {
+              loaders.user.prime(id, subscribers[index] as UserWithRelations);
+            }
+          });
+        }
         return result;
       },
     },
@@ -177,16 +199,38 @@ const UserType: UserGraphQLType = new GraphQLObjectType<
       resolve: async (
         user: UserWithRelations,
         _: unknown,
-        { loaders }: GraphQLContext,
+        { prisma, loaders }: GraphQLContext,
       ) => {
         if (!user) return [];
         const subscriberIds = (user.subscribedToUser || [])
-          .map((sub) => sub.subscriber?.id)
+          .filter((sub) => sub.subscriber !== null && sub.subscriber !== undefined)
+          .map((sub) => sub.subscriber.id)
           .filter((id): id is string => id !== null && id !== undefined);
         const subscribers = await loaders.user.loadMany(subscriberIds);
         const result = subscribers.filter(
           (subscriber): subscriber is UserWithRelations => subscriber !== null,
         );
+
+        for (const subscriber of result) {
+          const subscriberSubscriptions = await prisma.subscribersOnAuthors.findMany({
+            where: { subscriberId: subscriber.id },
+            include: { author: true },
+          });
+          const authorIds = subscriberSubscriptions
+            .map((sub) => sub.author?.id)
+            .filter((id): id is string => id !== null && id !== undefined);
+          const authors = await loaders.user.loadMany(authorIds);
+          subscriber.userSubscribedTo = subscriberSubscriptions.map((sub) => ({
+            subscriberId: sub.subscriberId,
+            authorId: sub.authorId,
+            author: sub.author,
+          }));
+          authorIds.forEach((id, index) => {
+            if (authors[index]) {
+              loaders.user.prime(id, authors[index] as UserWithRelations);
+            }
+          });
+        }
         return result;
       },
     },
@@ -319,6 +363,35 @@ const RootQueryType = new GraphQLObjectType({
               );
             }
           }
+
+          if (includeUserSubscribedTo) {
+            userWithRelations.userSubscribedTo.forEach((sub) => {
+              if (sub.author) {
+                const authorWithRelations: UserWithRelations = {
+                  ...sub.author,
+                  profile: null,
+                  posts: [],
+                  userSubscribedTo: [],
+                  subscribedToUser: [],
+                };
+                loaders.user.prime(sub.author.id, authorWithRelations);
+              }
+            });
+          }
+          if (includeSubscribedToUser) {
+            userWithRelations.subscribedToUser.forEach((sub) => {
+              if (sub.subscriber) {
+                const subscriberWithRelations: UserWithRelations = {
+                  ...sub.subscriber,
+                  profile: null,
+                  posts: [],
+                  userSubscribedTo: [],
+                  subscribedToUser: [],
+                };
+                loaders.user.prime(sub.subscriber.id, subscriberWithRelations);
+              }
+            });
+          }
           return userWithRelations;
         });
         return usersWithRelations;
@@ -352,7 +425,30 @@ const RootQueryType = new GraphQLObjectType({
           subscribedToUser: user.subscribedToUser || [],
         };
         loaders.user.prime(id, userWithRelations);
-
+        userWithRelations.userSubscribedTo.forEach((sub) => {
+          if (sub.author) {
+            const authorWithRelations: UserWithRelations = {
+              ...sub.author,
+              profile: null,
+              posts: [],
+              userSubscribedTo: [],
+              subscribedToUser: [],
+            };
+            loaders.user.prime(sub.author.id, authorWithRelations);
+          }
+        });
+        userWithRelations.subscribedToUser.forEach((sub) => {
+          if (sub.subscriber) {
+            const subscriberWithRelations: UserWithRelations = {
+              ...sub.subscriber,
+              profile: null,
+              posts: [],
+              userSubscribedTo: [],
+              subscribedToUser: [],
+            };
+            loaders.user.prime(sub.subscriber.id, subscriberWithRelations);
+          }
+        });
         return userWithRelations;
       },
     },
