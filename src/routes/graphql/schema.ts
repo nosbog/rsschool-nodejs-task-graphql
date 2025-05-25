@@ -29,6 +29,17 @@ const MemberTypeType = new GraphQLObjectType({
   },
 });
 
+// Post Object Type
+const PostType = new GraphQLObjectType({
+  name: 'Post',
+  fields: {
+    id: { type: new GraphQLNonNull(UUIDType) },
+    title: { type: new GraphQLNonNull(GraphQLString) },
+    content: { type: new GraphQLNonNull(GraphQLString) },
+  },
+});
+
+// User Object Type
 const UserType = new GraphQLObjectType({
   name: 'User',
   fields: {
@@ -75,6 +86,23 @@ const RootQueryType = new GraphQLObjectType({
       },
       resolve: async (parent, args, context) => {
         return context.prisma.user.findUnique({
+          where: { id: args.id }
+        });
+      },
+    },
+    posts: {
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(PostType))),
+      resolve: async (parent, args, context) => {
+        return context.prisma.post.findMany();
+      },
+    },
+    post: {
+      type: PostType,
+      args: {
+        id: { type: new GraphQLNonNull(UUIDType) },
+      },
+      resolve: async (parent, args, context) => {
+        return context.prisma.post.findUnique({
           where: { id: args.id }
         });
       },
