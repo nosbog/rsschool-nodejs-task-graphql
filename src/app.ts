@@ -30,4 +30,24 @@ const app: FastifyPluginAsync = async (fastify, _) => {
   });
 };
 
+import { graphql, parse } from 'graphql';
+import depthLimit from 'graphql-depth-limit';
+import schema from './schema'; // your schema file
+
+// Example Fastify route
+fastify.post('/graphql', async (request, reply) => {
+  const { query, variables, operationName } = request.body;
+
+  const result = await graphql({
+    schema,
+    source: query,
+    variableValues: variables,
+    operationName,
+    validationRules: [depthLimit(10)], // ✅ depth limit here
+  });
+
+  reply.send(result);
+});
+
+
 export default app;
