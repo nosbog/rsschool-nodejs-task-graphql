@@ -138,27 +138,43 @@ const UserType = new GraphQLObjectType({
     userSubscribedTo: {
       type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(UserType))),
       resolve: async (parent, args, context) => {
-        const user = await context.prisma.user.findUnique({
-          where: { id: parent.id }
+        const userWithSubs = await context.prisma.user.findUnique({
+          where: { id: parent.id },
+          include: {
+            userSubscribedTo: {
+              include: {
+                author: true
+              }
+            }
+          }
         });
-        if (!user || !user.userSubscribedTo) {
+        
+        if (!userWithSubs?.userSubscribedTo) {
           return [];
         }
-        return context.prisma.user.findMany({
-          where: { id: { in: user.userSubscribedTo } }
-        });
+        
+        return userWithSubs.userSubscribedTo.map(sub => sub.author);
       },
     },
     subscribedToUser: {
       type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(UserType))),
       resolve: async (parent, args, context) => {
-        return context.prisma.user.findMany({
-          where: {
-            userSubscribedTo: {
-              has: parent.id
+        const userWithSubscribers = await context.prisma.user.findUnique({
+          where: { id: parent.id },
+          include: {
+            subscribedToUser: {
+              include: {
+                subscriber: true
+              }
             }
           }
         });
+        
+        if (!userWithSubscribers?.subscribedToUser) {
+          return [];
+        }
+        
+        return userWithSubscribers.subscribedToUser.map(sub => sub.subscriber);
       },
     },
   }),
@@ -362,24 +378,23 @@ const MutationsType = new GraphQLObjectType({
         authorId: { type: new GraphQLNonNull(UUIDType) },
       },
       resolve: async (parent, args, context) => {
-        const user = await context.prisma.user.findUnique({
-          where: { id: args.userId }
+        const existingSubscription = await context.prisma.subscribersOnAuthors.findUnique({
+          where: {
+            subscriberId_authorId: {
+              subscriberId: args.userId,
+              authorId: args.authorId
+            }
+          }
         });
-        
-        if (!user) {
-          throw new Error('User not found');
-        }
 
-        const currentSubscriptions = user.userSubscribedTo || [];
-        
-        if (currentSubscriptions.includes(args.authorId)) {
+        if (existingSubscription) {
           return 'Already subscribed';
         }
 
-        await context.prisma.user.update({
-          where: { id: args.userId },
+        await context.prisma.subscribersOnAuthors.create({
           data: {
-            userSubscribedTo: [...currentSubscriptions, args.authorId]
+            subscriberId: args.userId,
+            authorId: args.authorId
           }
         });
 
@@ -393,27 +408,19 @@ const MutationsType = new GraphQLObjectType({
         authorId: { type: new GraphQLNonNull(UUIDType) },
       },
       resolve: async (parent, args, context) => {
-        const user = await context.prisma.user.findUnique({
-          where: { id: args.userId }
-        });
-        
-        if (!user) {
-          throw new Error('User not found');
+        try {
+          await context.prisma.subscribersOnAuthors.delete({
+            where: {
+              subscriberId_authorId: {
+                subscriberId: args.userId,
+                authorId: args.authorId
+              }
+            }
+          });
+          return 'Unsubscription successful';
+        } catch (error) {
+          return 'Subscription not found';
         }
-
-        const currentSubscriptions = user.userSubscribedTo || [];
-        const updatedSubscriptions = currentSubscriptions.filter(
-          id => id !== args.authorId
-        );
-
-        await context.prisma.user.update({
-          where: { id: args.userId },
-          data: {
-            userSubscribedTo: updatedSubscriptions
-          }
-        });
-
-        return 'Unsubscription successful';
       },
     },
   },
