@@ -192,6 +192,41 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
                 }
             },
 
+            changeUser: {
+                type: User,
+                args: {
+                    id: {type: UUID},
+                    dto: {
+                        type: new GraphQLInputObjectType({
+                            name: "ChangeUserInput",
+                            fields: {
+                                name: {type: GraphQLString},
+                                balance: {type: GraphQLFloat}
+                            }
+                        })
+                    }
+                },
+                resolve: async (_, args, {prisma}) => {
+                    return await prisma.user.update({
+                        where: {id: args.id},
+                        data: args.dto
+                    });
+                }
+            },
+
+            deleteUser: {
+                type: GraphQLString,
+                args: {
+                    id: {type: UUID}
+                },
+                resolve: async (_, args, {prisma}) => {
+                    await prisma.user.delete({
+                        where: {id: args.id}
+                    });
+                    return "User is deleted successfully";
+                }
+            }
+
         },
 
     });
