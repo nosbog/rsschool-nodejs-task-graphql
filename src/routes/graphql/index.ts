@@ -9,7 +9,8 @@ import {
     GraphQLID,
     GraphQLEnumType,
     GraphQLFloat,
-    GraphQLInt
+    GraphQLInt,
+    GraphQLInputObjectType,
 } from "graphql";
 
 const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
@@ -125,8 +126,79 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
         },
     });
 
+    const Mutations = new GraphQLObjectType({
+        name: "Mutations",
+        fields: {
+            createUser: {
+                type: User,
+                args: {
+                    dto: {
+                        type: new GraphQLInputObjectType({
+                            name: "CreateUserInput",
+                            fields: {
+                                name: {type: GraphQLString},
+                                balance: {type: GraphQLFloat}
+                            }
+                        })
+                    }
+                },
+                resolve: async (_, args, {prisma}) => {
+                    return await prisma.user.create({
+                        data: args.dto
+                    });
+                }
+            },
+
+            createProfile: {
+                type: Profile,
+                args: {
+                    dto: {
+                        type: new GraphQLInputObjectType({
+                            name: "CreateProfileInput",
+                            fields: {
+                                isMale: {type: GraphQLString},
+                                yearOfBirth: {type: GraphQLInt},
+                                userId: {type: UUID},
+                                memberTypeId: {type: GraphQLString}
+                            }
+                        })
+                    }
+                },
+                resolve: async (_, args, {prisma}) => {
+                    return await prisma.profile.create({
+                        data: args.dto
+                    });
+                }
+            },
+
+            createPost: {
+                type: Post,
+                args: {
+                    dto: {
+                        type: new GraphQLInputObjectType({
+                            name: "CreatePostInput",
+                            fields: {
+                                title: {type: GraphQLString},
+                                content: {type: GraphQLString},
+                                authorId: {type: UUID}
+                            }
+                        })
+                    }
+                },
+                resolve: async (_, args, {prisma}) => {
+                    return await prisma.post.create({
+                        data: args.dto
+                    });
+                }
+            },
+
+        },
+
+    });
+
     const schema = new GraphQLSchema({
         query: RootQuery,
+        mutation: Mutations,
     });
 
     fastify.route({
@@ -140,7 +212,7 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
         },
         async handler(req, reply) {
             const body = req.body as { query: string };
-            const response = await graphql({schema, source: body.query});
+            const response = await graphql({schema, source: body.query, contextValue: {prisma: fastify.prisma}});
             reply.send(response);
         },
     });
