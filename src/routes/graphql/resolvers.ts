@@ -1,17 +1,12 @@
 import { FastifyInstance } from 'fastify';
 import { MemberTypeId } from '../member-types/schemas.js';
+import { GraphQLResolveInfo } from 'graphql';
 
 interface User {
   id: string;
   name: string;
   balance: number;
-  profile?: {
-    id: string;
-    isMale: boolean;
-    yearOfBirth: number;
-    userId: string;
-    memberTypeId: MemberTypeId;
-  };
+  profile?: Profile;
   posts: Array<{
     id: string;
     title: string;
@@ -41,8 +36,6 @@ interface Profile {
   isMale: boolean;
   yearOfBirth: number;
   user: User;
-  userId: string;
-  memberTypeId: MemberTypeId;
   memberType: {
     id: MemberTypeId;
     discount: number;
@@ -51,58 +44,112 @@ interface Profile {
 }
 
 interface MemberType {
-  id: MemberTypeId;
+  id: string;
   discount: number;
   postsLimitPerMonth: number;
-  profiles: Array<Profile>;
 }
 
-export const createResolvers = (fastify: FastifyInstance) => ({
+export const resolvers = (fastify: FastifyInstance) => ({
   Query: {
     memberTypes: async () => {
-      const memberTypes = await fastify.prisma.memberType.findMany();
-      return memberTypes || [];
+      return fastify.prisma.memberType.findMany();
     },
-    memberType: async (_: unknown, { id }: { id: MemberTypeId }) => {
-      const memberType = await fastify.prisma.memberType.findUnique({
+    memberType: async ({ id }: { id: string }) => {
+      return fastify.prisma.memberType.findUnique({
         where: { id },
-        include: {
-          profiles: {
-            include: {
-              user: true,
-              memberType: true,
-            },
-          },
-        },
       });
-      return memberType || null;
     },
     posts: async () => {
-      const posts = await fastify.prisma.post.findMany({
+      return fastify.prisma.post.findMany({
         include: {
-          author: true,
+          author: {
+            include: {
+              profile: {
+                include: {
+                  memberType: true,
+                },
+              },
+              userSubscribedTo: {
+                include: {
+                  author: {
+                    include: {
+                      profile: {
+                        include: {
+                          memberType: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              subscribedToUser: {
+                include: {
+                  subscriber: {
+                    include: {
+                      profile: {
+                        include: {
+                          memberType: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
       });
-      return posts || [];
     },
-    post: async (_: unknown, { id }: { id: string }) => {
-      const post = await fastify.prisma.post.findUnique({
+    post: async ({ id }: { id: string }) => {
+      return fastify.prisma.post.findUnique({
         where: { id },
         include: {
-          author: true,
+          author: {
+            include: {
+              profile: {
+                include: {
+                  memberType: true,
+                },
+              },
+              userSubscribedTo: {
+                include: {
+                  author: {
+                    include: {
+                      profile: {
+                        include: {
+                          memberType: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              subscribedToUser: {
+                include: {
+                  subscriber: {
+                    include: {
+                      profile: {
+                        include: {
+                          memberType: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
       });
-      return post || null;
     },
     users: async () => {
-      const users = await fastify.prisma.user.findMany({
+      return fastify.prisma.user.findMany({
         include: {
           profile: {
             include: {
               memberType: true,
             },
           },
-          posts: true,
           userSubscribedTo: {
             include: {
               author: {
@@ -110,17 +157,6 @@ export const createResolvers = (fastify: FastifyInstance) => ({
                   profile: {
                     include: {
                       memberType: true,
-                    },
-                  },
-                  posts: true,
-                  userSubscribedTo: {
-                    include: {
-                      author: true,
-                    },
-                  },
-                  subscribedToUser: {
-                    include: {
-                      subscriber: true,
                     },
                   },
                 },
@@ -136,27 +172,15 @@ export const createResolvers = (fastify: FastifyInstance) => ({
                       memberType: true,
                     },
                   },
-                  posts: true,
-                  userSubscribedTo: {
-                    include: {
-                      author: true,
-                    },
-                  },
-                  subscribedToUser: {
-                    include: {
-                      subscriber: true,
-                    },
-                  },
                 },
               },
             },
           },
         },
       });
-      return users || [];
     },
-    user: async (_: unknown, { id }: { id: string }) => {
-      const user = await fastify.prisma.user.findUnique({
+    user: async ({ id }: { id: string }) => {
+      return fastify.prisma.user.findUnique({
         where: { id },
         include: {
           profile: {
@@ -164,7 +188,6 @@ export const createResolvers = (fastify: FastifyInstance) => ({
               memberType: true,
             },
           },
-          posts: true,
           userSubscribedTo: {
             include: {
               author: {
@@ -172,17 +195,6 @@ export const createResolvers = (fastify: FastifyInstance) => ({
                   profile: {
                     include: {
                       memberType: true,
-                    },
-                  },
-                  posts: true,
-                  userSubscribedTo: {
-                    include: {
-                      author: true,
-                    },
-                  },
-                  subscribedToUser: {
-                    include: {
-                      subscriber: true,
                     },
                   },
                 },
@@ -198,69 +210,403 @@ export const createResolvers = (fastify: FastifyInstance) => ({
                       memberType: true,
                     },
                   },
-                  posts: true,
-                  userSubscribedTo: {
-                    include: {
-                      author: true,
-                    },
-                  },
-                  subscribedToUser: {
-                    include: {
-                      subscriber: true,
-                    },
-                  },
                 },
               },
             },
           },
         },
       });
-      return user || null;
     },
     profiles: async () => {
-      const profiles = await fastify.prisma.profile.findMany({
+      return fastify.prisma.profile.findMany({
         include: {
-          user: true,
+          user: {
+            include: {
+              profile: {
+                include: {
+                  memberType: true,
+                },
+              },
+              userSubscribedTo: {
+                include: {
+                  author: {
+                    include: {
+                      profile: {
+                        include: {
+                          memberType: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              subscribedToUser: {
+                include: {
+                  subscriber: {
+                    include: {
+                      profile: {
+                        include: {
+                          memberType: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
           memberType: true,
         },
       });
-      return profiles || [];
     },
-    profile: async (_: unknown, { id }: { id: string }) => {
-      const profile = await fastify.prisma.profile.findUnique({
+    profile: async ({ id }: { id: string }) => {
+      return fastify.prisma.profile.findUnique({
         where: { id },
         include: {
-          user: true,
+          user: {
+            include: {
+              profile: {
+                include: {
+                  memberType: true,
+                },
+              },
+              userSubscribedTo: {
+                include: {
+                  author: {
+                    include: {
+                      profile: {
+                        include: {
+                          memberType: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              subscribedToUser: {
+                include: {
+                  subscriber: {
+                    include: {
+                      profile: {
+                        include: {
+                          memberType: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
           memberType: true,
         },
       });
-      return profile || null;
+    },
+  },
+  Mutation: {
+    createUser: async ({ dto }: { dto: { name: string; balance: number } }) => {
+      return fastify.prisma.user.create({
+        data: dto,
+        include: {
+          profile: {
+            include: {
+              memberType: true,
+            },
+          },
+          userSubscribedTo: {
+            include: {
+              author: {
+                include: {
+                  profile: {
+                    include: {
+                      memberType: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+          subscribedToUser: {
+            include: {
+              subscriber: {
+                include: {
+                  profile: {
+                    include: {
+                      memberType: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+    },
+    createProfile: async ({ dto }: { dto: { isMale: boolean; yearOfBirth: number; userId: string; memberTypeId: string } }) => {
+      return fastify.prisma.profile.create({
+        data: dto,
+        include: {
+          user: {
+            include: {
+              profile: {
+                include: {
+                  memberType: true,
+                },
+              },
+              userSubscribedTo: {
+                include: {
+                  author: {
+                    include: {
+                      profile: {
+                        include: {
+                          memberType: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              subscribedToUser: {
+                include: {
+                  subscriber: {
+                    include: {
+                      profile: {
+                        include: {
+                          memberType: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          memberType: true,
+        },
+      });
+    },
+    createPost: async ({ dto }: { dto: { title: string; content: string; authorId: string } }) => {
+      return fastify.prisma.post.create({
+        data: dto,
+        include: {
+          author: {
+            include: {
+              profile: {
+                include: {
+                  memberType: true,
+                },
+              },
+              userSubscribedTo: {
+                include: {
+                  author: {
+                    include: {
+                      profile: {
+                        include: {
+                          memberType: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              subscribedToUser: {
+                include: {
+                  subscriber: {
+                    include: {
+                      profile: {
+                        include: {
+                          memberType: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+    },
+    changeUser: async ({ id, dto }: { id: string; dto: { name?: string; balance?: number } }) => {
+      return fastify.prisma.user.update({
+        where: { id },
+        data: dto,
+        include: {
+          profile: {
+            include: {
+              memberType: true,
+            },
+          },
+          userSubscribedTo: {
+            include: {
+              author: {
+                include: {
+                  profile: {
+                    include: {
+                      memberType: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+          subscribedToUser: {
+            include: {
+              subscriber: {
+                include: {
+                  profile: {
+                    include: {
+                      memberType: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+    },
+    changeProfile: async ({ id, dto }: { id: string; dto: { isMale?: boolean; yearOfBirth?: number; memberTypeId?: string } }) => {
+      return fastify.prisma.profile.update({
+        where: { id },
+        data: dto,
+        include: {
+          user: {
+            include: {
+              profile: {
+                include: {
+                  memberType: true,
+                },
+              },
+              userSubscribedTo: {
+                include: {
+                  author: {
+                    include: {
+                      profile: {
+                        include: {
+                          memberType: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              subscribedToUser: {
+                include: {
+                  subscriber: {
+                    include: {
+                      profile: {
+                        include: {
+                          memberType: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          memberType: true,
+        },
+      });
+    },
+    changePost: async ({ id, dto }: { id: string; dto: { title?: string; content?: string } }) => {
+      return fastify.prisma.post.update({
+        where: { id },
+        data: dto,
+        include: {
+          author: {
+            include: {
+              profile: {
+                include: {
+                  memberType: true,
+                },
+              },
+              userSubscribedTo: {
+                include: {
+                  author: {
+                    include: {
+                      profile: {
+                        include: {
+                          memberType: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              subscribedToUser: {
+                include: {
+                  subscriber: {
+                    include: {
+                      profile: {
+                        include: {
+                          memberType: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+    },
+    deleteUser: async ({ id }: { id: string }) => {
+      await fastify.prisma.user.delete({
+        where: { id },
+      });
+      return id;
+    },
+    deletePost: async ({ id }: { id: string }) => {
+      await fastify.prisma.post.delete({
+        where: { id },
+      });
+      return id;
+    },
+    deleteProfile: async ({ id }: { id: string }) => {
+      await fastify.prisma.profile.delete({
+        where: { id },
+      });
+      return id;
+    },
+    subscribeTo: async ({ userId, authorId }: { userId: string; authorId: string }) => {
+      await fastify.prisma.subscribersOnAuthors.create({
+        data: {
+          subscriberId: userId,
+          authorId,
+        },
+      });
+      return userId;
+    },
+    unsubscribeFrom: async ({ userId, authorId }: { userId: string; authorId: string }) => {
+      await fastify.prisma.subscribersOnAuthors.delete({
+        where: {
+          subscriberId_authorId: {
+            subscriberId: userId,
+            authorId,
+          },
+        },
+      });
+      return userId;
     },
   },
   User: {
-    profile: (parent: User) => (parent && parent.profile ? parent.profile : null),
-    posts: (parent: User) => (parent && parent.posts ? parent.posts : []),
     userSubscribedTo: (parent: User) => {
-      if (!parent || !parent.userSubscribedTo) return [];
-      return parent.userSubscribedTo
-        .map((item) => item.author)
-        .filter((author): author is User => author !== null && author !== undefined);
+      if (!parent.userSubscribedTo) return [];
+      return parent.userSubscribedTo.map((sub) => sub.author).filter((user): user is User => user !== null);
     },
     subscribedToUser: (parent: User) => {
-      if (!parent || !parent.subscribedToUser) return [];
-      return parent.subscribedToUser
-        .map((item) => item.subscriber)
-        .filter((subscriber): subscriber is User => subscriber !== null && subscriber !== undefined);
+      if (!parent.subscribedToUser) return [];
+      return parent.subscribedToUser.map((sub) => sub.subscriber).filter((user): user is User => user !== null);
     },
   },
-  Profile: {
-    user: (parent: Profile) => (parent && parent.user ? parent.user : null),
-    memberType: (parent: Profile) => (parent && parent.memberType ? parent.memberType : null),
-  },
   Post: {
-    author: (parent: Post) => (parent && parent.author ? parent.author : null),
+    author: (parent: Post) => parent.author,
   },
-  MemberType: {
-    profiles: (parent: MemberType) => (parent && parent.profiles ? parent.profiles : []),
+  Profile: {
+    user: (parent: Profile) => parent.user,
+    memberType: (parent: Profile) => parent.memberType,
   },
 }); 

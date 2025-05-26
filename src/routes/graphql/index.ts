@@ -1,54 +1,67 @@
 import { FastifyInstance } from 'fastify';
-import { graphql, defaultFieldResolver, GraphQLFieldResolver, GraphQLResolveInfo } from 'graphql';
+import { graphql, GraphQLError, GraphQLResolveInfo } from 'graphql';
 import { schema } from './schema.js';
-import { createResolvers } from './resolvers.js';
+import { resolvers } from './resolvers.js';
 
 interface GraphQLRequest {
   query: string;
   variables?: Record<string, unknown>;
-  operationName?: string;
 }
 
 type ResolverFn = (source: unknown, args: unknown, context: unknown, info: GraphQLResolveInfo) => unknown;
 
+type ResolverMap = {
+  Query: Record<string, ResolverFn>;
+  Mutation: Record<string, ResolverFn>;
+};
+
+function flattenResolvers(resolverMap: ResolverMap): Record<string, ResolverFn> {
+  return { ...resolverMap.Query, ...resolverMap.Mutation };
+}
+
 export default async function (fastify: FastifyInstance) {
-  fastify.post('/', async (request, reply) => {
-    const { query, variables, operationName } = request.body as GraphQLRequest;
-    const resolvers = createResolvers(fastify);
-    // Custom fieldResolver to delegate to our resolver map
-    const fieldResolver: GraphQLFieldResolver<Record<string, unknown>, { fastify: FastifyInstance }> = (source, args, context, info: GraphQLResolveInfo) => {
-      const typeName = info.parentType.name;
-      const fieldName = info.fieldName;
-      const typeResolvers = resolvers[typeName] as Record<string, unknown> | undefined;
-      const fieldResolverFn = typeResolvers && typeof typeResolvers[fieldName] === 'function'
-        ? typeResolvers[fieldName] as ResolverFn
-        : undefined;
-      if (fieldResolverFn) {
-        return fieldResolverFn(source, args, context, info);
-      }
-      return defaultFieldResolver(source, args, context, info);
-    };
+  fastify.post<{ Body: GraphQLRequest }>('/', async (request, reply) => {
+    const { query, variables } = request.body;
+    const resolverMap = resolvers(fastify) as ResolverMap;
+    const rootValue = flattenResolvers(resolverMap);
 
-    const result = await graphql({
-      schema,
-      source: query,
-      variableValues: variables,
-      operationName,
-      rootValue: resolvers.Query,
-      contextValue: { fastify },
-      fieldResolver,
-    });
+    try {
+      const result = await graphql({
+        schema,
+        source: query,
+        variableValues: variables,
+        rootValue,
+        contextValue: { fastify },
+      });
 
-    // Only include errors if they are not just about nullable fields
-    if (result.errors && result.errors.length > 0) {
-      // Filter out errors that are just about nullable fields
-      const filteredErrors = result.errors.filter(
-        (err) => !/Cannot return null for non-nullable field/.test(err.message)
-      );
-      if (filteredErrors.length > 0) {
-        return reply.status(400).send({ data: result.data ?? null, errors: filteredErrors });
+      if (result.errors) {
+        return reply.code(400).send({
+          data: null,
+          errors: result.errors.map((error) => ({
+            message: error.message,
+            locations: error.locations,
+            path: error.path,
+          })),
+        });
       }
+
+      return reply.send({
+        data: result.data || {},
+        errors: null,
+      });
+    } catch (error) {
+      if (error instanceof GraphQLError) {
+        return reply.code(400).send({
+          data: null,
+          errors: [{
+            message: error.message,
+            locations: error.locations,
+            path: error.path,
+          }],
+        });
+      }
+
+      throw error;
     }
-    return reply.send({ data: result.data ?? null });
   });
 }
