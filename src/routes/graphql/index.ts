@@ -225,7 +225,41 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
                     });
                     return "User is deleted successfully";
                 }
-            }
+            },
+
+            subscribeToUser: {
+                type: GraphQLString,
+                args: {
+                    subscriberId: {type: UUID},
+                    authorId: {type: UUID}
+                },
+                resolve: async (_, args, {prisma}) => {
+                    await prisma.subscribersOnAuthors.create({
+                        data: {
+                            subscriberId: args.subscriberId,
+                            authorId: args.authorId
+                        }
+                    });
+                    return "Subscription is successful";
+                }
+            },
+
+            unsubscribeFromUser: {
+                type: GraphQLString,
+                args: {
+                    subscriberId: {type: UUID},
+                    authorId: {type: UUID}
+                },
+                resolve: async (_, args, {prisma}) => {
+                    await prisma.subscribersOnAuthors.deleteMany({
+                        where: {
+                            subscriberId: args.subscriberId,
+                            authorId: args.authorId
+                        }
+                    });
+                    return "Subscription is canceled";
+                }
+            },
 
         },
 
