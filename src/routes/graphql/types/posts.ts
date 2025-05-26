@@ -1,30 +1,13 @@
 import { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType, GraphQLString } from "graphql";
 import { UUIDType } from "./uuid.js";
-import { PrismaClient, Post as PrismaPost, User as PrismaUser, Profile as PrismaProfile, MemberType as PrismaMemberType } from '@prisma/client';
-import DataLoader from 'dataloader';
-import { User } from './user.js';
+import { UserType } from './user.js';
+import { Context, IDArgs } from "./interfaces.js";
 
-interface Context {
-    prisma: PrismaClient;
-    loaders: {
-        userLoader: DataLoader<string, PrismaUser & {
-            profile?: (PrismaProfile & { memberType?: PrismaMemberType }) | null;
-            posts?: PrismaPost[];
-            userSubscribedTo?: { author: PrismaUser }[];
-            subscribedToUser?: { subscriber: PrismaUser }[];
-        }>;
-        postLoader: DataLoader<string, PrismaPost>;
-        profileLoader: DataLoader<string, PrismaProfile & { memberType?: PrismaMemberType }>;
-        memberTypeLoader: DataLoader<string, PrismaMemberType>;
-    };
-}
-
-interface PostParent {
-    id: string;
+interface PostParent extends IDArgs {
     authorId: string;
 }
 
-export const Post = new GraphQLObjectType({
+export const PostType = new GraphQLObjectType({
     name: 'Post',
     fields: {
         id: { type: new GraphQLNonNull(UUIDType) },
@@ -32,7 +15,7 @@ export const Post = new GraphQLObjectType({
         content: { type: new GraphQLNonNull(GraphQLString) },
         authorId: { type: new GraphQLNonNull(UUIDType) },
         author: {
-            type: new GraphQLNonNull(User),
+            type: new GraphQLNonNull(UserType),
             resolve: async (parent: PostParent, _, context: Context) => {
                 return context.loaders.userLoader.load(parent.authorId);
             },

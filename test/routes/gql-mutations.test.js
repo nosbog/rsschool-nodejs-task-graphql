@@ -24,7 +24,6 @@ await test('gql-mutations', async (t) => {
 
   await t.test('Create resources.', async (t) => {
     const { body: user1 } = await createUser(app);
-
     const {
       body: { data, errors },
     } = await gqlQuery(app, {

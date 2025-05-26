@@ -26,6 +26,7 @@ export async function gqlQuery(
     body: dto,
   });
   const body = (await res.json()) as Static<typeof gqlResponseSchema>;
+  console.log(body)
   return { res, body };
 }
 

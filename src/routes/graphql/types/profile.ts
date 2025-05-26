@@ -1,30 +1,13 @@
 import { GraphQLBoolean, GraphQLInputObjectType, GraphQLInt, GraphQLNonNull, GraphQLObjectType } from "graphql";
 import { MemberType, MemberTypeId } from "./member-type.js";
 import { UUIDType } from "./uuid.js";
-import { PrismaClient, Profile as PrismaProfile, MemberType as PrismaMemberType, User as PrismaUser, Post as PrismaPost } from '@prisma/client';
-import DataLoader from 'dataloader';
+import { Context, IDArgs } from "./interfaces.js";
 
-interface Context {
-    prisma: PrismaClient;
-    loaders: {
-        userLoader: DataLoader<string, PrismaUser & {
-            profile?: (PrismaProfile & { memberType?: PrismaMemberType }) | null;
-            posts?: PrismaPost[];
-            userSubscribedTo?: { author: PrismaUser }[];
-            subscribedToUser?: { subscriber: PrismaUser }[];
-        }>;
-        postLoader: DataLoader<string, PrismaPost>;
-        profileLoader: DataLoader<string, PrismaProfile & { memberType?: PrismaMemberType }>;
-        memberTypeLoader: DataLoader<string, PrismaMemberType>;
-    };
-}
-
-interface ProfileParent {
-    id: string;
+interface ProfileParent extends IDArgs {
     memberTypeId: string;
 }
 
-export const Profile = new GraphQLObjectType({
+export const ProfileType = new GraphQLObjectType({
     name: 'Profile',
     fields: {
         id: { type: new GraphQLNonNull(UUIDType) },

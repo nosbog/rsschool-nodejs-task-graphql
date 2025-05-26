@@ -7,7 +7,7 @@ import { createLoaders } from './loaders.js';
 
 const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
   const { prisma } = fastify;
-  const schema = createSchema(prisma);
+  const schema = createSchema();
 
   fastify.route({
     url: '/',
@@ -23,9 +23,7 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
       const document = parse(req.body.query);
       const validationErrors = validate(schema, document, [depthLimit(5)])
 
-      if (validationErrors.length > 0) {
-        return { errors: validationErrors };
-      }
+      if (validationErrors.length > 0) return { errors: validationErrors };
 
       const loaders = createLoaders({ prisma });
 
