@@ -184,7 +184,7 @@ export const Mutation = new GraphQLObjectType({
             },
         },
         subscribeTo: {
-            type: UserType,
+            type: GraphQLBoolean,
             args: {
                 userId: { type: new GraphQLNonNull(UUIDType) },
                 authorId: { type: new GraphQLNonNull(UUIDType) }
@@ -199,12 +199,13 @@ export const Mutation = new GraphQLObjectType({
                 const user = await context.prisma.user.findUnique({ where: { id: userId } });
                 if (user) {
                     context.loaders.userLoader.prime(user.id, user);
+                    return true;
                 }
-                return user;
+                return false;
             }
         },
         unsubscribeFrom: {
-            type: UserType,
+            type: GraphQLBoolean,
             args: {
                 userId: { type: new GraphQLNonNull(UUIDType) },
                 authorId: { type: new GraphQLNonNull(UUIDType) }
@@ -221,8 +222,9 @@ export const Mutation = new GraphQLObjectType({
                 const user = await context.prisma.user.findUnique({ where: { id: userId } });
                 if (user) {
                     context.loaders.userLoader.prime(user.id, user);
+                    return true;
                 }
-                return user;
+                return false;
             }
         }
     }
