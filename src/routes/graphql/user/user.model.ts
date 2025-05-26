@@ -15,3 +15,5 @@ export type UserModel = {
   userSubscribedTo?: SubscriptionModel[];
   subscribedToUser?: SubscriptionModel[];
 };
+
+export type UserDto = Pick<UserModel, 'name' | 'balance'>;
