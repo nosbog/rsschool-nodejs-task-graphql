@@ -355,6 +355,67 @@ const MutationsType = new GraphQLObjectType({
         return 'Post deleted successfully';
       },
     },
+    subscribeTo: {
+      type: new GraphQLNonNull(GraphQLString),
+      args: {
+        userId: { type: new GraphQLNonNull(UUIDType) },
+        authorId: { type: new GraphQLNonNull(UUIDType) },
+      },
+      resolve: async (parent, args, context) => {
+        const user = await context.prisma.user.findUnique({
+          where: { id: args.userId }
+        });
+        
+        if (!user) {
+          throw new Error('User not found');
+        }
+
+        const currentSubscriptions = user.userSubscribedTo || [];
+        
+        if (currentSubscriptions.includes(args.authorId)) {
+          return 'Already subscribed';
+        }
+
+        await context.prisma.user.update({
+          where: { id: args.userId },
+          data: {
+            userSubscribedTo: [...currentSubscriptions, args.authorId]
+          }
+        });
+
+        return 'Subscription successful';
+      },
+    },
+    unsubscribeFrom: {
+      type: new GraphQLNonNull(GraphQLString),
+      args: {
+        userId: { type: new GraphQLNonNull(UUIDType) },
+        authorId: { type: new GraphQLNonNull(UUIDType) },
+      },
+      resolve: async (parent, args, context) => {
+        const user = await context.prisma.user.findUnique({
+          where: { id: args.userId }
+        });
+        
+        if (!user) {
+          throw new Error('User not found');
+        }
+
+        const currentSubscriptions = user.userSubscribedTo || [];
+        const updatedSubscriptions = currentSubscriptions.filter(
+          id => id !== args.authorId
+        );
+
+        await context.prisma.user.update({
+          where: { id: args.userId },
+          data: {
+            userSubscribedTo: updatedSubscriptions
+          }
+        });
+
+        return 'Unsubscription successful';
+      },
+    },
   },
 });
 
