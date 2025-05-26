@@ -10,6 +10,7 @@ import {
     GraphQLEnumType,
     GraphQLFloat,
     GraphQLInt,
+    GraphQLBoolean,
     GraphQLInputObjectType,
 } from "graphql";
 
@@ -156,7 +157,7 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
                         type: new GraphQLInputObjectType({
                             name: "CreateProfileInput",
                             fields: {
-                                isMale: {type: GraphQLString},
+                                isMale: {type: GraphQLBoolean},
                                 yearOfBirth: {type: GraphQLInt},
                                 userId: {type: UUID},
                                 memberTypeId: {type: GraphQLString}
@@ -261,8 +262,69 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
                 }
             },
 
-        },
+            changePost: {
+                type: Post,
+                args: {
+                    id: {type: UUID},
+                    dto: {
+                        type: new GraphQLInputObjectType({
+                            name: "ChangePostInput",
+                            fields: {
+                                title: {type: GraphQLString},
+                                content: {type: GraphQLString}
+                            }
+                        })
+                    }
+                },
+                resolve: async (_, args, {prisma}) => {
+                    return await prisma.post.update({
+                        where: {id: args.id},
+                        data: args.dto
+                    });
+                }
+            },
 
+            deletePost: {
+                type: GraphQLString,
+                args: {id: {type: UUID}},
+                resolve: async (_, args, {prisma}) => {
+                    await prisma.post.delete({where: {id: args.id}});
+                    return "Post is deleted";
+                }
+            },
+
+            changeProfile: {
+                type: Profile,
+                args: {
+                    id: {type: UUID},
+                    dto: {
+                        type: new GraphQLInputObjectType({
+                            name: "ChangeProfileInput",
+                            fields: {
+                                isMale: {type: GraphQLBoolean},
+                                yearOfBirth: {type: GraphQLInt},
+                                memberTypeId: {type: GraphQLString}
+                            }
+                        })
+                    }
+                },
+                resolve: async (_, args, {prisma}) => {
+                    return await prisma.profile.update({
+                        where: {id: args.id},
+                        data: args.dto
+                    });
+                }
+            },
+
+            deleteProfile: {
+                type: GraphQLString,
+                args: {id: {type: UUID}},
+                resolve: async (_, args, {prisma}) => {
+                    await prisma.profile.delete({where: {id: args.id}});
+                    return "Profile is deleted";
+                }
+            }
+        },
     });
 
     const schema = new GraphQLSchema({
