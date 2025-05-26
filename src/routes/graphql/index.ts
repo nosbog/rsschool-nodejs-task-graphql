@@ -1,7 +1,8 @@
 import { FastifyInstance } from 'fastify';
-import { graphql, GraphQLError, GraphQLResolveInfo } from 'graphql';
+import { graphql, GraphQLError, GraphQLResolveInfo, validate, parse } from 'graphql';
 import { schema } from './schema.js';
 import { resolvers } from './resolvers.js';
+import depthLimit from 'graphql-depth-limit';
 
 interface GraphQLRequest {
   query: string;
@@ -26,6 +27,19 @@ export default async function (fastify: FastifyInstance) {
     const rootValue = flattenResolvers(resolverMap);
 
     try {
+      const document = parse(query);
+      const validationErrors = validate(schema, document, [depthLimit(5)]);
+      if (validationErrors.length > 0) {
+        return reply.code(400).send({
+          data: null,
+          errors: validationErrors.map((error) => ({
+            message: error.message,
+            locations: error.locations,
+            path: error.path,
+          })),
+        });
+      }
+
       const result = await graphql({
         schema,
         source: query,
