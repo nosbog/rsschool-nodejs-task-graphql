@@ -11,6 +11,7 @@ import {
   GraphQLBoolean,
 } from 'graphql';
 import { UUIDType } from './types/uuid.js';
+import { parseResolveInfo } from 'graphql-parse-resolve-info';
 
 // MemberTypeId Enum
 const MemberTypeIdEnum = new GraphQLEnumType({
@@ -94,6 +95,10 @@ const ProfileType = new GraphQLObjectType({
     memberType: {
       type: new GraphQLNonNull(MemberTypeType),
       resolve: async (parent, args, context) => {
+        // Use DataLoader if available, fallback to direct query
+        if (context.dataLoaders) {
+          return context.dataLoaders.memberTypeLoader.load(parent.memberTypeId);
+        }
         return context.prisma.memberType.findUnique({
           where: { id: parent.memberTypeId }
         });
@@ -122,6 +127,10 @@ const UserType = new GraphQLObjectType({
     profile: {
       type: ProfileType,
       resolve: async (parent, args, context) => {
+        // Use DataLoader if available, fallback to direct query
+        if (context.dataLoaders) {
+          return context.dataLoaders.profileLoader.load(parent.id);
+        }
         return context.prisma.profile.findUnique({
           where: { userId: parent.id }
         });
@@ -130,6 +139,10 @@ const UserType = new GraphQLObjectType({
     posts: {
       type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(PostType))),
       resolve: async (parent, args, context) => {
+        // Use DataLoader if available, fallback to direct query
+        if (context.dataLoaders) {
+          return context.dataLoaders.postsLoader.load(parent.id);
+        }
         return context.prisma.post.findMany({
           where: { authorId: parent.id }
         });
@@ -138,6 +151,12 @@ const UserType = new GraphQLObjectType({
     userSubscribedTo: {
       type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(UserType))),
       resolve: async (parent, args, context) => {
+        // Use DataLoader if available
+        if (context.dataLoaders?.userSubscriptionsLoader) {
+          return context.dataLoaders.userSubscriptionsLoader.load(parent.id);
+        }
+        
+        // Fallback to individual query
         const userWithSubs = await context.prisma.user.findUnique({
           where: { id: parent.id },
           include: {
@@ -159,6 +178,12 @@ const UserType = new GraphQLObjectType({
     subscribedToUser: {
       type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(UserType))),
       resolve: async (parent, args, context) => {
+        // Use DataLoader if available
+        if (context.dataLoaders?.userSubscribersLoader) {
+          return context.dataLoaders.userSubscribersLoader.load(parent.id);
+        }
+        
+        // Fallback to individual query
         const userWithSubscribers = await context.prisma.user.findUnique({
           where: { id: parent.id },
           include: {
@@ -200,6 +225,10 @@ const RootQueryType = new GraphQLObjectType({
         id: { type: new GraphQLNonNull(MemberTypeIdEnum) },
       },
       resolve: async (parent, args, context) => {
+        // Use DataLoader if available, fallback to direct query
+        if (context.dataLoaders) {
+          return context.dataLoaders.memberTypeLoader.load(args.id);
+        }
         return context.prisma.memberType.findUnique({
           where: { id: args.id }
         });
@@ -207,8 +236,80 @@ const RootQueryType = new GraphQLObjectType({
     },
     users: {
       type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(UserType))),
-      resolve: async (parent, args, context) => {
-        return context.prisma.user.findMany();
+      resolve: async (parent, args, context, info) => {
+        // Parse the query to see what fields are requested
+        const parsedInfo = parseResolveInfo(info) as any;
+        const userFields = parsedInfo?.fieldsByTypeName?.User || {};
+        
+        const needsUserSubscribedTo = !!userFields.userSubscribedTo;
+        const needsSubscribedToUser = !!userFields.subscribedToUser;
+        const needsSubscriptions = needsUserSubscribedTo || needsSubscribedToUser;
+
+        let users;
+        if (needsSubscriptions) {
+          // Include subscription relationships when needed - but only the ones requested
+          const includeClause: any = {};
+          
+          if (needsUserSubscribedTo) {
+            includeClause.userSubscribedTo = {
+              include: { author: true }
+            };
+          }
+          
+          if (needsSubscribedToUser) {
+            includeClause.subscribedToUser = {
+              include: { subscriber: true }
+            };
+          }
+          
+          users = await context.prisma.user.findMany({
+            include: includeClause
+          });
+          
+          // Prime the DataLoaders with subscription data
+          if (context.dataLoaders) {
+            users.forEach(user => {
+              context.dataLoaders.userLoader.prime(user.id, user);
+              
+              if (needsUserSubscribedTo) {
+                if (user.userSubscribedTo) {
+                  const subscriptions = user.userSubscribedTo.map((sub: any) => sub.author);
+                  context.dataLoaders.userSubscriptionsLoader.prime(user.id, subscriptions);
+                  
+                  subscriptions.forEach((subUser: any) => {
+                    context.dataLoaders.userLoader.prime(subUser.id, subUser);
+                  });
+                } else {
+                  context.dataLoaders.userSubscriptionsLoader.prime(user.id, []);
+                }
+              }
+              
+              if (needsSubscribedToUser) {
+                if (user.subscribedToUser) {
+                  const subscribers = user.subscribedToUser.map((sub: any) => sub.subscriber);
+                  context.dataLoaders.userSubscribersLoader.prime(user.id, subscribers);
+                  
+                  subscribers.forEach((subUser: any) => {
+                    context.dataLoaders.userLoader.prime(subUser.id, subUser);
+                  });
+                } else {
+                  context.dataLoaders.userSubscribersLoader.prime(user.id, []);
+                }
+              }
+            });
+          }
+        } else {
+          // Simple query without includes when subscriptions not needed
+          users = await context.prisma.user.findMany();
+          
+          if (context.dataLoaders) {
+            users.forEach(user => {
+              context.dataLoaders.userLoader.prime(user.id, user);
+            });
+          }
+        }
+        
+        return users;
       },
     },
     user: {
@@ -217,6 +318,10 @@ const RootQueryType = new GraphQLObjectType({
         id: { type: new GraphQLNonNull(UUIDType) },
       },
       resolve: async (parent, args, context) => {
+        // Use DataLoader if available, fallback to direct query
+        if (context.dataLoaders) {
+          return context.dataLoaders.userLoader.load(args.id);
+        }
         return context.prisma.user.findUnique({
           where: { id: args.id }
         });
@@ -259,7 +364,7 @@ const RootQueryType = new GraphQLObjectType({
   },
 });
 
-// Mutations Type
+// Mutations Type (keeping exactly the same)
 const MutationsType = new GraphQLObjectType({
   name: 'Mutations',
   fields: {
